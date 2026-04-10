@@ -1,0 +1,25 @@
+## Regole uso snippet
+pwd
+cd /home/thimoty/git/agents-course
+
+## M1 - Esercizio 1: Setup ambiente
+python3 --version
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install langchain langchain-openai python-dotenv
+
+## M1 - Esercizio 1.1: Configurazione variabili
+cp .env.example .env
+nano .env
+cat .env
+
+## M1 - Esercizio 2: Avvio rapido script
+mkdir -p labs/m1
+touch labs/m1/main.py
+python labs/m1/main.py
+
+## Utility lezione
+ls -la
+git status
+deactivate
