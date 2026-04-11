@@ -1,3 +1,9 @@
 # Source materials (book original texts)
 resource/
 resources/
+
+# Local secrets
+.env
+
+# Local Netlify folder
+.netlify

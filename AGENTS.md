@@ -123,3 +123,28 @@ Maintenance rules:
 - keep ordering deterministic for live delivery
 - prefer additive updates; avoid rewriting already validated command blocks
 - when an exercise is finalized, preserve its snippet block unless an explicit change is approved
+
+## Netlify Deploy Skill
+
+A local deploy skill is available at:
+- `skills/netlify-deploy/SKILL.md`
+- global reusable skill: `/home/thimoty/.codex/skills/netlify-deploy-agents-course/SKILL.md`
+
+Operational baseline (aligned with `ai-ttt-course`):
+- static publish directory is `site/`
+- Netlify deploy is executed in production mode
+- credentials are reused from the same Netlify account context
+
+Project deploy files:
+- `netlify.toml`
+- `scripts/deploy_netlify.sh`
+
+Run from project root:
+- `scripts/deploy_netlify.sh "deploy message"`
+
+Standard for future deploys:
+- use `/home/thimoty/.codex/skills/netlify-deploy-agents-course/scripts/deploy.sh`
+
+Required environment variables:
+- `NETLIFY_AUTH_TOKEN`
+- `NETLIFY_SITE_ID`
