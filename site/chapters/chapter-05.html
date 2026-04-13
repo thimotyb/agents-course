@@ -24,6 +24,14 @@
             <option value="it">Italiano</option>
           </select>
         </label>
+        <label class="theme-switch" for="theme-select">
+          <span>Theme</span>
+          <select id="theme-select" aria-label="Choose theme">
+            <option value="light" selected>Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+        <button class="print-btn print-btn-top" type="button" data-print aria-label="Print this module">Print</button>
       </div>
       <section class="hero">
         <p><a href="../index.html">Home</a></p>
@@ -65,16 +73,19 @@
 
       <section class="panel">
         <h2>Guided lab</h2>
+        <h3>Execution steps</h3>
         <p>Implement a task-oriented agent that plans steps, calls tools, validates outputs, and handles recovery paths.</p>
       </section>
 
       <section class="panel">
         <h2>Exercises</h2>
+        <h3>Practice tasks</h3>
         <p>Add guardrails for tool misuse and define stop conditions to prevent infinite loops or low-value iterations.</p>
       </section>
 
       <section class="panel">
         <h2>Deliverable</h2>
+        <h3>Submission output</h3>
         <p>A LangGraph agent architecture with documented states, transitions, tools, and safety policies.</p>
       </section>
 
@@ -85,7 +96,7 @@
           <li>A repeatable structure for quality checks and improvements.</li>
           <li>An incremental bridge to the next module.</li>
         </ul>
-        <button id="print-page-btn" class="print-btn" type="button">Print module</button>
+        <button class="print-btn" type="button" id="print-page-btn" data-print aria-label="Print this module">Print</button>
       </section>
     </article>
   </main>

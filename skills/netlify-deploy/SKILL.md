@@ -19,6 +19,14 @@ Deploy `site/` to Netlify in production mode, using:
 - `NETLIFY_SITE_ID` points to the target Netlify site
 - project root contains `netlify.toml` with `publish = "site"`
 
+## Mandatory pre-deploy gate
+
+Before deploying, run and pass:
+
+```bash
+python3 scripts/non_regression_guard.py check
+```
+
 ## Command
 
 From project root:

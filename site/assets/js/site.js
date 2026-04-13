@@ -88,7 +88,7 @@
   const main = document.querySelector(".module-main");
   if (!root || !main) return;
 
-  const h2Headings = [...main.querySelectorAll("h2")];
+  const allHeadings = [...main.querySelectorAll("h2, h3")];
   const list = document.createElement("ul");
   list.className = "outline-list";
 
@@ -114,57 +114,56 @@
   const headings = [];
   const links = new Map();
 
-  h2Headings.forEach((h2) => {
-    const li = document.createElement("li");
-    const row = document.createElement("div");
-    row.className = "outline-item-row";
+  let currentLi = null;
+  let currentSubList = null;
+  let currentToggle = null;
+
+  allHeadings.forEach((heading) => {
+    const isH2 = heading.tagName.toLowerCase() === "h2";
+    const id = ensureId(heading);
     const a = document.createElement("a");
-    const h2Id = ensureId(h2);
-    a.href = `#${h2Id}`;
-    a.textContent = h2.textContent || "Section";
-    row.appendChild(a);
+    a.href = `#${id}`;
+    a.textContent = heading.textContent || "Section";
+    headings.push(heading);
+    links.set(id, a);
 
-    headings.push(h2);
-    links.set(h2Id, a);
+    if (isH2) {
+      currentLi = document.createElement("li");
+      const row = document.createElement("div");
+      row.className = "outline-item-row";
+      row.appendChild(a);
+      currentLi.appendChild(row);
+      list.appendChild(currentLi);
+      
+      currentSubList = null;
+      currentToggle = null;
+    } else if (currentLi) {
+      // Se è un h3, aggiungilo alla sottolista dell'ultimo h2 incontrato
+      if (!currentSubList) {
+        currentSubList = document.createElement("ul");
+        currentSubList.className = "outline-list outline-sublist";
+        currentLi.appendChild(currentSubList);
 
-    const section = h2.closest("section");
-    const h3s = section ? [...section.querySelectorAll("h3")] : [];
-    if (h3s.length > 0) {
-      const toggle = document.createElement("button");
-      toggle.type = "button";
-      toggle.className = "outline-toggle";
-      toggle.setAttribute("aria-label", `Toggle ${a.textContent || "section"} subsections`);
-      toggle.setAttribute("aria-expanded", "true");
-      toggle.textContent = "▾";
-      row.insertBefore(toggle, a);
+        // Aggiungi il toggle all'h2 se non esiste ancora
+        const row = currentLi.querySelector(".outline-item-row");
+        currentToggle = document.createElement("button");
+        currentToggle.type = "button";
+        currentToggle.className = "outline-toggle";
+        currentToggle.setAttribute("aria-expanded", "true");
+        currentToggle.textContent = "▾";
+        row.insertBefore(currentToggle, row.firstChild);
 
-      const sub = document.createElement("ul");
-      sub.className = "outline-list outline-sublist";
-      h3s.forEach((h3) => {
-        const subLi = document.createElement("li");
-        const subA = document.createElement("a");
-        const h3Id = ensureId(h3);
-        subA.href = `#${h3Id}`;
-        subA.textContent = h3.textContent || "Subsection";
-        subLi.appendChild(subA);
-        sub.appendChild(subLi);
-        headings.push(h3);
-        links.set(h3Id, subA);
-      });
-      toggle.addEventListener("click", () => {
-        const expanded = toggle.getAttribute("aria-expanded") === "true";
-        const nextExpanded = !expanded;
-        toggle.setAttribute("aria-expanded", String(nextExpanded));
-        toggle.textContent = nextExpanded ? "▾" : "▸";
-        sub.hidden = !nextExpanded;
-      });
-      li.appendChild(row);
-      li.appendChild(sub);
-    } else {
-      li.appendChild(row);
+        currentToggle.addEventListener("click", () => {
+          const expanded = currentToggle.getAttribute("aria-expanded") === "true";
+          currentToggle.setAttribute("aria-expanded", String(!expanded));
+          currentToggle.textContent = !expanded ? "▾" : "▸";
+          currentSubList.hidden = expanded;
+        });
+      }
+      const subLi = document.createElement("li");
+      subLi.appendChild(a);
+      currentSubList.appendChild(subLi);
     }
-
-    list.appendChild(li);
   });
 
   root.replaceChildren(list);

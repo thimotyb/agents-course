@@ -103,7 +103,39 @@
           <img src="../assets/images/m1-figure-1-5-ai-agent-workflow.png" alt="Workflow of an AI agent selecting tools, executing calls, iterating on results, and producing a final response.">
           <figcaption><strong>Figure M1.5.</strong> Workflow of an AI agent that orchestrates multiple tools to assemble a complete result.</figcaption>
         </figure>
+        <p>Interest in agents has grown further with Model Context Protocol (MCP), which gives services a standard way to expose tools through MCP servers that agents can access through MCP clients. This shifts integration work toward the service layer and reduces the need for custom connectors in each agent application.</p>
         <p>In production settings, this loop may run for multiple iterations and often includes human approval for high-stakes actions. Agent architectures can also vary, including supervisor patterns that coordinate more specialized sub-agents.</p>
+      </section>
+
+      <section class="panel">
+        <h2>2. Introducing LangChain</h2>
+        <h3>2.1 The Need for a Framework</h3>
+        <p>Building LLM applications often leads to repetitive "plumbing" tasks: loading data, splitting text, generating embeddings, and managing prompts. Without a framework, developers end up writing fragile "glue code" that is hard to maintain and scale. LangChain addresses these challenges by providing modular building blocks that standardize how data is ingested, processed, and retrieved.</p>
+        <p>Three core principles guide its design: <strong>modularity</strong> (swappable components), <strong>composability</strong> (building chains and workflows), and <strong>extensibility</strong> (easy integration with third-party tools). By using LangChain, you focus on application logic rather than low-level wiring, ensuring that prompts, chains, and integrations remain maintainable as your project grows.</p>
+      </section>
+
+      <section class="panel">
+        <h3>2.2 LangChain Architecture</h3>
+        <p>Most LangChain workflows follow a consistent pattern for bringing proprietary data to the model. It starts by pulling text from sources—like files or databases—into <strong>Document</strong> objects, which are then split into smaller chunks. These chunks are converted into <strong>embeddings</strong> (vector representations of meaning) and stored in a <strong>vector store</strong> for efficient retrieval.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m1-figure-1-6-langchain-architecture.png" alt="LangChain architecture diagram showing document loading, splitting, embedding, and storage.">
+          <figcaption><strong>Figure M1.6.</strong> High-level LangChain architecture for document ingestion and retrieval.</figcaption>
+        </figure>
+        <p>At query time, only the most relevant chunks are retrieved based on similarity search, allowing the LLM to answer questions without overstuffing the prompt with entire documents. This architecture balances context limits and costs while preserving answer quality.</p>
+      </section>
+
+      <section class="panel">
+        <h3>2.3 Core Object Model</h3>
+        <p>LangChain is organized around specific class families that represent the building blocks of an LLM application. The <strong>Document</strong> entity is central, supported by <strong>DocumentLoaders</strong> (to ingest data), <strong>TextSplitters</strong> (to chunk it), and <strong>VectorStores/Retrievers</strong> (to index and pull relevant text).</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m1-figure-1-7-object-model-document.png" alt="LangChain object model for Document-related classes.">
+          <figcaption><strong>Figure M1.7.</strong> Object model for core Document-related classes and their interactions.</figcaption>
+        </figure>
+        <p>Beyond documents, the framework provides abstractions for LLM interactions, such as <strong>PromptTemplates</strong> and <strong>PromptValues</strong>. A key architectural feature is the <strong>Runnable</strong> interface, which allows these components to be composed and chained together consistently, enabling modular and traceable workflows.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m1-figure-1-8-object-model-llm.png" alt="LangChain object model for LLM and Prompt-related classes.">
+          <figcaption><strong>Figure M1.8.</strong> Object model for LLM interfaces, PromptTemplates, and their hierarchy.</figcaption>
+        </figure>
       </section>
 
       <section class="panel info-grid">

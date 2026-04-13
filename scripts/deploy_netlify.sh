@@ -22,6 +22,9 @@ if [[ -z "${NETLIFY_SITE_ID:-}" ]]; then
   exit 1
 fi
 
+echo "[info] Running regression checks before deploy"
+python3 scripts/non_regression_guard.py check
+
 echo "[info] Deploying ${PUBLISH_DIR} to Netlify site ${NETLIFY_SITE_ID}"
 npx --yes netlify-cli deploy \
   --prod \

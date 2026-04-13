@@ -24,6 +24,14 @@
             <option value="it">Italiano</option>
           </select>
         </label>
+        <label class="theme-switch" for="theme-select">
+          <span>Theme</span>
+          <select id="theme-select" aria-label="Choose theme">
+            <option value="light" selected>Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+        <button class="print-btn print-btn-top" type="button" data-print aria-label="Print this module">Print</button>
       </div>
       <section class="hero">
         <p><a href="../index.html">Home</a></p>
@@ -65,16 +73,19 @@
 
       <section class="panel">
         <h2>Guided lab</h2>
+        <h3>Execution steps</h3>
         <p>Create an ADK project from scratch, add at least one external tool, and run an end-to-end agent workflow on a practical task.</p>
       </section>
 
       <section class="panel">
         <h2>Exercises</h2>
+        <h3>Practice tasks</h3>
         <p>Implement structured logging and error handling, then compare agent behavior before and after reliability improvements.</p>
       </section>
 
       <section class="panel">
         <h2>Deliverable</h2>
+        <h3>Submission output</h3>
         <p>An ADK-based agent repository with setup instructions, runnable examples, and a short operational runbook.</p>
       </section>
 
@@ -85,7 +96,7 @@
           <li>Tool wiring, observability, and failure handling are central to usable agents.</li>
           <li>The same workflow can be extended from local prototype to deployable service.</li>
         </ul>
-        <button id="print-page-btn" class="print-btn" type="button">Print module</button>
+        <button class="print-btn" type="button" id="print-page-btn" data-print aria-label="Print this module">Print</button>
       </section>
     </article>
   </main>
