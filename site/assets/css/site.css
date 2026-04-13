@@ -8,6 +8,10 @@
   --line: #d6e0ea;
   --ink: #08141f;
   --shadow: 0 14px 34px rgba(5, 22, 34, 0.08);
+  --grad-a: rgba(10, 109, 136, 0.08);
+  --grad-b: rgba(8, 79, 102, 0.08);
+  --header-a: rgba(255, 255, 255, 0.72);
+  --header-b: rgba(255, 255, 255, 0.15);
 }
 
 * {
@@ -22,11 +26,27 @@ body {
   margin: 0;
   color: var(--text);
   background:
-    radial-gradient(circle at 12% 10%, rgba(10, 109, 136, 0.08), transparent 40%),
-    radial-gradient(circle at 87% 82%, rgba(8, 79, 102, 0.08), transparent 35%),
+    radial-gradient(circle at 12% 10%, var(--grad-a), transparent 40%),
+    radial-gradient(circle at 87% 82%, var(--grad-b), transparent 35%),
     var(--bg);
   font-family: "Source Serif 4", Georgia, serif;
   line-height: 1.65;
+}
+
+body[data-theme="dark"] {
+  --bg: #0f1722;
+  --surface: #182333;
+  --text: #d8e5f5;
+  --muted: #9eb2cb;
+  --accent: #53b8d6;
+  --accent-strong: #8bdff4;
+  --line: #2b3c52;
+  --ink: #f2f7ff;
+  --shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+  --grad-a: rgba(83, 184, 214, 0.12);
+  --grad-b: rgba(21, 44, 74, 0.5);
+  --header-a: rgba(19, 31, 45, 0.88);
+  --header-b: rgba(16, 26, 39, 0.52);
 }
 
 h1,
@@ -79,7 +99,7 @@ body {
 .site-header {
   padding: 2.4rem 0 2rem;
   border-bottom: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.15));
+  background: linear-gradient(180deg, var(--header-a), var(--header-b));
   backdrop-filter: blur(2px);
 }
 
@@ -99,7 +119,8 @@ body {
   color: var(--muted);
 }
 
-.lang-switch {
+.lang-switch,
+.theme-switch {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
@@ -107,12 +128,13 @@ body {
   color: var(--muted);
 }
 
-.lang-switch select {
+.lang-switch select,
+.theme-switch select {
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 0.35rem 0.55rem;
   color: var(--ink);
-  background: #fff;
+  background: var(--surface);
 }
 
 .hero {
@@ -254,6 +276,33 @@ body {
   margin-top: 0.45rem;
 }
 
+.outline-item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.outline-toggle {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 6px;
+  width: 1.35rem;
+  height: 1.35rem;
+  line-height: 1;
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.outline-toggle:hover,
+.outline-toggle:focus-visible {
+  color: var(--accent-strong);
+  border-color: var(--accent);
+}
+
 .outline-list a {
   text-decoration: none;
   color: var(--muted);
@@ -265,6 +314,11 @@ body {
 .outline-list a.active {
   color: var(--accent-strong);
   border-left-color: var(--accent-strong);
+}
+
+.outline-sublist {
+  margin-left: 1.7rem;
+  margin-top: 0.35rem;
 }
 
 .module-nav {
@@ -293,6 +347,62 @@ body {
   margin-bottom: 0.2rem;
 }
 
+.module-figure {
+  margin: 1rem 0;
+}
+
+.module-figure img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: zoom-in;
+  background: #fff;
+}
+
+.module-figure figcaption {
+  margin-top: 0.45rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.figure-lightbox {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(8, 20, 31, 0.82);
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.figure-lightbox[hidden] {
+  display: none;
+}
+
+.figure-lightbox-inner {
+  max-width: min(1200px, 96vw);
+  max-height: 96vh;
+  display: grid;
+  gap: 0.5rem;
+  justify-items: center;
+}
+
+.figure-lightbox-image {
+  max-width: 100%;
+  max-height: calc(96vh - 4.5rem);
+  border-radius: 12px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.38);
+  cursor: zoom-out;
+}
+
+.figure-lightbox-caption {
+  color: #e8f2ff;
+  text-align: center;
+  max-width: 90ch;
+}
+
 .info-grid {
   display: grid;
   gap: 0.9rem;
@@ -306,11 +416,15 @@ body {
 
 .print-btn {
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   border-radius: 10px;
   padding: 0.45rem 0.75rem;
   cursor: pointer;
+}
+
+.print-btn-top {
+  margin-left: auto;
 }
 
 .top-link {

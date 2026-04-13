@@ -13,6 +13,11 @@ Main language policy:
 - source content is authored in English
 - Italian is provided on-page via Google Translate switch (`EN/IT`)
 
+Runtime baseline for examples:
+- use local `ollama` runtime on Ubuntu
+- default model: `gemma4:e4b`
+- avoid dependence on OpenAI API keys for classroom examples
+
 ## Canonical Project Structure
 
 Use this structure as the baseline:
@@ -53,6 +58,9 @@ Each module page must use a two-level hierarchy:
 - `Titolo 1.1` (subsection level) -> HTML `h3`
 
 Rules:
+- sections and subsections must be explicitly numbered
+- course numbering is authoritative and may differ from source/book numbering
+- each subsection (`h3`) is rendered as one dedicated slide-like rectangular block
 - avoid flat, unstructured content blocks
 - keep numbering and naming stable across revisions
 - preserve a predictable section sequence across modules
@@ -63,10 +71,24 @@ Every module page must include:
 - a left-side outline panel
 - auto-generated navigable index from section headings
 - active section highlighting while scrolling
+- collapsible sidebar behavior (toggle open/close)
+- collapsible tree controls with visible arrows/chevrons for expand/collapse of subsection groups
+- click-to-navigate behavior for every index item
 
 Implementation baseline:
 - outline host in module layout (`#outline-nav`)
 - behavior implemented by shared script (`site/assets/js/site.js`)
+
+## Module Header Controls (Required)
+
+Every module page must expose these controls in the header area:
+- language selector (`#lang-select`)
+- theme selector (`#theme-select`) with at least `light` and `dark`
+- print button (top print trigger)
+
+Every module page must also include:
+- bottom print button (`#print-page-btn`)
+- back-to-top button (`.top-link`)
 
 ## Figures Standard (Required)
 
@@ -74,7 +96,8 @@ Figures must follow the same behavior style used in the sibling project (`ai-ttt
 
 - all figures are explicitly numbered (example: `Figure M3.2`)
 - every figure is clickable
-- click opens zoomed view (modal/lightbox style)
+- click opens zoomed full-screen view (modal/lightbox style)
+- second click (or close action) restores normal in-flow size
 - figure caption always includes number + meaningful description
 - image path must remain stable once module is finalized
 
@@ -107,6 +130,24 @@ Work strictly module-by-module:
 5. move to next module
 
 Never silently rewrite previously finalized module content.
+
+## Content Extraction and Writing Constraints (Required)
+
+Source usage policy:
+- source material and figures are extracted from `resources/`
+- extracted module content must remain in English
+
+Writing constraints:
+- never reference the book directly
+- do not preserve or mirror source/book section numbering; use course numbering only
+- never reference a previous or following chapter/module
+- use non-conversational, expository language
+- keep content synthetic but readable (no excessive summarization)
+
+Authoring workflow constraints:
+- work one module at a time
+- proceed step-by-step
+- add figures and content only when explicitly requested by the user
 
 ## Lab Snippets File (Required)
 

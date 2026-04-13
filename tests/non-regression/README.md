@@ -4,6 +4,16 @@ When a module is finalized, create a lock that freezes:
 - required key texts
 - required image references (`<img src=...>`)
 
+Regression checks also enforce baseline module UI/structure on every
+`site/chapters/chapter-*.html` page:
+- print controls are present
+- top button is present
+- left outline navigation is present
+- language selector is present
+- theme selector is present
+- content keeps a two-level heading hierarchy (`h2` + `h3`, no deeper levels)
+- heading numbering is validated (no duplicates, sequential siblings, valid `h3` -> `h2` parent)
+
 ## Create or update a lock
 
 ```bash

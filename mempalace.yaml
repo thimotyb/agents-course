@@ -2,3 +2,16 @@ wing: agents_course
 rooms:
 - name: general
   description: All project files
+memory:
+  ui_requirements:
+  - Left outline navigation must expose visible chevron arrows for per-section collapse/expand.
+  - Outline tree remains click-to-navigate for every item and keeps active section highlighting.
+  content_rules:
+  - Course section numbering is independent from source/book numbering.
+  - Never mirror book numbering in chapter headings.
+  - When importing a paragraph from resources, include all figures present in that source paragraph.
+  writing_style:
+  - Prefer summarized content over long-form prose.
+  - Do not make text overly terse or bullet-like when body prose is expected.
+  - Use complete sentences with medium length.
+  - Keep phrasing clear and compact, avoiding overly long periods.

@@ -24,6 +24,14 @@
             <option value="it">Italiano</option>
           </select>
         </label>
+        <label class="theme-switch" for="theme-select">
+          <span>Theme</span>
+          <select id="theme-select" aria-label="Choose theme">
+            <option value="light" selected>Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+        <button class="print-btn print-btn-top" type="button" data-print aria-label="Print this module">Print</button>
       </div>
       <section class="hero">
         <p><a href="../index.html">Home</a></p>
@@ -48,6 +56,56 @@
         </nav>
       </section>
 
+      <section class="panel">
+        <h2>1. Introduction</h2>
+        <h3>1.1 LLM Applications, Chatbots, and AI Agents</h3>
+        <p>LLMs work well with natural language: they understand text, generate it, and extract useful information. This enables many applications, including summarization, translation, sentiment analysis, semantic search, chatbots, and code generation. For this reason, LLM systems are now used in sectors such as education, healthcare, law, and finance.</p>
+        <p>Even with different use cases, most LLM systems follow a similar flow: natural-language input, unstructured data processing, context retrieval, and prompt construction for model execution. In practice, these systems are grouped into three categories.</p>
+        <p>LLM-based applications, or engines, provide a bounded capability such as summarization, search, or generation. They produce an output and stop, without choosing autonomous follow-up actions.</p>
+        <p>Chatbots are conversational interfaces that keep context across turns. Their focus is dialogue and interactive Q&amp;A.</p>
+        <p>AI agents are autonomous or semi-autonomous systems that plan and execute multi-step work toward a goal. Unlike engines, they can loop (observe -&gt; decide -&gt; act -&gt; observe), use tools and APIs, and adapt based on intermediate outcomes.</p>
+      </section>
+
+      <section class="panel">
+        <h2>1.2 LLM-based Applications</h2>
+        <h3>1.2.1 Summarization and Q&amp;A engines</h3>
+        <p>An LLM-based application is a backend component for specific language tasks. A summarization engine, for example, condenses long text into concise output that can be returned immediately or stored for reuse.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m1-figure-1-1-summarization-engine.png" alt="Architecture of a summarization engine that receives long text, generates summaries, and exposes results through a REST API.">
+          <figcaption><strong>Figure M1.1.</strong> A summarization engine processes large text volumes, stores summaries, and exposes results through a REST API.</figcaption>
+        </figure>
+        <p>Summarization engines are often exposed as shared API services so multiple systems can call them on demand. Another common pattern is the Q&amp;A engine, which answers queries against a domain knowledge base through two phases: ingestion and query.</p>
+        <p>In ingestion, the engine collects documents, splits them into chunks, converts chunks into embeddings, and stores text plus vectors in a vector store. In query, it embeds the user question, retrieves relevant chunks, and builds a prompt with question and context before calling the LLM.</p>
+        <p>This design is Retrieval-Augmented Generation (RAG), where generation is grounded by retrieved context at runtime.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m1-figure-1-2-qa-engine-rag.png" alt="RAG-based Q and A engine workflow with ingestion, vector storage, retrieval, and grounded answer generation.">
+          <figcaption><strong>Figure M1.2.</strong> A Q&amp;A engine implemented with RAG: documents are embedded and stored, relevant chunks are retrieved for each question, and the LLM generates a grounded answer.</figcaption>
+        </figure>
+        <p>Engines are not limited to Q&amp;A. They can run predefined chains with API calls, data retrieval, and post-processing. The key property remains the same: a bounded, goal-specific workflow with logic defined before runtime.</p>
+        <h3>1.2.2 LLM-based chatbots</h3>
+        <p>An LLM-based chatbot acts as an interactive assistant that supports continuous, natural conversation with the model. Unlike simple one-shot scripts, chatbots are designed to keep exchanges useful, safe, and consistent through explicit prompt instructions and role-based messages.</p>
+        <p>To improve factual quality, chatbots often retrieve context from local knowledge sources such as vector stores. This combination of dialogue and retrieval helps produce answers that are not only fluent, but also more relevant to the domain.</p>
+        <p>A key capability is conversation memory: by using previous turns, the chatbot can keep answers coherent and personalized. Because memory is constrained by context limits and cost, many systems summarize or compress chat history during longer interactions.</p>
+        <p>Chatbots are often specialized for tasks such as summarization, Q&amp;A, and translation. The main difference from engines is interactivity: users can refine outputs step by step, and the system adapts responses through iterative dialogue.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m1-figure-1-3-summarization-chatbot.png" alt="Summarization chatbot architecture with interactive user loop and context-aware response refinement.">
+          <figcaption><strong>Figure M1.3.</strong> A summarization chatbot extends a summarization engine with interactive dialogue and iterative output refinement.</figcaption>
+        </figure>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m1-figure-1-4-chatbot-sequence.png" alt="Sequence diagram of user and chatbot interactions for iterative summary refinement.">
+          <figcaption><strong>Figure M1.4.</strong> Sequence flow for chatbot-based summary refinement through multi-turn user interaction.</figcaption>
+        </figure>
+        <h3>1.2.3 AI agents</h3>
+        <p>An AI agent is a system that uses an LLM to execute multi-step tasks with branching logic and adaptive decisions. Unlike fixed pipelines, agents operate with controlled autonomy: they follow constraints, but they decide what to do next at runtime.</p>
+        <p>At each step, the agent asks the model to select tools, executes those tools, evaluates intermediate results, and continues until a stopping condition is reached. This loop lets agents combine structured and unstructured data sources in a single workflow.</p>
+        <p>A typical pattern is goal-oriented orchestration: the agent receives a user request, chooses relevant services, runs queries or API calls, and then composes a final response from the collected outputs.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m1-figure-1-5-ai-agent-workflow.png" alt="Workflow of an AI agent selecting tools, executing calls, iterating on results, and producing a final response.">
+          <figcaption><strong>Figure M1.5.</strong> Workflow of an AI agent that orchestrates multiple tools to assemble a complete result.</figcaption>
+        </figure>
+        <p>In production settings, this loop may run for multiple iterations and often includes human approval for high-stakes actions. Agent architectures can also vary, including supervisor patterns that coordinate more specialized sub-agents.</p>
+      </section>
+
       <section class="panel info-grid">
         <div>
           <h2>Learning outcomes</h2>
@@ -65,16 +123,19 @@
 
       <section class="panel">
         <h2>Guided lab</h2>
+        <h3>Execution steps</h3>
         <p>Build a mini assistant that classifies user intent and routes to different prompt templates with deterministic settings.</p>
       </section>
 
       <section class="panel">
         <h2>Exercises</h2>
+        <h3>Practice tasks</h3>
         <p>Run three prompt variants over the same input set and compare factuality, verbosity, and consistency.</p>
       </section>
 
       <section class="panel">
         <h2>Deliverable</h2>
+        <h3>Submission output</h3>
         <p>A repository containing one runnable chain, test prompts, and a short design note describing model and prompt decisions.</p>
       </section>
 
@@ -85,7 +146,7 @@
           <li>A repeatable structure for quality checks and improvements.</li>
           <li>An incremental bridge to the next module.</li>
         </ul>
-        <button id="print-page-btn" class="print-btn" type="button">Print module</button>
+        <button class="print-btn" type="button" id="print-page-btn" data-print aria-label="Print this module">Print</button>
       </section>
     </article>
   </main>
