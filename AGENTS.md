@@ -111,10 +111,11 @@ Once a module is approved/finalized:
 - approved images/figures must not disappear
 
 Mandatory workflow:
-1. finalize module content
-2. create/update lock file  
+1. Always run non-regression tests (`python3 scripts/non_regression_guard.py check`) **before** starting any modification to ensure a clean baseline.
+2. Update/modify module content as needed.
+3. Update/create lock file if the structure has intentionally changed  
    `python3 scripts/non_regression_guard.py lock site/chapters/chapter-XX.html --id Mx`
-3. run checks after every subsequent change  
+4. Run checks after every subsequent change to verify stability  
    `python3 scripts/non_regression_guard.py check`
 
 Any failing lock check is a blocking regression until fixed.

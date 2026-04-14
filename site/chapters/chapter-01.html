@@ -15,24 +15,6 @@
 
   <header class="site-header">
     <div class="shell">
-      <div class="header-top">
-        <p class="site-mark">AI Agent Programming</p>
-        <label class="lang-switch" for="lang-select">
-          <span>Language</span>
-          <select id="lang-select" aria-label="Choose language">
-            <option value="en" selected>English</option>
-            <option value="it">Italiano</option>
-          </select>
-        </label>
-        <label class="theme-switch" for="theme-select">
-          <span>Theme</span>
-          <select id="theme-select" aria-label="Choose theme">
-            <option value="light" selected>Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </label>
-        <button class="print-btn print-btn-top" type="button" data-print aria-label="Print this module">Print</button>
-      </div>
       <section class="hero">
         <p><a href="../index.html">Home</a></p>
         <h1>M1 - Getting Started with LLMs and LangChain</h1>
@@ -50,10 +32,25 @@
     <article class="module-main">
       <section class="panel">
         <nav class="module-nav" aria-label="Module navigation">
-          <span>Previous</span>
           <span>M1</span>
           <a href="chapter-02.html">M2 Next</a>
         </nav>
+      </section>
+
+      <section class="panel info-grid">
+        <div>
+          <h2>Learning outcomes</h2>
+          <ul>
+            <li>Compare LLM architectures: engines, chatbots, and autonomous agents.</li>
+            <li>Navigate LangChain’s core object model and its modular components.</li>
+            <li>Select the optimal technique for grounding LLMs: Prompt Engineering, RAG, or Fine-tuning.</li>
+            <li>Evaluate model selection based on accuracy, speed, and cost tradeoffs.</li>
+          </ul>
+        </div>
+        <div>
+          <h2>Topics</h2>
+          <p>LLM fundamentals, prompt templates, chain composition, output parsing, and runtime controls.</p>
+        </div>
       </section>
 
       <section class="panel">
@@ -138,52 +135,80 @@
         </figure>
       </section>
 
-      <section class="panel info-grid">
-        <div>
-          <h2>Learning outcomes</h2>
-          <ul>
-            <li>Explain the core concepts and design choices for this module.</li>
-            <li>Implement a working example with LangChain or LangGraph.</li>
-            <li>Evaluate output quality and identify iteration points.</li>
-          </ul>
-        </div>
-        <div>
-          <h2>Topics</h2>
-          <p>LLM fundamentals, prompt templates, chain composition, output parsing, and runtime controls.</p>
-        </div>
+      <section class="panel">
+        <h2>3. Typical LLM Use Cases</h2>
+        <p>LLMs are applied across a wide range of tasks, from text classification to code generation and logical reasoning. In practice, these models act as versatile engines that can be adapted to various business needs.</p>
+        <ul>
+          <li><strong>Text classification and sentiment analysis:</strong> Categorizing content or support tickets based on intent and tone.</li>
+          <li><strong>Natural language understanding and generation:</strong> Identifying main topics and creating tailored summaries.</li>
+          <li><strong>Semantic search:</strong> Querying knowledge bases based on intent rather than simple keywords.</li>
+          <li><strong>Autonomous reasoning:</strong> Planning and managing multi-step processes, such as assembling complex holiday packages.</li>
+          <li><strong>Structured data extraction:</strong> Pulling entities and relationships from unstructured text like financial reports.</li>
+          <li><strong>Code understanding and generation:</strong> Analyzing codebases, suggesting improvements, and generating new components.</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>4. Adapting LLMs to Your Needs</h2>
+        <p>Real-world tasks often involve specific domains or scenarios that extend beyond the initial training of the LLM. Several techniques can ensure that a model meets user needs effectively, ranging from simple prompt adjustments to more complex model training.</p>
+
+        <h3>4.1 Prompt engineering</h3>
+        <p>Prompt engineering is the practice of designing inputs—from single commands to complex blocks of instructions—so the model produces useful and accurate responses. Through in-context learning and few-shot prompting, developers can guide the model's behavior and adapt it to domain-specific needs without needing extra training data. This lightweight yet effective approach is often sufficient for many applications, including maintaining conversation context in chatbots.</p>
+
+        <h3>4.2 Retrieval-Augmented Generation (RAG)</h3>
+        <p>One of the most effective ways to improve model responses is to ground them in your own data using RAG. Instead of relying only on pretrained knowledge, RAG retrieves relevant context from a local knowledge base—usually stored in a vector database—and adds it to the prompt. This workflow keeps inputs concise, reduces token costs, and significantly lowers the risk of hallucinations by ensuring that generated answers are based on verified facts.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m1-figure-1-9-rag-ingestion.png" alt="RAG workflow: documents are split into chunks, converted to embeddings, and stored in a vector store.">
+          <figcaption><strong>Figure M1.9.</strong> A collection of documents is split into text chunks and transformed into vector-based embeddings, which are then stored in a vector store for retrieval.</figcaption>
+        </figure>
+
+        <h3>4.3 Fine-tuning</h3>
+        <p>Fine-tuning adapts a pretrained model to perform better in a specific task or domain by training it on a curated dataset of examples. This process improves efficiency because the model "knows" how to respond in a particular context without needing long instructions in every prompt. However, preparing high-quality datasets takes time and hardware resources, and in many cases, RAG outperforms fine-tuning for dynamic or less popular knowledge.</p>
+        <p>Recent advances such as Low-Rank Adaptation (LoRA) and other parameter-efficient fine-tuning methods have lowered both cost and complexity, making fine-tuning more accessible. Related techniques, such as instruction tuning and Reinforcement Learning from Human Feedback (RLHF), push models to follow directions more reliably, though they typically demand more engineering effort and infrastructure.</p>
+        <p>Whether fine-tuning is truly necessary is an ongoing debate. General-purpose LLMs are surprisingly strong out of the box, especially when paired with RAG. In fact, research shows that RAG often outperforms fine-tuning by letting you provide context dynamically at runtime, reducing both costs and retraining needs (see the research by Soudani et al. in the references).</p>
+      </section>
+
+      <section class="panel">
+        <h2>5. Selecting the Right LLM</h2>
+        <p>When developing LLM-based applications, choosing the right model involves balancing performance, speed, and cost. Modern models come in various sizes and types, accessible through proprietary APIs or as open-source projects that can be self-hosted.</p>
+        
+        <h3>5.1 Core Tradeoffs</h3>
+        <p>The selection process is generally guided by three primary factors: <strong>Accuracy</strong>, <strong>Speed</strong>, and <strong>Cost</strong>. Larger models typically offer higher accuracy but respond more slowly and carry a higher per-token cost. Conversely, smaller models favor low latency and affordability at the expense of performance on complex reasoning tasks.</p>
+        
+        <h3>5.2 Technical Considerations</h3>
+        <p>Beyond the core tradeoffs, developers must evaluate specific requirements such as the <strong>context window size</strong>, which determines how much data the model can process at once. Other factors include <strong>multilingual support</strong> and whether the task requires a standard <strong>instruction model</strong> for following steps or a <strong>reasoning model</strong> designed for complex problem-solving.</p>
+        
+        <h3>5.3 Multi-model Strategies</h3>
+        <p>An effective production strategy often involves using different models for different tasks within the same workflow. For example, a system might use a small, fast model for initial query routing or simple summarization, and reserve a larger, more capable model for final answer synthesis. This approach optimizes the overall system for accuracy, speed, and cost simultaneously.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Further reading</h2>
+        <ul>
+          <li>Heydar Soudani, Evangelos Kanoulas, and Faegheh Hasibi. "Fine-Tuning vs. RAG for Less Popular Knowledge" (2024). <a href="https://arxiv.org/abs/2403.01432" target="_blank" rel="noopener noreferrer">https://arxiv.org/abs/2403.01432</a></li>
+        </ul>
       </section>
 
       <section class="panel">
         <h2>Guided lab</h2>
         <h3>Execution steps</h3>
-        <p>Build a mini assistant that classifies user intent and routes to different prompt templates with deterministic settings.</p>
-      </section>
-
-      <section class="panel">
-        <h2>Exercises</h2>
-        <h3>Practice tasks</h3>
-        <p>Run three prompt variants over the same input set and compare factuality, verbosity, and consistency.</p>
-      </section>
-
-      <section class="panel">
-        <h2>Deliverable</h2>
-        <h3>Submission output</h3>
-        <p>A repository containing one runnable chain, test prompts, and a short design note describing model and prompt decisions.</p>
+        <p>Explore hands-on examples by running the <code>01-langchain_examples_ollama.ipynb</code> notebook. This lab guides you through building a mini assistant that classifies user intent and routes to different prompt templates using deterministic settings.</p>
+        <p>Access the materials here: <a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch01/01-langchain_examples_ollama.ipynb" target="_blank" rel="noopener noreferrer">Jupyter Notebook - Module 1</a></p>
       </section>
 
       <section class="panel">
         <h2>Key takeaways</h2>
         <ul>
-          <li>A clear implementation path from concept to runnable artifact.</li>
-          <li>A repeatable structure for quality checks and improvements.</li>
-          <li>An incremental bridge to the next module.</li>
+          <li><strong>Diverse LLM Architectures:</strong> Understand the shift from task-specific engines and interactive chatbots to autonomous agents that use tools and multi-step reasoning.</li>
+          <li><strong>Framework Efficiency:</strong> Use LangChain to standardize the "plumbing" of LLM apps—document loading, chunking, and vector storage—ensuring maintainable and scalable code.</li>
+          <li><strong>Strategic Adaptation:</strong> Choose the right method to ground your model: use Prompt Engineering for style, RAG for proprietary data and factual accuracy, or Fine-tuning for specialized domain expertise.</li>
+          <li><strong>Optimized Model Selection:</strong> Balance the "accuracy-speed-cost" triangle by selecting models based on task complexity, often using multi-model pipelines for maximum efficiency.</li>
+          <li><strong>RAG over Fine-tuning:</strong> For most production needs, Retrieval-Augmented Generation provides a more dynamic, cost-effective, and transparent way to provide context than model retraining.</li>
         </ul>
-        <button class="print-btn" type="button" id="print-page-btn" data-print aria-label="Print this module">Print</button>
       </section>
     </article>
   </main>
 
-  <a class="top-link" href="#top" aria-label="Back to top">Top</a>
   <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>

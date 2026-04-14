@@ -18,11 +18,8 @@ SPACE_RE = re.compile(r"\s+")
 MODULE_FILE_RE = re.compile(r"^site/chapters/chapter-\d+\.html$")
 
 REQUIRED_UI_MARKERS: list[tuple[str, re.Pattern[str]]] = [
-    ("Print button", re.compile(r'id="print-page-btn"|class="[^"]*print-btn-top[^"]*"', re.IGNORECASE)),
-    ("Top button", re.compile(r'class="[^"]*top-link[^"]*"[^>]*href="#top"', re.IGNORECASE)),
+    # Fixed UI is now injected via site.js, so we don't check it in static HTML files
     ("Left outline nav", re.compile(r'id="outline-nav"', re.IGNORECASE)),
-    ("Language selector", re.compile(r'id="lang-select"', re.IGNORECASE)),
-    ("Theme selector", re.compile(r'id="theme-select"', re.IGNORECASE)),
 ]
 
 
@@ -232,6 +229,60 @@ def check_heading_numbering(html: str) -> list[str]:
     return issues
 
 
+def check_module_flow(html: str) -> list[str]:
+    issues: list[str] = []
+    headings = [normalize(h) for h in re.findall(r"<h[23][^>]*>(.*?)</h[23]>", html, flags=re.IGNORECASE | re.DOTALL)]
+    
+    if not any("Topics" in h for h in headings):
+        issues.append("Missing 'Topics' section")
+    if not any("Learning outcomes" in h for h in headings):
+        issues.append("Missing 'Learning outcomes' section")
+    
+    # Check initial position (info-grid)
+    article_start = html.find("<article")
+    info_grid_pos = html.find('class="panel info-grid"')
+    if info_grid_pos == -1:
+        issues.append("Missing 'info-grid' panel for Topics and Learning outcomes")
+    elif info_grid_pos < article_start:
+        issues.append("'info-grid' must be inside the article")
+
+    # Check terminal sections
+    if not any("Guided lab" in h for h in headings):
+        issues.append("Missing 'Guided lab' section")
+    if not any("Key takeaways" in h for h in headings):
+        issues.append("Missing 'Key takeaways' section")
+        
+    guided_pos = html.find("Guided lab")
+    takeaways_pos = html.find("Key takeaways")
+    if guided_pos != -1 and takeaways_pos != -1:
+        if guided_pos > takeaways_pos:
+            issues.append("'Key takeaways' should follow 'Guided lab'")
+
+    return issues
+
+
+def check_ui_logic(root_path: Path) -> list[str]:
+    issues: list[str] = []
+    js_file = root_path / "site" / "assets" / "js" / "site.js"
+    css_file = root_path / "site" / "assets" / "css" / "site.css"
+    
+    if js_file.exists():
+        js_content = js_file.read_text()
+        if "outline-toggle-spacer" not in js_content:
+            issues.append("JS: Missing logic for 'outline-toggle-spacer' in navigation menu")
+        if "toggle.addEventListener" not in js_content:
+            issues.append("JS: Missing event listener for navigation toggle")
+            
+    if css_file.exists():
+        css_content = css_file.read_text()
+        if ".outline-toggle-spacer" not in css_content:
+            issues.append("CSS: Missing style for '.outline-toggle-spacer'")
+        if "position: fixed" not in css_content or ".print-fixed" not in css_content:
+            issues.append("CSS: Missing style for fixed 'Print' button")
+            
+    return issues
+
+
 def cmd_check(args: argparse.Namespace) -> int:
     lock_dir = Path(args.lock_dir)
     if not lock_dir.is_absolute():
@@ -272,6 +323,16 @@ def cmd_check(args: argparse.Namespace) -> int:
             else:
                 print("  [ok] No regressions detected for locked texts/images")
 
+    # Global UI Logic Check
+    print("\n[logic] Checking JS/CSS non-regression...")
+    ui_logic_issues = check_ui_logic(ROOT)
+    if ui_logic_issues:
+        failures += 1
+        for issue in ui_logic_issues:
+            print(f"  [fail] {issue}")
+    else:
+        print("  [ok] UI logic for navigation and fixed buttons is present")
+
     module_files = sorted((ROOT / "site" / "chapters").glob("chapter-*.html"))
     if not module_files:
         print("\n[warn] No module pages found under site/chapters")
@@ -285,9 +346,10 @@ def cmd_check(args: argparse.Namespace) -> int:
             miss_ui = check_required_ui_markers(html)
             structure_issues = check_two_level_structure(html)
             numbering_issues = check_heading_numbering(html)
+            flow_issues = check_module_flow(html)
 
             print(f"\n[structure] {rel}")
-            if miss_ui or structure_issues or numbering_issues:
+            if miss_ui or structure_issues or numbering_issues or flow_issues:
                 failures += 1
                 if miss_ui:
                     print(f"  [fail] Missing required UI controls ({len(miss_ui)}):")
@@ -301,14 +363,18 @@ def cmd_check(args: argparse.Namespace) -> int:
                     print(f"  [fail] Heading numbering issues ({len(numbering_issues)}):")
                     for issue in numbering_issues:
                         print(f"    - {issue}")
+                if flow_issues:
+                    print(f"  [fail] Module flow issues ({len(flow_issues)}):")
+                    for issue in flow_issues:
+                        print(f"    - {issue}")
             else:
-                print("  [ok] UI controls, two-level structure, and numbering are valid")
+                print("  [ok] UI controls, structure, numbering, and flow are valid")
 
     if failures:
-        print(f"\n[result] FAIL - {failures} lock file(s) with regressions")
+        print(f"\n[result] FAIL - {failures} check(s) with regressions")
         return 1
 
-    print("\n[result] PASS - all locked modules are stable")
+    print("\n[result] PASS - all modules and logic are compliant")
     return 0
 
 

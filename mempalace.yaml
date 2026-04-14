@@ -10,6 +10,9 @@ memory:
   - Course section numbering is independent from source/book numbering.
   - Never mirror book numbering in chapter headings.
   - When importing a paragraph from resources, include all figures present in that source paragraph.
+  - Guided lab links must point directly to the GitHub repository (e.g., https://github.com/thimotyb/building-llm-applications/blob/main/).
+  - The "Topics" section must always be placed at the beginning of the module, right after the navigation panel.
+  - Always run non-regression tests (python3 scripts/non_regression_guard.py check) before starting any modification on a finalized module to ensure a clean baseline.
   writing_style:
   - Prefer summarized content over long-form prose.
   - Do not make text overly terse or bullet-like when body prose is expected.
