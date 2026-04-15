@@ -15,9 +15,8 @@ Deploy `site/` to Netlify in production mode, using:
 
 ## Preconditions
 
-- `NETLIFY_AUTH_TOKEN` is available in environment
-- `NETLIFY_SITE_ID` points to the target Netlify site
-- project root contains `netlify.toml` with `publish = "site"`
+- `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` are defined in the `.env` file in the project root.
+- `netlify.toml` is present with `publish = "site"`.
 
 ## Mandatory pre-deploy gate
 
@@ -29,10 +28,10 @@ python3 scripts/non_regression_guard.py check
 
 ## Command
 
-From project root:
+From project root, load variables and run:
 
 ```bash
-scripts/deploy_netlify.sh "optional deploy message"
+export $(grep -v '^#' .env | xargs) && scripts/deploy_netlify.sh "optional deploy message"
 ```
 
 ## Expected Behavior
