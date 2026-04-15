@@ -72,6 +72,21 @@ def extract_images(html: str) -> list[str]:
     return unique
 
 
+def extract_links(html: str) -> list[str]:
+    hrefs = re.findall(r"<a[^>]+href=[\"']([^\"']+)[\"']", html, flags=re.IGNORECASE)
+    unique: list[str] = []
+    seen: set[str] = set()
+    for href in hrefs:
+        h = href.strip()
+        if not h or h.startswith("#") or h.startswith("javascript:"):
+            continue
+        if h in seen:
+            continue
+        seen.add(h)
+        unique.append(h)
+    return unique
+
+
 def lock_id_from_target(target: Path) -> str:
     stem = target.stem.lower().replace("_", "-")
     return stem
@@ -86,6 +101,7 @@ def cmd_lock(args: argparse.Namespace) -> int:
     html = target.read_text(encoding="utf-8")
     texts = extract_heading_and_core_texts(html)
     images = extract_images(html)
+    links = extract_links(html)
 
     if args.max_texts > 0:
         texts = texts[: args.max_texts]
@@ -104,12 +120,14 @@ def cmd_lock(args: argparse.Namespace) -> int:
         "file": rel_target,
         "required_texts": texts,
         "required_images": images,
+        "required_links": links,
     }
     lock_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     print(f"[ok] Lock written: {lock_path}")
     print(f"     required_texts: {len(texts)}")
     print(f"     required_images: {len(images)}")
+    print(f"     required_links: {len(links)}")
     return 0
 
 
@@ -283,6 +301,43 @@ def check_ui_logic(root_path: Path) -> list[str]:
     return issues
 
 
+import requests
+
+
+def check_external_links(html: str) -> list[str]:
+    issues: list[str] = []
+    links = extract_links(html)
+    github_links = [l for l in links if "github.com" in l.lower()]
+    
+    for url in github_links:
+        try:
+            # Use a HEAD request with a timeout for speed. Some servers might 405 on HEAD, so we check status.
+            response = requests.head(url, timeout=5, allow_redirects=True)
+            if response.status_code >= 400:
+                # Retry with GET just in case HEAD is not supported
+                response = requests.get(url, timeout=5, allow_redirects=True)
+            
+            if response.status_code != 200:
+                issues.append(f"Broken external link: {url} (HTTP {response.status_code})")
+        except Exception as e:
+            issues.append(f"Broken external link: {url} (Error: {str(e)})")
+    return issues
+
+
+def check_image_links(html: str, module_file: Path) -> list[str]:
+    issues: list[str] = []
+    images = extract_images(html)
+    for src in images:
+        if src.startswith("http"):
+            continue
+        
+        # Resolve relative path
+        img_path = (module_file.parent / src).resolve()
+        if not img_path.exists():
+            issues.append(f"Broken image link: {src} (not found at {img_path.relative_to(ROOT)})")
+    return issues
+
+
 def cmd_check(args: argparse.Namespace) -> int:
     lock_dir = Path(args.lock_dir)
     if not lock_dir.is_absolute():
@@ -309,8 +364,12 @@ def cmd_check(args: argparse.Namespace) -> int:
             current_imgs = set(extract_images(html))
             req_imgs = data.get("required_images", [])
             miss_imgs = [img for img in req_imgs if img not in current_imgs]
+            
+            current_links = set(extract_links(html))
+            req_links = data.get("required_links", [])
+            miss_links = [link for link in req_links if link not in current_links]
 
-            if miss_texts or miss_imgs:
+            if miss_texts or miss_imgs or miss_links:
                 failures += 1
                 if miss_texts:
                     print(f"  [fail] Missing required texts ({len(miss_texts)}):")
@@ -320,8 +379,12 @@ def cmd_check(args: argparse.Namespace) -> int:
                     print(f"  [fail] Missing required images ({len(miss_imgs)}):")
                     for src in miss_imgs:
                         print(f"    - {src}")
+                if miss_links:
+                    print(f"  [fail] Missing required links ({len(miss_links)}):")
+                    for href in miss_links:
+                        print(f"    - {href}")
             else:
-                print("  [ok] No regressions detected for locked texts/images")
+                print("  [ok] No regressions detected for locked texts/images/links")
 
     # Global UI Logic Check
     print("\n[logic] Checking JS/CSS non-regression...")
@@ -347,9 +410,11 @@ def cmd_check(args: argparse.Namespace) -> int:
             structure_issues = check_two_level_structure(html)
             numbering_issues = check_heading_numbering(html)
             flow_issues = check_module_flow(html)
+            image_link_issues = check_image_links(html, module_file)
+            external_link_issues = check_external_links(html)
 
             print(f"\n[structure] {rel}")
-            if miss_ui or structure_issues or numbering_issues or flow_issues:
+            if miss_ui or structure_issues or numbering_issues or flow_issues or image_link_issues or external_link_issues:
                 failures += 1
                 if miss_ui:
                     print(f"  [fail] Missing required UI controls ({len(miss_ui)}):")
@@ -367,8 +432,16 @@ def cmd_check(args: argparse.Namespace) -> int:
                     print(f"  [fail] Module flow issues ({len(flow_issues)}):")
                     for issue in flow_issues:
                         print(f"    - {issue}")
+                if image_link_issues:
+                    print(f"  [fail] Broken image links ({len(image_link_issues)}):")
+                    for issue in image_link_issues:
+                        print(f"    - {issue}")
+                if external_link_issues:
+                    print(f"  [fail] Broken external GitHub links ({len(external_link_issues)}):")
+                    for issue in external_link_issues:
+                        print(f"    - {issue}")
             else:
-                print("  [ok] UI controls, structure, numbering, and flow are valid")
+                print("  [ok] UI controls, structure, numbering, flow, images, and external links are valid")
 
     if failures:
         print(f"\n[result] FAIL - {failures} check(s) with regressions")

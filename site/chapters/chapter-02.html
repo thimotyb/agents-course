@@ -42,41 +42,137 @@
         <div>
           <h2>Learning outcomes</h2>
           <ul>
-            <li>Explain the core concepts and design choices for this module.</li>
-            <li>Implement a working example with LangChain or LangGraph.</li>
-            <li>Evaluate output quality and identify iteration points.</li>
+            <li>Analyze the limitations of LLM context windows and the need for scalable summarization.</li>
+            <li>Implement MapReduce and Refine strategies using LangChain and LCEL.</li>
+            <li>Select the optimal summarization technique based on document count, size, and context requirements.</li>
+            <li>Manage multi-document ingestion from various sources like Wikipedia, PDF, and DOCX.</li>
           </ul>
         </div>
         <div>
           <h2>Topics</h2>
-          <p>Map-reduce summarization, token budgeting, chunking strategy, refinement loops, and graph orchestration.</p>
+          <p>Context window limits, MapReduce vs. Refine strategies, document loaders, and LCEL chain composition for summarization.</p>
         </div>
+      </section>
+
+      <section class="panel">
+        <h2>1. The Need for Automated Summarization</h2>
+        <p>In modern data-driven environments, the volume of text information—from technical reports to entire books—frequently exceeds the capacity for manual review. Summarization engines are essential tools for automating the condensation of large document sets, a task that remains impractical and costly to perform manually even with general-purpose AI interfaces.</p>
+        
+        <h3>1.1 Context Window Constraints</h3>
+        <p>Every Large Language Model (LLM) is constrained by a <strong>context window</strong>: the maximum number of tokens (words or characters) it can process in a single prompt. While newer models offer expanded windows, many production scenarios involve documents that still exceed these limits. Automated techniques allow developers to bypass these physical constraints by processing data in manageable segments.</p>
+
+        <h3>1.2 Beyond Basic Prompting</h3>
+        <p>While simple documents can be summarized using a basic prompt, real-world applications require more robust patterns. Using <strong>LangChain Expression Language (LCEL)</strong>, we can build sequences of connected operations where the output of one step informs the next. This modular approach is the foundation for handling long-form content, consolidating multiple files, and preparing data for advanced AI agent architectures.</p>
+      </section>
+
+      <section class="panel">
+        <h2>2. Summarizing Large Documents</h2>
+        <p>When a single document exceeds the LLM’s context window, we must employ strategies that process the text in parts while maintaining the overall information integrity. The most common pattern for this scenario is the <strong>MapReduce</strong> approach.</p>
+        
+        <h3>2.1 The MapReduce Workflow</h3>
+        <p>The MapReduce technique breaks down the summarization task into three distinct stages:</p>
+        <ul>
+          <li><strong>Chunking:</strong> The large document is split into smaller, overlapping segments (chunks) using a tokenizer. This ensures each piece fits comfortably within the model's token limit.</li>
+          <li><strong>Map Stage:</strong> Each chunk is sent to the LLM independently and in parallel to generate an individual summary for that specific segment.</li>
+          <li><strong>Reduce Stage:</strong> The individual summaries from the map stage are combined into a single text, which is then summarized one final time to produce the cohesive global summary.</li>
+        </ul>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m2-figure-3-1-mapreduce.png" alt="MapReduce summarization workflow showing chunking, individual mapping, and final reduction.">
+          <figcaption><strong>Figure M2.1.</strong> The MapReduce approach enables parallel processing of large documents by summarizing chunks before aggregating results into a final output.</figcaption>
+        </figure>
+      </section>
+
+      <section class="panel">
+        <h2>3. Summarizing Across Multiple Documents</h2>
+        <p>In many real-world scenarios, you need to combine insights from various data sources rather than processing a single long text. This requires techniques for loading content from different formats and consolidating it into a coherent summary.</p>
+
+        <h3>3.1 Multi-Source MapReduce</h3>
+        <p>The MapReduce pattern can be extended to handle multiple documents (e.g., Wikipedia pages, Word files, PDFs). Each document is loaded into a <code>Document</code> object, mapped to an individual summary, and then reduced into a final consolidated output. This approach is highly scalable as each document can be processed in parallel.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m2-figure-3-2-multi-document.png" alt="MapReduce summarization across multiple documents.">
+          <figcaption><strong>Figure M2.2.</strong> Multi-document MapReduce workflow for consolidating information from diverse sources.</figcaption>
+        </figure>
+
+        <h3>3.2 The Refine Technique</h3>
+        <p>Unlike MapReduce, the <strong>Refine</strong> technique is an incremental process. A final summary is constructed step-by-step by iteratively summarizing the combination of the <em>current summary</em> and the <em>next document</em>. This continues until all documents have been processed. This method is slower (sequential) but often preserves more context and nuances across documents than MapReduce.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m2-figure-3-3-refine.png" alt="The refine summarization technique showing incremental summary updates.">
+          <figcaption><strong>Figure M2.3.</strong> The refine technique builds a global summary by progressively updating it with information from each new document.</figcaption>
+        </figure>
+
+        <h3>3.3 Summarization Flowchart</h3>
+        <p>Selecting the right technique depends on the document count, size, and your tolerance for latency or information loss. The following flowchart provides a decision matrix to choose between Stuffed prompts, MapReduce, or Refine based on the context window and the nature of the data.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m2-figure-3-4-flowchart.png" alt="Summarization strategy flowchart.">
+          <figcaption><strong>Figure M2.4.</strong> Flowchart for selecting the optimal summarization approach based on context size and source diversity.</figcaption>
+        </figure>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m2-figure-3-5-summarization-exercise.png" alt="Summarization exercise execution screenshot.">
+          <figcaption><strong>Figure M2.5.</strong> Execution output of a summarization chain showing the processed results.</figcaption>
+        </figure>
+      </section>
+
+      <section class="panel">
+        <h2>4. Creating a Research Summarization Engine</h2>
+        <p>A research summarization engine represents a more advanced application of the techniques discussed so far. Instead of summarizing a static document, this engine dynamically gathers information from the web to answer complex user queries.</p>
+
+        <h3>4.1 Engine Overview</h3>
+        <p>When researching a topic manually, you typically perform a web search, sift through pages, take notes, and compile a final summary. A <strong>semiautomated approach</strong> involves using an LLM to summarize each search result individually before manually consolidating them into a final report.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m2-figure-4-1-semiautomated.png" alt="Semiautomated research summarization workflow.">
+          <figcaption><strong>Figure M2.6.</strong> Semiautomated workflow where the LLM summarizes individual search results for manual consolidation.</figcaption>
+        </figure>
+
+        <p>A <strong>fully automated research engine</strong> goes a step further by automating the entire pipeline: performing web searches, scraping content from multiple URLs, and synthesizing a comprehensive research report without human intervention between steps.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m2-figure-4-2-automated-engine.png" alt="Automated research summarization engine architecture.">
+          <figcaption><strong>Figure M2.7.</strong> Architecture of a fully automated research engine that integrates web searching, scraping, and multi-stage summarization.</figcaption>
+        </figure>
+
+        <h3>4.2 Core Engine Components</h3>
+        <p>Building a research engine requires two fundamental capabilities beyond the LLM itself: the ability to find relevant information on the web and the ability to extract clean text from those pages.</p>
+        
+        <ul>
+          <li><strong>Web Searching:</strong> Utilizing search engine wrappers like <code>DuckDuckGoSearchAPIWrapper</code> allows the engine to programmatically retrieve a list of URLs based on generated queries without requiring complex API keys.
+            <br><em>Implementation:</em> <a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch04/web_searching.py" target="_blank" rel="noopener noreferrer">web_searching.py</a>
+            <br><em>Test script:</em> <a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch04/web_searching_try.py" target="_blank" rel="noopener noreferrer">web_searching_try.py</a>
+          </li>
+          <li><strong>Web Scraping:</strong> Once URLs are identified, libraries like <code>BeautifulSoup</code> and <code>requests</code> are used to fetch and parse the HTML content, stripping away navigation menus and ads to provide clean text for the LLM to process.
+            <br><em>Implementation:</em> <a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch04/web_scraping.py" target="_blank" rel="noopener noreferrer">web_scraping.py</a>
+          </li>
+        </ul>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m2-figure-4-3-duckduckgo-debugger.png" alt="Testing DuckDuckGo search in the debugger.">
+          <figcaption><strong>Figure M2.8.</strong> Verifying web search results in the debugger using the test script <code>web_searching_try.py</code>.</figcaption>
+        </figure>
       </section>
 
       <section class="panel">
         <h2>Guided lab</h2>
         <h3>Execution steps</h3>
-        <p>Implement a LangGraph summarizer that ingests long text, chunks it, summarizes each chunk, and composes a final summary.</p>
-      </section>
-
-      <section class="panel">
-        <h2>Exercises</h2>
-        <h3>Practice tasks</h3>
-        <p>Add a quality rubric and test the same pipeline with technical and non-technical documents.</p>
-      </section>
-
-      <section class="panel">
-        <h2>Deliverable</h2>
-        <h3>Submission output</h3>
-        <p>A graph-based summarization workflow with documented node responsibilities and measurable quality criteria.</p>
+        <p>Explore hands-on implementations of summarization chains by running the notebooks in the <code>ch03</code> and <code>ch04</code> folders of the code repository. The lab covers TokenTextSplitter usage, full MapReduce LCEL chains, the implementation of the Refine technique function, and building a complete automated research summarization engine.</p>
+        <p>Access the materials here:</p>
+        <ul>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch03" target="_blank" rel="noopener noreferrer">Code Examples - Module 2 (Ch03)</a></li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch04" target="_blank" rel="noopener noreferrer">Code Examples - Module 2 (Ch04)</a></li>
+        </ul>
       </section>
 
       <section class="panel">
         <h2>Key takeaways</h2>
         <ul>
-          <li>A clear implementation path from concept to runnable artifact.</li>
-          <li>A repeatable structure for quality checks and improvements.</li>
-          <li>An incremental bridge to the next module.</li>
+          <li><strong>MapReduce</strong> and <strong>Refine</strong> are core patterns for processing documents that exceed LLM context limits.</li>
+          <li><strong>Automated Research Engines</strong> combine web search wrappers, scraping tools, and multi-stage summarization into a single pipeline.</li>
+          <li><strong>LCEL</strong> facilitates the parallelization of these tasks, significantly improving efficiency when handling multiple web sources.</li>
+          <li>A clear <strong>decision flowchart</strong> helps select the right strategy based on document volume, size, and required context integrity.</li>
         </ul>
       </section>
     </article>

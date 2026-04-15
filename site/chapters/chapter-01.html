@@ -43,13 +43,14 @@
           <ul>
             <li>Compare LLM architectures: engines, chatbots, and autonomous agents.</li>
             <li>Navigate LangChain’s core object model and its modular components.</li>
+            <li>Evaluate and refine prompts using in-context learning (zero-shot, few-shot, and CoT).</li>
             <li>Select the optimal technique for grounding LLMs: Prompt Engineering, RAG, or Fine-tuning.</li>
-            <li>Evaluate model selection based on accuracy, speed, and cost tradeoffs.</li>
+            <li>Optimize model selection based on accuracy, speed, and cost tradeoffs.</li>
           </ul>
         </div>
         <div>
           <h2>Topics</h2>
-          <p>LLM fundamentals, prompt templates, chain composition, output parsing, and runtime controls.</p>
+          <p>LLM fundamentals, prompt engineering patterns, LangChain object model, in-context learning, RAG, and model selection.</p>
         </div>
       </section>
 
@@ -61,11 +62,10 @@
         <p>LLM-based applications, or engines, provide a bounded capability such as summarization, search, or generation. They produce an output and stop, without choosing autonomous follow-up actions.</p>
         <p>Chatbots are conversational interfaces that keep context across turns. Their focus is dialogue and interactive Q&amp;A.</p>
         <p>AI agents are autonomous or semi-autonomous systems that plan and execute multi-step work toward a goal. Unlike engines, they can loop (observe -&gt; decide -&gt; act -&gt; observe), use tools and APIs, and adapt based on intermediate outcomes.</p>
-      </section>
-
-      <section class="panel">
-        <h2>1.2 LLM-based Applications</h2>
-        <h3>1.2.1 Summarization and Q&amp;A engines</h3>
+        
+        <p><strong>LLM-based Applications:</strong> These systems are tailored for specific language tasks and can be further categorized based on their interactivity and complexity.</p>
+        
+        <h3>1.2 Summarization and Q&amp;A engines</h3>
         <p>An LLM-based application is a backend component for specific language tasks. A summarization engine, for example, condenses long text into concise output that can be returned immediately or stored for reuse.</p>
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m1-figure-1-1-summarization-engine.png" alt="Architecture of a summarization engine that receives long text, generates summaries, and exposes results through a REST API.">
@@ -79,7 +79,8 @@
           <figcaption><strong>Figure M1.2.</strong> A Q&amp;A engine implemented with RAG: documents are embedded and stored, relevant chunks are retrieved for each question, and the LLM generates a grounded answer.</figcaption>
         </figure>
         <p>Engines are not limited to Q&amp;A. They can run predefined chains with API calls, data retrieval, and post-processing. The key property remains the same: a bounded, goal-specific workflow with logic defined before runtime.</p>
-        <h3>1.2.2 LLM-based chatbots</h3>
+        
+        <h3>1.3 LLM-based chatbots</h3>
         <p>An LLM-based chatbot acts as an interactive assistant that supports continuous, natural conversation with the model. Unlike simple one-shot scripts, chatbots are designed to keep exchanges useful, safe, and consistent through explicit prompt instructions and role-based messages.</p>
         <p>To improve factual quality, chatbots often retrieve context from local knowledge sources such as vector stores. This combination of dialogue and retrieval helps produce answers that are not only fluent, but also more relevant to the domain.</p>
         <p>A key capability is conversation memory: by using previous turns, the chatbot can keep answers coherent and personalized. Because memory is constrained by context limits and cost, many systems summarize or compress chat history during longer interactions.</p>
@@ -92,7 +93,8 @@
           <img src="../assets/images/m1-figure-1-4-chatbot-sequence.png" alt="Sequence diagram of user and chatbot interactions for iterative summary refinement.">
           <figcaption><strong>Figure M1.4.</strong> Sequence flow for chatbot-based summary refinement through multi-turn user interaction.</figcaption>
         </figure>
-        <h3>1.2.3 AI agents</h3>
+        
+        <h3>1.4 AI agents</h3>
         <p>An AI agent is a system that uses an LLM to execute multi-step tasks with branching logic and adaptive decisions. Unlike fixed pipelines, agents operate with controlled autonomy: they follow constraints, but they decide what to do next at runtime.</p>
         <p>At each step, the agent asks the model to select tools, executes those tools, evaluates intermediate results, and continues until a stopping condition is reached. This loop lets agents combine structured and unstructured data sources in a single workflow.</p>
         <p>A typical pattern is goal-oriented orchestration: the agent receives a user request, chooses relevant services, runs queries or API calls, and then composes a final response from the collected outputs.</p>
@@ -109,9 +111,6 @@
         <h3>2.1 The Need for a Framework</h3>
         <p>Building LLM applications often leads to repetitive "plumbing" tasks: loading data, splitting text, generating embeddings, and managing prompts. Without a framework, developers end up writing fragile "glue code" that is hard to maintain and scale. LangChain addresses these challenges by providing modular building blocks that standardize how data is ingested, processed, and retrieved.</p>
         <p>Three core principles guide its design: <strong>modularity</strong> (swappable components), <strong>composability</strong> (building chains and workflows), and <strong>extensibility</strong> (easy integration with third-party tools). By using LangChain, you focus on application logic rather than low-level wiring, ensuring that prompts, chains, and integrations remain maintainable as your project grows.</p>
-      </section>
-
-      <section class="panel">
         <h3>2.2 LangChain Architecture</h3>
         <p>Most LangChain workflows follow a consistent pattern for bringing proprietary data to the model. It starts by pulling text from sources—like files or databases—into <strong>Document</strong> objects, which are then split into smaller chunks. These chunks are converted into <strong>embeddings</strong> (vector representations of meaning) and stored in a <strong>vector store</strong> for efficient retrieval.</p>
         <figure class="module-figure" data-zoomable>
@@ -119,9 +118,6 @@
           <figcaption><strong>Figure M1.6.</strong> High-level LangChain architecture for document ingestion and retrieval.</figcaption>
         </figure>
         <p>At query time, only the most relevant chunks are retrieved based on similarity search, allowing the LLM to answer questions without overstuffing the prompt with entire documents. This architecture balances context limits and costs while preserving answer quality.</p>
-      </section>
-
-      <section class="panel">
         <h3>2.3 Core Object Model</h3>
         <p>LangChain is organized around specific class families that represent the building blocks of an LLM application. The <strong>Document</strong> entity is central, supported by <strong>DocumentLoaders</strong> (to ingest data), <strong>TextSplitters</strong> (to chunk it), and <strong>VectorStores/Retrievers</strong> (to index and pull relevant text).</p>
         <figure class="module-figure" data-zoomable>
@@ -151,17 +147,14 @@
       <section class="panel">
         <h2>4. Adapting LLMs to Your Needs</h2>
         <p>Real-world tasks often involve specific domains or scenarios that extend beyond the initial training of the LLM. Several techniques can ensure that a model meets user needs effectively, ranging from simple prompt adjustments to more complex model training.</p>
-
         <h3>4.1 Prompt engineering</h3>
         <p>Prompt engineering is the practice of designing inputs—from single commands to complex blocks of instructions—so the model produces useful and accurate responses. Through in-context learning and few-shot prompting, developers can guide the model's behavior and adapt it to domain-specific needs without needing extra training data. This lightweight yet effective approach is often sufficient for many applications, including maintaining conversation context in chatbots.</p>
-
         <h3>4.2 Retrieval-Augmented Generation (RAG)</h3>
         <p>One of the most effective ways to improve model responses is to ground them in your own data using RAG. Instead of relying only on pretrained knowledge, RAG retrieves relevant context from a local knowledge base—usually stored in a vector database—and adds it to the prompt. This workflow keeps inputs concise, reduces token costs, and significantly lowers the risk of hallucinations by ensuring that generated answers are based on verified facts.</p>
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m1-figure-1-9-rag-ingestion.png" alt="RAG workflow: documents are split into chunks, converted to embeddings, and stored in a vector store.">
           <figcaption><strong>Figure M1.9.</strong> A collection of documents is split into text chunks and transformed into vector-based embeddings, which are then stored in a vector store for retrieval.</figcaption>
         </figure>
-
         <h3>4.3 Fine-tuning</h3>
         <p>Fine-tuning adapts a pretrained model to perform better in a specific task or domain by training it on a curated dataset of examples. This process improves efficiency because the model "knows" how to respond in a particular context without needing long instructions in every prompt. However, preparing high-quality datasets takes time and hardware resources, and in many cases, RAG outperforms fine-tuning for dynamic or less popular knowledge.</p>
         <p>Recent advances such as Low-Rank Adaptation (LoRA) and other parameter-efficient fine-tuning methods have lowered both cost and complexity, making fine-tuning more accessible. Related techniques, such as instruction tuning and Reinforcement Learning from Human Feedback (RLHF), push models to follow directions more reliably, though they typically demand more engineering effort and infrastructure.</p>
@@ -171,39 +164,98 @@
       <section class="panel">
         <h2>5. Selecting the Right LLM</h2>
         <p>When developing LLM-based applications, choosing the right model involves balancing performance, speed, and cost. Modern models come in various sizes and types, accessible through proprietary APIs or as open-source projects that can be self-hosted.</p>
-        
         <h3>5.1 Core Tradeoffs</h3>
         <p>The selection process is generally guided by three primary factors: <strong>Accuracy</strong>, <strong>Speed</strong>, and <strong>Cost</strong>. Larger models typically offer higher accuracy but respond more slowly and carry a higher per-token cost. Conversely, smaller models favor low latency and affordability at the expense of performance on complex reasoning tasks.</p>
-        
         <h3>5.2 Technical Considerations</h3>
-        <p>Beyond the core tradeoffs, developers must evaluate specific requirements such as the <strong>context window size</strong>, which determines how much data the model can process at once. Other factors include <strong>multilingual support</strong> and whether the task requires a standard <strong>instruction model</strong> for following steps or a <strong>reasoning model</strong> designed for complex problem-solving.</p>
-        
+        <p>Beyond the core tradeoffs, several technical dimensions influence model selection:</p>
+        <ul>
+          <li><strong>Model Purpose:</strong> Mainstream models like GPT, Gemini, and Claude excel at general tasks. For specialized needs like code generation, choose domain-specific models such as Meta's Code Llama or Claude Code.</li>
+          <li><strong>Context Window Size:</strong> Larger windows (supporting up to millions of tokens) allow processing of long documents but can increase cost and processing overhead. Most standard APIs cap between 128K and 256K.</li>
+          <li><strong>Multilingual Support:</strong> Models like Qwen and Llama offer broad coverage, while specific releases (e.g., certain Gemma versions) are optimized for specific language families.</li>
+          <li><strong>Instruction vs. Reasoning Models:</strong> Instruction models (e.g., GPT-5-mini) follow explicit steps efficiently, while reasoning models (e.g., GPT-5 Thinking) are designed for complex problem-solving, trading speed for deeper logic.</li>
+          <li><strong>Open Source vs. Proprietary:</strong> Open-source models (Mistral, Falcon) provide privacy and control, whereas proprietary APIs often deliver superior results with less setup effort, though costs may scale differently.</li>
+        </ul>
         <h3>5.3 Multi-model Strategies</h3>
         <p>An effective production strategy often involves using different models for different tasks within the same workflow. For example, a system might use a small, fast model for initial query routing or simple summarization, and reserve a larger, more capable model for final answer synthesis. This approach optimizes the overall system for accuracy, speed, and cost simultaneously.</p>
+      </section>
+
+      <section class="panel">
+        <h2>6. Prompt Engineering Patterns and Examples</h2>
+        <p>Designing effective prompts is a core skill for LLM application development. By providing clear instructions and context, you can guide the model toward producing accurate and structured results across various use cases.</p>
+        
+        <h3>6.1 Common Text Processing Tasks</h3>
+        <p>LLMs excel at standard language tasks through zero-shot prompting. These include <strong>Text Classification</strong> (categorizing input into labels), <strong>Sentiment Analysis</strong> (determining tone), <strong>Text Summarization</strong> (condensing long passages), and <strong>Question Answering</strong> (extracting facts from text).</p>
+
+        <h3>6.2 Advanced Text Composition</h3>
+        <p>For complex outputs, structured prompts define a <strong>Persona</strong> (the role the model should play) and specify a <strong>Tone</strong> (e.g., professional, witty). Using XML-style tags helps the model distinguish between instructions and data, ensuring the output aligns with expectations.</p>
+
+        <h3>6.3 Reasoning and In-Context Learning</h3>
+        <p>When zero-shot prompts fail, in-context learning provides "mini-training":</p>
+        <ul>
+          <li><strong>Few-shot Learning:</strong> Providing several examples in the prompt to teach the model a new pattern or rule.</li>
+          <li><strong>Chain of Thought (CoT):</strong> Explicitly instructing the model to "think step-by-step," which is essential for logical deductions and complex calculations.</li>
+        </ul>
+
+        <h3>6.4 Beyond Chain of Thought</h3>
+        <p>Advanced techniques extend CoT to handle more complex or chaotic scenarios:</p>
+        <ul>
+          <li><strong>Tree of Thought (ToT):</strong> Allows the model to explore multiple reasoning paths simultaneously, evaluating and refining options as it progresses. This is highly effective for tasks requiring strategic planning.</li>
+          <li><strong>Thread of Thought (ThoT):</strong> Designed for chaotic contexts, it systematically analyzes large volumes of information while filtering out irrelevant details, mimicking human cognitive processes.</li>
+        </ul>
+
+        <h3>6.5 Standard Prompt Structure</h3>
+        <p>A robust, professional prompt is typically organized into specific sections to ensure clarity and reliability:</p>
+        <ul>
+          <li><strong>Persona:</strong> The specific role the LLM should embody.</li>
+          <li><strong>Context &amp; Instruction:</strong> Background information and the explicit action to be taken.</li>
+          <li><strong>Input &amp; Steps:</strong> The data to be processed and the sequence of operations to follow.</li>
+          <li><strong>Tone &amp; Output Format:</strong> The desired style and the final structure (e.g., JSON, table).</li>
+        </ul>
+        <p>Enforcing this structure using <strong>XML-style tags</strong> (e.g., <code>&lt;Persona&gt;</code>, <code>&lt;Context&gt;</code>) is a recommended practice by OpenAI and Anthropic to help the model distinguish between instructions and data.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Guided lab</h2>
+        <h3>Execution steps</h3>
+        <p>Explore hands-on examples by running the following notebooks from the chapter materials:</p>
+        <ul>
+          <li><code>01-langchain_examples_ollama.ipynb</code>: Basic intent classification and prompt routing.</li>
+          <li><code>02-prompt-examples-ollama.ipynb</code>: Advanced few-shot and reasoning implementations.</li>
+        </ul>
+        <p>Access the materials here:</p>
+        <ul>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch01/01-langchain_examples_ollama.ipynb" target="_blank" rel="noopener noreferrer">Jupyter Notebook - Module 1 (Ch01)</a></li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch02/02-prompt_examples_ollama.ipynb" target="_blank" rel="noopener noreferrer">Jupyter Notebook - Module 1 (Ch02)</a></li>
+        </ul>
       </section>
 
       <section class="panel">
         <h2>Further reading</h2>
         <ul>
           <li>Heydar Soudani, Evangelos Kanoulas, and Faegheh Hasibi. "Fine-Tuning vs. RAG for Less Popular Knowledge" (2024). <a href="https://arxiv.org/abs/2403.01432" target="_blank" rel="noopener noreferrer">https://arxiv.org/abs/2403.01432</a></li>
+          <li>Tree of Thought (ToT) Research: <a href="https://arxiv.org/abs/2305.10601" target="_blank" rel="noopener noreferrer">https://arxiv.org/abs/2305.10601</a></li>
+          <li>Thread of Thought (ThoT) Research: <a href="https://arxiv.org/abs/2311.08734" target="_blank" rel="noopener noreferrer">https://arxiv.org/abs/2311.08734</a></li>
+          <li>"The Prompt Report: A Systematic Survey of Prompting Techniques": <a href="https://arxiv.org/abs/2406.06608" target="_blank" rel="noopener noreferrer">https://arxiv.org/abs/2406.06608</a></li>
+          <li>OpenAI Prompt Engineering Guide: <a href="https://mng.bz/z2aA" target="_blank" rel="noopener noreferrer">mng.bz/z2aA</a></li>
+          <li>Anthropic Prompt Engineering Guidelines: <a href="https://mng.bz/0zVv" target="_blank" rel="noopener noreferrer">mng.bz/0zVv</a></li>
+          <li>Prompting Guide - Techniques: <a href="https://www.promptingguide.ai/techniques" target="_blank" rel="noopener noreferrer">www.promptingguide.ai/techniques</a></li>
+          <li>DAIR.AI Prompt Engineering Guide: <a href="https://github.com/dair-ai/Prompt-Engineering-Guide" target="_blank" rel="noopener noreferrer">github.com/dair-ai/Prompt-Engineering-Guide</a></li>
+          <li>System Survey of Prompting Techniques: <a href="https://mng.bz/jZ8e" target="_blank" rel="noopener noreferrer">mng.bz/jZ8e</a></li>
+          <li>LangChain Deep Dive: <a href="https://python.langchain.com/docs/concepts/prompt_templates/" target="_blank" rel="noopener noreferrer">Prompt Templates and Variable Injection</a></li>
+          <li>LangChain Deep Dive: <a href="https://python.langchain.com/docs/how_to/few_shot_examples/" target="_blank" rel="noopener noreferrer">Few-shot Learning and Example Selectors</a></li>
+          <li>LangChain Deep Dive: <a href="https://python.langchain.com/docs/concepts/lcel/" target="_blank" rel="noopener noreferrer">LCEL: Composing Runnables with the Pipe Operator</a></li>
+          <li>LangChain Documentation: <a href="https://docs.langchain.com/langsmith/prompt-engineering-concepts#prompts-vs-prompt-templates" target="_blank" rel="noopener noreferrer">Prompt Engineering Concepts (Prompts vs. Templates)</a></li>
         </ul>
-      </section>
-
-      <section class="panel">
-        <h2>Guided lab</h2>
-        <h3>Execution steps</h3>
-        <p>Explore hands-on examples by running the <code>01-langchain_examples_ollama.ipynb</code> notebook. This lab guides you through building a mini assistant that classifies user intent and routes to different prompt templates using deterministic settings.</p>
-        <p>Access the materials here: <a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch01/01-langchain_examples_ollama.ipynb" target="_blank" rel="noopener noreferrer">Jupyter Notebook - Module 1</a></p>
       </section>
 
       <section class="panel">
         <h2>Key takeaways</h2>
         <ul>
           <li><strong>Diverse LLM Architectures:</strong> Understand the shift from task-specific engines and interactive chatbots to autonomous agents that use tools and multi-step reasoning.</li>
-          <li><strong>Framework Efficiency:</strong> Use LangChain to standardize the "plumbing" of LLM apps—document loading, chunking, and vector storage—ensuring maintainable and scalable code.</li>
-          <li><strong>Strategic Adaptation:</strong> Choose the right method to ground your model: use Prompt Engineering for style, RAG for proprietary data and factual accuracy, or Fine-tuning for specialized domain expertise.</li>
-          <li><strong>Optimized Model Selection:</strong> Balance the "accuracy-speed-cost" triangle by selecting models based on task complexity, often using multi-model pipelines for maximum efficiency.</li>
-          <li><strong>RAG over Fine-tuning:</strong> For most production needs, Retrieval-Augmented Generation provides a more dynamic, cost-effective, and transparent way to provide context than model retraining.</li>
+          <li><strong>Strategic Adaptation:</strong> Choose the right method to ground your model: use Prompt Engineering for style, RAG for proprietary data, or Fine-tuning for specialized domain expertise.</li>
+          <li><strong>Leverage In-Context Learning:</strong> Use one-shot and few-shot examples to teach the model unfamiliar rules or formats without fine-tuning.</li>
+          <li><strong>Decompose Reasoning:</strong> Encourage models to show their work through Chain of Thought (CoT) to improve factual accuracy in complex tasks.</li>
+          <li><strong>Optimized Model Selection:</strong> Balance the "accuracy-speed-cost" triangle by selecting models based on task complexity, often using multi-model pipelines.</li>
         </ul>
       </section>
     </article>
