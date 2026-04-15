@@ -72,6 +72,7 @@ memory:
     - Keep phrasing clear and compact, avoiding overly long periods.
 
   project_progress:
-    - M1: Finished, verified, and locked (includes Prompt Engineering from Ch02).
-    - M2: Completed Introduction, MapReduce, Refine, Strategy Flowchart, and Research Engine Overview (Source Ch03 and Section 4.1 of Ch04).
-    - Next step: Finalize M2 and lock for non-regression.
+    - M1: Finished, verified, and locked. Fixed broken GitHub links.
+    - M2: Completed Section 3 (MapReduce/Refine) and Section 4 (Research Engine Pipeline, Query Rewrite, Prompts, Sequential Run).
+    - Infrastructure: Non-regression guard now checks broken images and external GitHub links. MemPalace centralized sync active.
+    - Next step: Finalize M2 (parallelization with LCEL) and lock for non-regression.

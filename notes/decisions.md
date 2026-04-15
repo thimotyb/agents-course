@@ -62,12 +62,20 @@ Execution workflow:
 - proceed step-by-step
 - add figures and content incrementally based on user instructions
 
-## Runtime baseline for classroom examples
+## Project Progress Log
 
-Technical baseline:
-- use local Ollama runtime on Ubuntu
-- default model: `gemma4:e4b`
-- avoid OpenAI API-key dependency in classroom exercises
-
-Execution artifact:
-- setup commands are maintained in `snippets-agents_v1.txt`
+### 2026-04-15
+- **M1:** Verified and locked. Fixed broken GitHub link in Guided Lab (underscore vs hyphen).
+- **M2 (Summarization):**
+    - Completed Section 3 (Multi-document summarization with MapReduce and Refine).
+    - Completed Section 4 (Research Engine):
+        - 4.1 Overview (Figures M2.6, M2.7).
+        - 4.2 Core Components: Web Search & Scraping (Figure M2.8 - Debugger).
+        - 4.3 Query Rewriting (Figure M2.9).
+        - 4.4 Prompt Engineering (Modular prompts.py).
+        - 4.5 Sequential Pipeline (Figure M2.10 - Execution log).
+    - Updated Guided Lab with Ch03 and Ch04 GitHub links.
+- **Infrastructure:**
+    - Updated `non_regression_guard.py` with broken image detection and external GitHub link verification.
+    - Added `non_regression_standards` and `course_authoring_skill` specifications to `mempalace.yaml`.
+    - Synchronized workspace with centralized MemPalace database on Google Drive.
