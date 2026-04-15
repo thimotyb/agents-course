@@ -153,6 +153,45 @@
           <img src="../assets/images/m2-figure-4-3-duckduckgo-debugger.png" alt="Testing DuckDuckGo search in the debugger.">
           <figcaption><strong>Figure M2.8.</strong> Verifying web search results in the debugger using the test script <code>web_searching_try.py</code>.</figcaption>
         </figure>
+
+        <h3>4.3 Query Rewriting and Multi-Query Generation</h3>
+        <p>A single user question is often too broad or ambiguous for a search engine to return highly relevant results. To overcome this, we use <strong>Query Rewriting</strong>: an LLM processes the original question and generates multiple, more specific search queries. This ensures a broader coverage of the topic and provides diverse perspectives for the final synthesis.</p>
+        <p>While this initial approach is implemented sequentially—which increases the total processing time—it serves as the foundation for the more efficient <strong>parallel execution</strong> patterns we will explore using LCEL.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m2-figure-4-4-query-rewrite.png" alt="Multi-query generation and rewriting workflow.">
+          <figcaption><strong>Figure M2.9.</strong> Using an LLM to rewrite a single user question into multiple targeted search queries to improve search coverage.</figcaption>
+        </figure>
+
+        <h3>4.4 Prompt Engineering for Research</h3>
+        <p>The success of an automated research engine relies on carefully crafted prompts that guide the LLM through different specialized tasks. We maintain these templates in a centralized <code>prompts.py</code> file for modularity and easier refinement.</p>
+        
+        <p>Key prompts used in this architecture include:</p>
+        <ul>
+          <li><strong>Assistant Selection:</strong> Determines the most relevant persona (e.g., "Tour Guide", "Technical Expert") and sets its specific operating instructions based on the user's question.</li>
+          <li><strong>Web Search Generation:</strong> Rewrites the broad user query into multiple, specific, and optimized search terms for DuckDuckGo.</li>
+          <li><strong>Content Summarization:</strong> Guides the LLM to extract only the most relevant facts and details from a raw, scraped web page while ignoring noise (ads, navigation).</li>
+          <li><strong>Research Report Synthesis:</strong> The final stage prompt that compiles all intermediate summaries and source URLs into a coherent, structured Markdown report.</li>
+        </ul>
+        <p><em>Implementation:</em> <a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch04/prompts.py" target="_blank" rel="noopener noreferrer">prompts.py</a></p>
+
+        <h3>4.5 Sequential Research Pipeline</h3>
+        <p>The first complete version of the engine follows a <strong>sequential pipeline</strong>. While slower than parallel execution, this linear flow is easier to debug and demonstrates the logical progression of information through the system.</p>
+        
+        <p>The execution steps in the <code>research_engine_seq.py</code> implementation are:</p>
+        <ol>
+          <li><strong>Assistant Selection:</strong> The LLM analyzes the query to choose the best research persona.</li>
+          <li><strong>Search Generation:</strong> The original question is rewritten into multiple optimized search queries.</li>
+          <li><strong>Execution Loop:</strong> The system iterates through each generated query, performing a web search and retrieving result URLs.</li>
+          <li><strong>Scraping and Summarization:</strong> For each URL, the content is scraped, cleaned, and summarized individually.</li>
+          <li><strong>Final Synthesis:</strong> All individual summaries are combined into a final structured research report.</li>
+        </ol>
+        <p><em>Full Pipeline Code:</em> <a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch04/research_engine_seq.py" target="_blank" rel="noopener noreferrer">research_engine_seq.py</a></p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m2-figure-4-5-sequential-engine-run.png" alt="Execution of the sequential research engine.">
+          <figcaption><strong>Figure M2.10.</strong> Console output showing the step-by-step execution of the sequential research summarization engine.</figcaption>
+        </figure>
       </section>
 
       <section class="panel">
