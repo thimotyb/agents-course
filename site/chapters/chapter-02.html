@@ -208,6 +208,21 @@
         <h2>Guided lab</h2>
         <h3>Execution steps</h3>
         <p>Explore hands-on implementations of summarization chains by running the notebooks in the <code>ch03</code> and <code>ch04</code> folders of the code repository. The lab covers TokenTextSplitter usage, full MapReduce LCEL chains, the implementation of the Refine technique function, and building a complete automated research summarization engine.</p>
+        
+        <h4>Setup for Chapter 4</h4>
+        <p>To run and debug the research engine, follow these environment setup steps:</p>
+        <ol>
+          <li><strong>Create Virtual Environment:</strong> Navigate to the <code>ch04</code> folder and run:
+            <br><code>python3 -m venv env_ch04</code>
+          </li>
+          <li><strong>Activate & Install:</strong> Activate the environment and install dependencies:
+            <br><code>source env_ch04/bin/activate && pip install -r requirements.txt</code>
+          </li>
+          <li><strong>Configure Debugger:</strong> To use the VS Code debugger, ensure your <code>.vscode/launch.json</code> is correctly configured to use the local virtual environment interpreter.
+            <br><em>Reference:</em> <a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch04/.vscode/launch.json" target="_blank" rel="noopener noreferrer">Example launch.json</a>
+          </li>
+        </ol>
+
         <p>Access the materials here:</p>
         <ul>
           <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch03" target="_blank" rel="noopener noreferrer">Code Examples - Module 2 (Ch03)</a></li>
