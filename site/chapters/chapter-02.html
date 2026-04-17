@@ -46,11 +46,12 @@
             <li>Implement MapReduce and Refine strategies using LangChain and LCEL.</li>
             <li>Select the optimal summarization technique based on document count, size, and context requirements.</li>
             <li>Manage multi-document ingestion from various sources like Wikipedia, PDF, and DOCX.</li>
+            <li>Explain the fundamentals of agentic workflows and their implementation using LangGraph.</li>
           </ul>
         </div>
         <div>
           <h2>Topics</h2>
-          <p>Context window limits, MapReduce vs. Refine strategies, document loaders, and LCEL chain composition for summarization.</p>
+          <p>Context window limits, MapReduce vs. Refine strategies, document loaders, LCEL chain composition, and transitioning from linear LangChain sequences to stateful LangGraph workflows (Core Components, StateGraph, and Typed State).</p>
         </div>
       </section>
 
@@ -264,8 +265,142 @@
         </figure>
 
         <p><em>Full LCEL Implementation:</em> <a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch04/chain_5_1.py" target="_blank" rel="noopener noreferrer">chain_5_1.py</a></p>
+      </section>
 
-        <h3>4.7 Setup for Chapter 4</h3>
+      <section class="panel">
+        <h2>5. Introduction to Agentic Workflows and LangGraph</h2>
+        <p>Large language models (LLMs) are driving a new generation of applications that require more than simple prompt–response exchanges. As applications become more complex, <strong>agentic workflows</strong> have become essential—a pattern where the LLM orchestrates a structured, multistep process using predefined components and explicit state management.</p>
+        <p>Agentic workflows follow a well-defined and consistent sequence of steps. Instead of adapting their behavior dynamically during execution, they emphasize reliability, transparency, and control. In this approach, the LLM makes decisions within clearly defined boundaries, ensuring that each stage of the process remains structured and reproducible. Later in the book, we’ll explore agent architectures that build on these principles to achieve greater autonomy and adaptability.</p>
+
+        <h3>5.1 Understanding Agentic Workflows and Agents</h3>
+        <p>LLM-powered agent-based systems typically follow one of two core design patterns: agentic workflows and agents. Each pattern shapes how the application operates, as illustrated in Figure M2.19. Because these terms are often used interchangeably—but have important differences—it’s essential to understand exactly what is meant by agentic workflow and agent before diving deeper:</p>
+        <ul>
+          <li><strong>Agentic workflow (or simply workflow):</strong> Guides an application through a fixed sequence of predetermined steps. The LLM is used to select among predefined options, helping the system complete tasks and manage the overall flow.</li>
+          <li><strong>Agent:</strong> Uses language models for more than just task execution: they reason, make decisions, and dynamically determine the next steps based on available tools and evolving context. Here, a <em>tool</em> typically refers to a function that returns or processes data.</li>
+        </ul>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m2-figure-5-1-workflows-agents.png" alt="Workflows vs Agents. Workflows use the LLM to choose from fixed options, while Agents dynamically select tools.">
+          <figcaption><strong>Figure M2.19.</strong> Workflows and agents. Workflows use the LLM to choose the next step from a fixed set of options, such as routing a request to a SQL database or a REST API, and synthesizing the answer with the related results. Agents, however, dynamically select and combine tools to achieve their objectives.</figcaption>
+        </figure>
+
+        <p>While both patterns rely on the LLM to drive application behavior, workflows maintain a structured and predictable path, whereas agents can adapt in real time based on new information and shifting goals. Let’s discuss more about workflows next.</p>
+
+        <h3>5.2 Workflows</h3>
+        <p>Workflows use the LLM to pick the next step from a limited set of choices. They typically implement patterns such as Controller-Worker or Router, as illustrated in Figure M2.20.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m2-figure-5-2-workflow-patterns.png" alt="Common workflow patterns: Controller-Worker and Router.">
+          <figcaption><strong>Figure M2.20.</strong> Common workflow patterns. The Controller-Worker pattern uses the LLM in the controller and orchestrates the flow by assigning various tasks to workers following a certain sequence. In the Router pattern, the LLM simply directs the task to the appropriate worker based on the context.</figcaption>
+        </figure>
+
+        <p>In the Controller-Worker pattern, the controller spawns tasks for workers following a certain sequence. In the Router pattern, the LLM simply directs the task to the proper processor (or worker). This chapter will focus on workflows, and we’ll convert the web research application we built earlier with LangChain into an agentic workflow built with LangGraph.</p>
+
+        <h3>5.3 Agents</h3>
+        <p>LLM-based agents use language models to perceive data, reason about it, decide on actions, and achieve goals. Advanced agents retain memory of past interactions, build dynamic workflows, and even learn from feedback. Unlike fixed prompt–response systems, agents generate new flows based on real-time data and available tools. We’ll cover multi-tool agents as well as more complex multi-agent systems in later modules.</p>
+
+        <h3>5.4 When to use agent-based architectures</h3>
+        <p>The concepts of LLM-based workflows and agents are closely related and often overlap, with no sharp dividing line between them. Both approaches are most valuable when your application needs to break complex tasks into smaller steps, make decisions based on previous results, access external tools or data, or maintain context throughout extended interactions. It’s best to adopt agentic workflows or agents when your use case genuinely benefits from explicit state management and dynamic control—balancing the added power against the increased complexity.</p>
+
+        <h3>5.5 LangGraph basics</h3>
+        <p>LangGraph builds on LangChain to manage more complex agentic workflows with branching paths, stateful processing, and clear transitions between steps. It’s a framework for building stateful, multi-step AI applications using a graph-based structure. In LangGraph, nodes represent individual tasks, such as generating text, calling an API, or analyzing data. Edges define the paths that connect these tasks. The state is information that moves between nodes and updates at each step. This setup is better than traditional chains when you need to make decisions, manage state, or handle complex agentic workflows.</p>
+
+        <div class="note">
+          <p><strong>Note:</strong> LangGraph isn’t a replacement for LangChain but an extension. Think of LangChain as providing the building blocks and LangGraph as offering a blueprint to connect those parts into a complex system. LangChain gives you components such as LLMs, embeddings, and retrievers, while LangGraph helps you organize those components into a structured, stateful workflow.</p>
+        </div>
+
+        <p>To use LangGraph effectively, it’s important to understand a few key concepts, including the core components of a graph (nodes and edges), how state flows through the graph, and how conditional edges control its behavior. These are the building blocks we’ll explore in the next modules.</p>
+
+        <h3>5.6 Moving from LangChain chains to LangGraph</h3>
+        <p>LangChain’s simple, linear chains work for straightforward tasks but have limits when your applications get more complex. A typical LangChain setup often looks like this:</p>
+        <pre><code>chain = (
+    prompt_template 
+    | llm 
+    | output_parser
+)</code></pre>
+        <p>This setup struggles when tasks need to split into different paths, when you need to repeat steps based on new information, or when you want to manage state across multiple steps. It also falls short when multiple processes need to happen in parallel.</p>
+        <p>LangGraph solves these problems by offering better state management, conditional branching, and support for cyclical workflows. With explicit state management, you can define and track data consistently across the workflow, which is essential for memory and reasoning. Conditional branching allows agents to take different paths based on previous results, making decision-making smoother. Cyclical workflows let agents repeat tasks until they meet specific conditions, which helps refine results.</p>
+        <p>LangGraph also makes it easier to understand and debug complex workflows. Its graph-based structure offers a clearer view of how data flows through the system, which helps when you need to trace or fix problems. This graph-based approach works well for a range of use cases, such as multi-step reasoning, task planning, managing context in long conversations, coordinating research tasks, and automating business processes. As your applications get more complex, the benefits of using LangGraph’s agent-based architecture become clearer. It gives you the control and flexibility needed to build smart, multi-step systems that can adapt and make decisions on their own.</p>
+
+        <h3>5.7 LangGraph Core Components</h3>
+        <p>LangGraph provides a robust framework for building stateful, multi-step AI applications. Figure M2.21 presents the core components that form the LangGraph application’s foundation.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m2-figure-5-3-core-components.png" alt="LangGraph core components: State, Nodes, and Edges.">
+          <figcaption><strong>Figure M2.21.</strong> LangGraph core components. A strongly typed state (in this example, modeled with <code>ResearchState</code>) flows through the workflow. Nodes perform tasks, and edges create directed data flows between them.</figcaption>
+        </figure>
+
+        <p>At the heart of every LangGraph application is a <strong>state object</strong>—in our example, <code>ResearchState</code>—which defines a clear and strongly typed state for the entire workflow. This state is typically defined as a Python <code>TypedDict</code>, ensuring that data passed between components is well-structured and type-checked.</p>
+        <p>In a LangGraph, each <strong>node</strong> functions as a processing unit. Nodes can handle tasks such as generating search queries, calling external APIs, summarizing results, and transforming data. The <strong>edges</strong> between nodes determine the directed flow of data, defining how information moves through the graph.</p>
+
+        <h3>5.8 StateGraph and ResearchState</h3>
+        <p>A core utility in LangGraph is the <a href="https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.StateGraph" target="_blank" rel="noopener noreferrer"><code>StateGraph</code></a> class, which you use to define the graph that models your application’s workflow. State management is central to LangGraph: unlike chain-based methods that rely on implicit state, LangGraph enforces explicit, strongly typed state, making workflows more robust and predictable.</p>
+        
+        <p>Here’s an extended version of the <code>ResearchState</code> that defines the structured data for our research engine:</p>
+        <pre><code>from typing import TypedDict, Optional, List
+
+class ResearchState(TypedDict):
+    user_question: str
+    assistant_info: Optional[dict]
+    search_queries: Optional[List[dict]]
+    search_results: Optional[List[dict]]
+    research_summary: Optional[str]
+    final_report: Optional[str]</code></pre>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m2-figure-5-5-state-transitions.png" alt="LangGraph state transitions and ResearchState dump.">
+          <figcaption><strong>Figure M2.23.</strong> Visualization of the <code>ResearchState</code> object being passed between nodes, including the state dump at entry and exit points.</figcaption>
+        </figure>
+
+        <p>One of LangGraph’s powerful features is its <strong>conditional edges</strong>, which allow you to define dynamic execution paths based on the runtime state. Combined with entry points and end conditions, this gives you full control over where the graph begins, how it progresses, and when it completes.</p>
+
+        <h3>5.9 Defining Graph Nodes and Edges</h3>
+        <p>Nodes represent processing steps. Each node is a function that takes the current state and returns updates. You can add them to the graph using the <a href="https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.StateGraph.add_node" target="_blank" rel="noopener noreferrer"><code>add_node</code></a> method:</p>
+        <pre><code>graph.add_node("generate_queries", generate_search_queries)</code></pre>
+
+        <p>Edges define the valid transitions between these nodes. A simple linear edge is created with the <a href="https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.StateGraph.add_edge" target="_blank" rel="noopener noreferrer"><code>add_edge</code></a> method:</p>
+        <pre><code>graph.add_edge("generate_queries", "perform_searches")</code></pre>
+
+        <p>To handle decision-making, you can use <strong>conditional edges</strong>. These use a function to choose the next node based on the current state. They are defined using the <a href="https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.StateGraph.add_conditional_edges" target="_blank" rel="noopener noreferrer"><code>add_conditional_edges</code></a> method:</p>
+        <pre><code>def should_refine(state: dict) -> str:
+    if len(state["search_results"]) < 2:
+        return "refine_queries"
+    return "summarize_results"
+
+graph.add_conditional_edges("perform_searches", should_refine)</code></pre>
+
+        <p>Finally, every graph needs a starting point (entry point) and a clear end condition (exit point). You set the starting node using <a href="https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.StateGraph.set_entry_point" target="_blank" rel="noopener noreferrer"><code>set_entry_point</code></a>, and you can direct the flow to a special <code>END</code> node to terminate the workflow:</p>
+        <pre><code>from langgraph.graph import END
+
+graph.set_entry_point("generate_queries")
+graph.add_edge("write_report", END)</code></pre>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m2-figure-5-4-langgraph-execution.png" alt="LangGraph workflow execution.">
+          <figcaption><strong>Figure M2.22.</strong> Execution of a LangGraph-based research agent showing state transitions and node execution in real-time.</figcaption>
+        </figure>
+
+        <h3>5.10 Environment Setup</h3>
+        <p>To ensure a clean and reproducible environment for your LangGraph projects, it is recommended to use a virtual environment (<code>venv</code>). This isolates your project dependencies from the global Python installation.</p>
+        
+        <p><strong>1. Create the virtual environment:</strong></p>
+        <pre><code>python3 -m venv .venv</code></pre>
+        
+        <p><strong>2. Activate the virtual environment:</strong></p>
+        <ul>
+          <li><strong>Linux/macOS:</strong> <code>source .venv/bin/activate</code></li>
+          <li><strong>Windows (Command Prompt):</strong> <code>.venv\Scripts\activate.bat</code></li>
+          <li><strong>Windows (PowerShell):</strong> <code>.venv\Scripts\Activate.ps1</code></li>
+        </ul>
+        <p>Once activated, your terminal prompt will typically show <code>(.venv)</code>, indicating that any packages you install will be contained within this environment.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Guided lab</h2>
+        <h3>Execution steps</h3>
+        <p>Explore hands-on implementations of summarization chains by running the notebooks in the <code>ch03</code> and <code>ch04</code> folders of the code repository. The lab covers TokenTextSplitter usage, full MapReduce LCEL chains, the implementation of the Refine technique function, and building a complete automated research summarization engine.</p>
+        
+        <p><strong>Setup for Chapter 4 Lab</strong></p>
         <p>To run and debug the research engine, follow these environment setup steps:</p>
         <ol>
           <li><strong>Create Virtual Environment:</strong> Navigate to the <code>ch04</code> folder and run:
@@ -278,32 +413,31 @@
             <br><em>Reference:</em> <a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch04/.vscode/launch.json" target="_blank" rel="noopener noreferrer">Example launch.json</a>
           </li>
         </ol>
-      </section>
 
-      <section class="panel">
-        <h2>Guided lab</h2>
-        <h3>Execution steps</h3>
-        <p>Explore hands-on implementations of summarization chains by running the notebooks in the <code>ch03</code> and <code>ch04</code> folders of the code repository. The lab covers TokenTextSplitter usage, full MapReduce LCEL chains, the implementation of the Refine technique function, and building a complete automated research summarization engine.</p>
         <p>Access the materials here:</p>
         <ul>
           <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch03" target="_blank" rel="noopener noreferrer">Code Examples - Module 2 (Ch03)</a></li>
           <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch04" target="_blank" rel="noopener noreferrer">Code Examples - Module 2 (Ch04)</a></li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch05" target="_blank" rel="noopener noreferrer">Code Examples - Module 2 (Ch05)</a></li>
         </ul>
       </section>
 
       <section class="panel">
         <h2>Key takeaways</h2>
         <ul>
-          <li><strong>MapReduce</strong> and <strong>Refine</strong> are core patterns for processing documents that exceed LLM context limits.</li>
-          <li><strong>Automated Research Engines</strong> combine web search wrappers, scraping tools, and multi-stage summarization into a single pipeline.</li>
-          <li><strong>LCEL</strong> facilitates the parallelization of these tasks, significantly improving efficiency when handling multiple web sources.</li>
-          <li>A clear <strong>decision flowchart</strong> helps select the right strategy based on document volume, size, and required context integrity.</li>
+          <li><strong>Summarization Patterns:</strong> MapReduce and Refine are essential strategies for processing large documents that exceed an LLM's context window.</li>
+          <li><strong>Agentic Workflows vs. Agents:</strong> Workflows follow a structured, predictable sequence of steps, while agents use LLMs to dynamically reason and select tools in real-time.</li>
+          <li><strong>LangGraph Framework:</strong> An extension of LangChain that enables the creation of stateful, multi-step applications using a graph-based structure of nodes and edges.</li>
+          <li><strong>Core Components:</strong> LangGraph applications are built around <strong>Nodes</strong> (processing units), <strong>Edges</strong> (flow control), and a <strong>Typed State</strong> (shared data structure).</li>
+          <li><strong>State Management:</strong> Explicit, strongly typed state (e.g., via Python <code>TypedDict</code>) ensures reliable data transitions and easier debugging in complex AI pipelines.</li>
+          <li><strong>Conditional Logic:</strong> Using conditional edges allows workflows to adapt dynamically, such as looping back to refine search queries if initial results are insufficient.</li>
         </ul>
       </section>
 
       <section class="panel">
         <h2>Further reading</h2>
         <ul>
+          <li>Anthropic Research: <a href="https://mng.bz/lZ0o" target="_blank" rel="noopener noreferrer">Building Effective Agents</a></li>
           <li>LangChain Expression Language (LCEL) Interface: <a href="https://langchain-opentutorial.gitbook.io/langchain-opentutorial/01-basic/07-lcel-interface" target="_blank" rel="noopener noreferrer">LCEL Interface Guide</a></li>
           <li>LangChain Summarization Documentation: <a href="https://python.langchain.com/docs/tutorials/summarization/" target="_blank" rel="noopener noreferrer">Summarization Use Cases</a></li>
           <li>LangChain Expression Language (LCEL) Documentation: <a href="https://python.langchain.com/docs/concepts/lcel/" target="_blank" rel="noopener noreferrer">LCEL Concepts</a></li>

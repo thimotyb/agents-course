@@ -10,6 +10,7 @@
     "2. Summarizing Large Documents",
     "3. Summarizing Across Multiple Documents",
     "4. Creating a Research Summarization Engine",
+    "5. Introduction to Agentic Workflows and LangGraph",
     "Guided lab",
     "Key takeaways",
     "Further reading",
@@ -24,8 +25,7 @@
     "4.3 Query Rewriting and Multi-Query Generation",
     "4.4 Prompt Engineering for Research",
     "4.5 Sequential Research Pipeline",
-    "4.6 Parallelized Research Engine with LCEL",
-    "4.7 Setup for Chapter 4"
+    "4.6 Parallelized Research Engine with LCEL"
   ],
   "required_images": [
     "../assets/images/m2-figure-3-1-mapreduce.png",
@@ -45,7 +45,12 @@
     "../assets/images/m2-figure-4-10-parallel-architectural.png",
     "../assets/images/m2-figure-4-11-enhanced-search-summarization.png",
     "../assets/images/m2-figure-4-12-web-research-chain.png",
-    "../assets/images/m2-figure-4-13-parallel-execution-ide.png"
+    "../assets/images/m2-figure-4-13-parallel-execution-ide.png",
+    "../assets/images/m2-figure-5-1-workflows-agents.png",
+    "../assets/images/m2-figure-5-2-workflow-patterns.png",
+    "../assets/images/m2-figure-5-3-core-components.png",
+    "../assets/images/m2-figure-5-5-state-transitions.png",
+    "../assets/images/m2-figure-5-4-langgraph-execution.png"
   ],
   "required_links": [
     "../index.html",
@@ -57,9 +62,16 @@
     "https://github.com/thimotyb/building-llm-applications/blob/main/ch04/prompts.py",
     "https://github.com/thimotyb/building-llm-applications/blob/main/ch04/research_engine_seq.py",
     "https://github.com/thimotyb/building-llm-applications/blob/main/ch04/chain_5_1.py",
+    "https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.StateGraph",
+    "https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.StateGraph.add_node",
+    "https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.StateGraph.add_edge",
+    "https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.StateGraph.add_conditional_edges",
+    "https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.StateGraph.set_entry_point",
     "https://github.com/thimotyb/building-llm-applications/blob/main/ch04/.vscode/launch.json",
     "https://github.com/thimotyb/building-llm-applications/tree/main/ch03",
     "https://github.com/thimotyb/building-llm-applications/tree/main/ch04",
+    "https://github.com/thimotyb/building-llm-applications/tree/main/ch05",
+    "https://mng.bz/lZ0o",
     "https://langchain-opentutorial.gitbook.io/langchain-opentutorial/01-basic/07-lcel-interface",
     "https://python.langchain.com/docs/tutorials/summarization/",
     "https://python.langchain.com/docs/concepts/lcel/"
