@@ -1,0 +1,46 @@
+{
+  "id": "M3",
+  "file": "site/chapters/chapter-03.html",
+  "required_texts": [
+    "M3 - RAG Systems",
+    "Outline",
+    "Learning outcomes",
+    "Topics",
+    "1. Fundamentals of RAG and Semantic Search",
+    "2. Evolution of Q&A Chatbots",
+    "3. The RAG Design Pattern",
+    "4. Vector Stores",
+    "Guided lab",
+    "Key takeaways",
+    "Further reading",
+    "1.1 What is RAG?",
+    "1.2 Semantic Search",
+    "2.1 Basic Q&A over a Single Document",
+    "2.2 Designing for Enterprise Knowledge Bases",
+    "3.1 Content Ingestion Stage (Indexing)",
+    "3.2 Question-Answering Stage (Retrieval and Generation)",
+    "4.1 How Vector Stores Work",
+    "4.2 Vector Libraries vs. Vector Databases",
+    "4.3 Popular Vector Store Providers",
+    "4.4 Understanding Semantic Distance",
+    "Connect LLMs to external data sources using Retrieval-Augmented Generation for grounded and accurate information retrieval."
+  ],
+  "required_images": [
+    "../assets/images/m3-figure-6-1-simple-qa-chatbot.png",
+    "../assets/images/m3-figure-6-2-enterprise-qa-chatbot.png",
+    "../assets/images/m3-figure-6-3-rag-ingestion.png",
+    "../assets/images/m3-figure-6-4-rag-qa-stage.png",
+    "../assets/images/m3-figure-6-5-semantic-distance.png"
+  ],
+  "required_links": [
+    "../index.html",
+    "chapter-02.html",
+    "chapter-04.html",
+    "https://docs.trychroma.com/",
+    "https://www.pinecone.io/",
+    "https://www.mongodb.com/products/platform/atlas-vector-search",
+    "https://github.com/facebookresearch/faiss/wiki/",
+    "https://arxiv.org/pdf/2310.11703.pdf",
+    "https://mng.bz/BzQ2"
+  ]
+}

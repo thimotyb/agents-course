@@ -12,7 +12,7 @@
 | --- | --- | --- | --- | --- |
 | M1 | Getting Started with LLMs and LangChain | `site/chapters/chapter-01.html` | O'Reilly book contents + selected sections from Part 1 | Baseline concepts, setup, first chains |
 | M2 | Summarization with LangChain and LangGraph | `site/chapters/chapter-02.html` | O'Reilly book contents + summarization-oriented chapters | Prompt compression and graph workflows |
-| M3 | RAG Systems | `site/chapters/chapter-03.html` | O'Reilly book contents + retrieval-focused chapters | Foundational RAG pipeline |
+| M3 | RAG Systems | `site/chapters/chapter-03.html` | O'Reilly book contents (Ch 06) | Foundational RAG pipeline |
 | M4 | Advanced RAG | `site/chapters/chapter-04.html` | O'Reilly book contents + advanced retrieval/evaluation chapters | Query strategies, reranking, eval |
 | M5 | AI Agents Architectures with LangGraph | `site/chapters/chapter-05.html` | O'Reilly book contents + agent architecture chapters | Multi-step, tools, memory, control flow |
 | M6 | Google Agent Development Kit | `site/chapters/chapter-06.html` | ADK docs + guided tutorials | ADK-based agent implementation and operations |

@@ -18,7 +18,7 @@
       <section class="hero">
         <p><a href="../index.html">Home</a></p>
         <h1>M3 - RAG Systems</h1>
-        <p class="hero-copy">Introduce retrieval-augmented generation as a standard architecture for grounded and updatable knowledge access.</p>
+        <p class="hero-copy">Connect LLMs to external data sources using Retrieval-Augmented Generation for grounded and accurate information retrieval.</p>
       </section>
     </div>
   </header>
@@ -42,46 +42,153 @@
         <div>
           <h2>Learning outcomes</h2>
           <ul>
-            <li>Explain the core concepts and design choices for this module.</li>
-            <li>Implement a working example with LangChain or LangGraph.</li>
-            <li>Evaluate output quality and identify iteration points.</li>
+            <li>Understand the foundational principles of Retrieval-Augmented Generation (RAG).</li>
+            <li>Define and differentiate between traditional keyword search and Semantic Search.</li>
+            <li>Explain the role of Vector Databases and ChromaDB in grounding LLM responses.</li>
+            <li>Analyze the transition from simple Q&A over single documents to enterprise-scale knowledge bases.</li>
           </ul>
         </div>
         <div>
           <h2>Topics</h2>
-          <p>Document preprocessing, embeddings, vector stores, retriever configuration, and answer grounding.</p>
+          <p>Semantic Search, RAG fundamentals, Vector Databases, ChromaDB, Context-based grounding, Enterprise Q&A architectures.</p>
         </div>
       </section>
 
       <section class="panel">
+        <h2>1. Fundamentals of RAG and Semantic Search</h2>
+        <p>Retrieval-Augmented Generation (RAG) is the definitive design pattern for building Large Language Model (LLM) applications that require access to specific, up-to-date, or private information. While LLMs are trained on vast datasets, RAG allows them to "look up" information from a provided knowledge base before generating an answer, ensuring that responses are grounded in factual context.</p>
+
+        <h3>1.1 What is RAG?</h3>
+        <p><strong>Retrieval-Augmented Generation (RAG)</strong> is an architecture that combines two main processes: <strong>Retrieval</strong> (finding relevant document fragments from a data source) and <strong>Generation</strong> (using an LLM to synthesize those fragments into a natural language response). This pattern enables systems like Q&amp;A chatbots to query multiple documents and retrieve the most relevant information based on the meaning of the question.</p>
+        
+        <p>Key components of a RAG system include:</p>
+        <ul>
+          <li><strong>Vector Databases:</strong> Specialized storage systems optimized for meaning-based retrieval. They store data as high-dimensional vectors (embeddings) to allow for efficient similarity searches.</li>
+          <li><strong>ChromaDB:</strong> An open-source vector store that facilitates the creation of RAG architectures by providing a streamlined interface for indexing and querying document embeddings.</li>
+        </ul>
+
+        <h3>1.2 Semantic Search</h3>
+        <p>At the core of RAG is <strong>Semantic Search</strong>, which focuses on the <em>meaning</em> of information rather than simple keyword matching. Unlike traditional search engines that fail if exact terms are missing, semantic search understands the intent behind a query. It can retrieve relevant results even if the question and the document don't share a single identical word.</p>
+        
+        <div class="note">
+          <p><strong>Definition:</strong> Semantic search involves understanding a query's meaning, retrieving relevant fragments from a document store that match that meaning, and optionally generating a natural language answer.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>2. Evolution of Q&amp;A Chatbots</h2>
+        <p>The transition from a simple prompt to a robust knowledge-based system follows a clear progression, starting with basic context injection and moving towards automated retrieval systems.</p>
+
+        <h3>2.1 Basic Q&amp;A over a Single Document</h3>
+        <p>A simple Q&amp;A interaction involves sending a prompt containing both the user's question and the specific <strong>context</strong> (the document) to the LLM. The chatbot then <strong>synthesizes</strong> an answer based on this provided information. This setup is effective for single-document analysis but limited by the LLM's context window.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-6-1-simple-qa-chatbot.png" alt="Simple Q&A chatbot process involving context injection.">
+          <figcaption><strong>Figure M3.1.</strong> The basic Q&amp;A chatbot process: the user provides a document and a question, and the LLM synthesizes an answer using the provided context.</figcaption>
+        </figure>
+
+        <h3>2.2 Designing for Enterprise Knowledge Bases</h3>
+        <p>When dealing with enterprise-scale data—such as intranets, shared folders, and thousands of documents—it is impossible to include all content in a single prompt. An enterprise-grade chatbot must be able to autonomously access a knowledge base and retrieve only the specific fragments needed to answer a query.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-6-2-enterprise-qa-chatbot.png" alt="Hypothetical design for an enterprise Q&A chatbot with multiple data sources.">
+          <figcaption><strong>Figure M3.2.</strong> Enterprise Q&amp;A chatbot design where the system's knowledge is expanded through various data sources such as intranet pages and document repositories.</figcaption>
+        </figure>
+      </section>
+
+      <section class="panel">
+        <h2>3. The RAG Design Pattern</h2>
+        <p>The Retrieval-Augmented Generation (RAG) design pattern is the standard architecture for building specialized Q&amp;A chatbots. It allows a system to provide accurate, grounded answers by combining a robust retrieval mechanism with the generative power of an LLM.</p>
+
+        <h3>3.1 Content Ingestion Stage (Indexing)</h3>
+        <p>Before a chatbot can answer questions, the knowledge base must be prepared through an ingestion pipeline. This process involves extracting text from various sources, splitting it into manageable <strong>chunks</strong>, and converting those chunks into <strong>embeddings</strong> (numerical vector representations).</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-6-3-rag-ingestion.png" alt="RAG content ingestion stage: from source documents to vector database.">
+          <figcaption><strong>Figure M3.3.</strong> The content ingestion stage: documents are chunked and transformed into embeddings before being stored in a vector database for efficient retrieval.</figcaption>
+        </figure>
+
+        <p>Storing both the original text and its embedding in a <strong>vector store</strong> enables the system to perform semantic lookups. This means a query for "feline" can successfully retrieve documents mentioning "cats" or "lions," even without an exact keyword match.</p>
+
+        <h3>3.2 Question-Answering Stage (Retrieval and Generation)</h3>
+        <p>Once the data is indexed, the Q&amp;A workflow follows a multi-step process to synthesize a response:</p>
+        <ol>
+          <li><strong>Retrieval:</strong> The system converts the user's question into an embedding and performs a similarity search in the vector store.</li>
+          <li><strong>Augmentation:</strong> The most relevant text chunks are retrieved and added to the prompt as "context."</li>
+          <li><strong>Generation:</strong> The LLM receives the augmented prompt (question + context) and synthesizes the final answer.</li>
+        </ol>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-6-4-rag-qa-stage.png" alt="RAG Q&A stage: Retrieval and Generation workflow.">
+          <figcaption><strong>Figure M3.4.</strong> The Q&amp;A stage: the system retrieves relevant context from the vector store to augment the LLM's generation process.</figcaption>
+        </figure>
+
+        <div class="note warning">
+          <p><strong>Warning:</strong> The primary goal of this architecture is to minimize <strong>hallucinations</strong>. By grounding the LLM in specific, retrieved context, we prevent the model from relying solely on its internal training data, which might be outdated or incorrect for specialized domains.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>4. Vector Stores</h2>
+        <p>A <strong>vector store</strong> is a storage system designed to efficiently store and query high-dimensional vectors. In the context of LLMs, these vectors (embeddings) act as numerical representations of text, capturing the underlying meaning of words and phrases.</p>
+
+        <h3>4.1 How Vector Stores Work</h3>
+        <p>Searches in vector stores are <strong>similarity searches</strong>. Unlike keyword searches, they measure the "distance" between the embedding of a user's question and the embeddings of stored text chunks. This mathematical proximity reflects semantic similarity—how closely the meanings of the pieces of text align.</p>
+        <p>Common distance functions used for these calculations include:</p>
+        <ul>
+          <li><strong>Cosine Similarity:</strong> Measures the cosine of the angle between two vectors.</li>
+          <li><strong>Euclidean Distance:</strong> Calculates the straight-line distance between two points in space.</li>
+          <li><strong>Hamming Distance:</strong> Used for comparing strings of equal length.</li>
+        </ul>
+
+        <h3>4.2 Vector Libraries vs. Vector Databases</h3>
+        <p>The ecosystem of vector storage has evolved from simple libraries to complex database systems:</p>
+        <ul>
+          <li><strong>Vector Libraries (e.g., FAISS):</strong> Early systems that stored only embeddings in memory. They required external storage for the original text and lacked CRUD (Create, Read, Update, Delete) capabilities.</li>
+          <li><strong>Vector Databases (e.g., Pinecone, ChromaDB):</strong> Modern systems that store both the text and its corresponding embedding. They support metadata, full CRUD operations, and concurrent querying during data ingestion.</li>
+          <li><strong>Extended Traditional Databases:</strong> Existing systems like <strong>PostgreSQL (via PgVector)</strong> or <strong>MongoDB Atlas</strong> have added vector support, allowing embeddings to be stored alongside traditional records.</li>
+        </ul>
+
+        <h3>4.3 Popular Vector Store Providers</h3>
+        <p>Choosing the right vector store depends on the specific requirements of the application, such as scalability, ease of use, or existing infrastructure:</p>
+        <ul>
+          <li><a href="https://docs.trychroma.com/" target="_blank" rel="noopener noreferrer"><strong>ChromaDB:</strong></a> An open-source, developer-friendly vector database optimized for simplicity.</li>
+          <li><a href="https://www.pinecone.io/" target="_blank" rel="noopener noreferrer"><strong>Pinecone:</strong></a> A fully managed, cloud-native vector database designed for high-performance enterprise applications.</li>
+          <li><a href="https://www.mongodb.com/products/platform/atlas-vector-search" target="_blank" rel="noopener noreferrer"><strong>MongoDB Atlas:</strong></a> A popular NoSQL database that now offers integrated vector search capabilities.</li>
+          <li><a href="https://github.com/facebookresearch/faiss/wiki/" target="_blank" rel="noopener noreferrer"><strong>FAISS:</strong></a> A library for efficient similarity search and clustering of dense vectors, developed by Meta.</li>
+        </ul>
+
+        <h3>4.4 Understanding Semantic Distance</h3>
+        <p>The effectiveness of a vector store relies on the concept of <strong>semantic distance</strong>. When text is transformed into an embedding, it is mapped to a specific point in a high-dimensional mathematical space.</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-6-5-semantic-distance.png" alt="Visualization of semantic distance in embedding space.">
+          <figcaption><strong>Figure M3.5.</strong> Semantic distance visualization: concepts with similar meanings are positioned closer together in the vector space, allowing the system to retrieve relevant content based on proximity rather than keyword matching.</figcaption>
+        </figure>
+
+        <p>In this "embedding space," the mathematical <strong>closeness</strong> between two vectors reflects their similarity in meaning. When a user submits a query, the system calculates the distance between the query vector and the stored document vectors. It then retrieves the "top-k" results—those with the smallest semantic distance—ensuring that the AI understands context and intent rather than just matching characters.</p>
+      </section>
+
+      <section class="panel">
         <h2>Guided lab</h2>
-        <h3>Execution steps</h3>
-        <p>Create a RAG chatbot on a scoped corpus with source citations and confidence-oriented answer formatting.</p>
-      </section>
-
-      <section class="panel">
-        <h2>Exercises</h2>
-        <h3>Practice tasks</h3>
-        <p>Tune chunk size, overlap, and retrieval k values; measure impact on answer relevance and hallucination rate.</p>
-      </section>
-
-      <section class="panel">
-        <h2>Deliverable</h2>
-        <h3>Submission output</h3>
-        <p>A runnable baseline RAG system with ingestion script, retriever setup, and evaluation notes.</p>
+        <p>Lab materials for Module 3 will be added soon.</p>
       </section>
 
       <section class="panel">
         <h2>Key takeaways</h2>
         <ul>
-          <li>A clear implementation path from concept to runnable artifact.</li>
-          <li>A repeatable structure for quality checks and improvements.</li>
-          <li>An incremental bridge to the next module.</li>
+          <li>RAG combines information retrieval with LLM-based response generation.</li>
+          <li>Semantic search identifies relevant information based on meaning and intent, surpassing keyword-based limitations.</li>
+          <li>Vector stores like ChromaDB are essential for storing and querying document fragments efficiently.</li>
+          <li>Grounding answers in provided context reduces hallucinations and improves accuracy.</li>
+          <li>Vector databases offer advanced features like CRUD support and metadata storage compared to simple vector libraries.</li>
         </ul>
       </section>
-    </article>
-  </main>
 
-  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-</body>
-</html>
+      <section class="panel">
+        <h2>Further reading</h2>
+        <ul>
+          <li>Yikun Han et al.: <a href="https://arxiv.org/pdf/2310.11703.pdf" target="_blank" rel="noopener noreferrer">Comprehensive Survey on Vector Database Management Systems</a></li>
+          <li>Erika Shorten: <a href="https://mng.bz/BzQ2" target="_blank" rel="noopener noreferrer">Distance Metrics in Vector Search</a></li>
+        </ul>
+      </section>

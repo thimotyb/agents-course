@@ -73,6 +73,7 @@ memory:
 
   project_progress:
     - M1: Finished, verified, and locked. Fixed broken GitHub links.
-    - M2: Completed Section 3 (MapReduce/Refine) and Section 4 (Research Engine Pipeline, Query Rewrite, Prompts, Sequential Run).
+    - M2: Finished, verified, and locked. Added full LangGraph section (5.1-5.10) with execution figures (M2.19-M2.23).
+    - M3: Started introduction and fundamentals of RAG and Semantic Search (Section 1 and 2, Figures M3.1-M3.2).
     - Infrastructure: Non-regression guard now checks broken images and external GitHub links. MemPalace centralized sync active.
-    - Next step: Finalize M2 (parallelization with LCEL) and lock for non-regression.
+    - Next step: Continue Module M3 (RAG design pattern and indexing).
