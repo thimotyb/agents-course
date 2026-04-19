@@ -201,6 +201,55 @@
       </section>
 
       <section class="panel">
+        <h2>6. The LangChain Object Model for RAG</h2>
+        <p>One of LangChain’s biggest advantages for LLM-based applications is its ability to orchestrate communication between components such as data loaders, vector stores, and LLMs. Instead of integrating directly with each API, LangChain provides abstractions that let you swap out any component with a different provider without disrupting the overall design of your application.</p>
+
+        <h3>6.1 Content Ingestion (Indexing) Stage</h3>
+        <p>The ingestion stage focuses on preparing and storing data. LangChain models this process using several specialized classes that handle text loading, transformation, and storage.</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-7-1-indexing-object-model.png" alt="LangChain object model for content ingestion.">
+          <figcaption><strong>Figure M3.8.</strong> LangChain object model for content ingestion, showing the relationship between Loaders, Transformers (Splitters), Embeddings, and the Vector Store.</figcaption>
+        </figure>
+
+        <p>Key components in this stage include:</p>
+        <ul>
+          <li><a href="https://reference.langchain.com/python/langchain-core/documents/base/Document" target="_blank" rel="noopener noreferrer"><strong>Document:</strong></a> Models the text content and related metadata.</li>
+          <li><a href="https://reference.langchain.com/python/langchain-core/document_loaders/base/BaseLoader" target="_blank" rel="noopener noreferrer"><strong>BaseLoader:</strong></a> Loads text from external sources (e.g., PDFs, CSVs, URLs) into the Document model.</li>
+          <li><a href="https://reference.langchain.com/python/langchain-text-splitters/base/TextSplitter" target="_blank" rel="noopener noreferrer"><strong>TextSplitter:</strong></a> Divides documents into smaller chunks for efficient processing. Consequently, a <code>TextSplitter</code> has the following signature: <code>Document -> list[Document]</code>.</li>
+          <li><a href="https://reference.langchain.com/python/langchain-core/embeddings/embeddings/Embeddings" target="_blank" rel="noopener noreferrer"><strong>Embeddings:</strong></a> Converts text chunks into numerical vector representations (embedding models).</li>
+          <li><a href="https://reference.langchain.com/python/langchain-core/vectorstores/base/VectorStore" target="_blank" rel="noopener noreferrer"><strong>VectorStore:</strong></a> Stores text chunks and their embeddings for efficient retrieval.</li>
+        </ul>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-7-2-ingestion-sequence.png" alt="Sequence diagram of content ingestion in LangChain.">
+          <figcaption><strong>Figure M3.9.</strong> Sequence diagram of the typical content ingestion process: from loading source data to final storage in the vector database.</figcaption>
+        </figure>
+
+        <h3>6.2 Q&A (Retrieval and Generation) Stage</h3>
+        <p>In the Q&amp;A stage, LangChain orchestrates the flow from a user's question to the final generated answer, ensuring the model is correctly grounded in the retrieved context.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-7-3-qa-object-model.png" alt="LangChain object model for Q&A stage.">
+          <figcaption><strong>Figure M3.10.</strong> LangChain object model for the Q&amp;A stage, highlighting the role of the Retriever and Prompt Templates in augmenting the Language Model.</figcaption>
+        </figure>
+
+        <p>The interaction between classes ensures a seamless transition from search to synthesis:</p>
+        <ul>
+          <li><a href="https://reference.langchain.com/python/langchain-core/vectorstores/base/VectorStore" target="_blank" rel="noopener noreferrer"><strong>VectorStore:</strong></a> Stores and retrieves relevant text chunks.</li>
+          <li><a href="https://reference.langchain.com/python/langchain-core/retrievers/base/BaseRetriever" target="_blank" rel="noopener noreferrer"><strong>Retriever:</strong></a> Retrieves relevant text chunks from the vector store based on the similarity between the query’s embedding and the stored text embeddings.</li>
+          <li><a href="https://reference.langchain.com/python/langchain-core/embeddings/embeddings/Embeddings" target="_blank" rel="noopener noreferrer"><strong>Embeddings:</strong></a> Ensures consistent embeddings for both queries and documents.</li>
+          <li><a href="https://reference.langchain.com/python/langchain-core/prompts/prompt/PromptTemplate" target="_blank" rel="noopener noreferrer"><strong>PromptTemplate:</strong></a> Constructs the input for the language model, typically using the user question and a context made of retrieved text chunks.</li>
+          <li><a href="https://reference.langchain.com/python/langchain-core/language_models/base/BaseLanguageModel" target="_blank" rel="noopener noreferrer"><strong>LanguageModel:</strong></a> Generates grounded responses using the provided context and query.</li>
+        </ul>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-7-4-qa-sequence.png" alt="Sequence diagram of the Q&A process in LangChain.">
+          <figcaption><strong>Figure M3.11.</strong> Sequence diagram of the Q&amp;A workflow: showing how the orchestrator coordinates the Retriever, PromptTemplate, and LLM to produce an answer.</figcaption>
+        </figure>
+      </section>
+
+      <section class="panel">
         <h2>Guided lab</h2>
         <p>In this lab, you will explore a practical implementation of semantic search using ChromaDB. You will learn how to initialize a vector store, ingest documents, and perform queries based on semantic similarity.</p>
         
