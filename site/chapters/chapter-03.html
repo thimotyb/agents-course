@@ -170,8 +170,49 @@
       </section>
 
       <section class="panel">
+        <h2>5. Building a RAG System with ChromaDB</h2>
+        <p>By combining a vector database like ChromaDB with a powerful language model, we can implement a custom RAG system. This setup allows the chatbot to autonomously retrieve relevant information, eliminating the need for the user to manually provide context in every prompt.</p>
+
+        <h3>5.1 Architectural Components</h3>
+        <p>The practical implementation of a RAG architecture involves orchestrating several components: the vector store (ChromaDB), the retrieval logic, and the generative model (LLM). This integration ensures that the LLM has access to the most relevant facts before generating a response.</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-6-7-rag-architecture-chromadb.png" alt="RAG architectural diagram with ChromaDB and LLM.">
+          <figcaption><strong>Figure M3.7.</strong> RAG architectural workflow: the orchestrating chatbot queries ChromaDB, retrieves the best-matching content, and feeds it into the LLM alongside the original user question.</figcaption>
+        </figure>
+
+        <h3>5.2 The Retrieval and Generation Loop</h3>
+        <p>In a production-ready RAG system, the process is streamlined for reliability and speed:</p>
+        <ol>
+          <li><strong>Querying:</strong> The chatbot transforms the natural language question into a vector and queries the collection in ChromaDB.</li>
+          <li><strong>Context Selection:</strong> The database returns the most semantically relevant text chunks.</li>
+          <li><strong>Prompt Synthesis:</strong> A reusable template combines the user's question with the retrieved chunks to create a grounded prompt.</li>
+          <li><strong>Execution:</strong> The LLM processes the grounded prompt to produce a factual and context-aware answer.</li>
+        </ol>
+
+        <h3>5.3 Using a Safer Q&A Prompt</h3>
+        <p>Hallucinations can be significantly mitigated by using a well-structured and proven prompt for Q&amp;A. A standard approach is to use a <strong>hallucination-safe RAG prompt</strong>, which explicitly instructs the model to only use the provided context and to admit when an answer is not present.</p>
+        
+        <div class="note">
+          <p><strong>Tip:</strong> The <a href="https://smith.langchain.com/hub" target="_blank" rel="noopener noreferrer">LangChain Hub</a> (part of LangSmith) is a popular LLM resource that is constantly updated with open-source models, prompts, and advice on various use cases. It is highly recommended to explore the hub for production-ready prompt templates.</p>
+        </div>
+
+        <p>A widely used prompt for this purpose is the <a href="https://smith.langchain.com/hub/rlm/rag-prompt" target="_blank" rel="noopener noreferrer">rlm/rag-prompt</a>, which provides a reliable baseline for grounded generation in RAG architectures.</p>
+      </section>
+
+      <section class="panel">
         <h2>Guided lab</h2>
-        <p>Lab materials for Module 3 will be added soon.</p>
+        <p>In this lab, you will explore a practical implementation of semantic search using ChromaDB. You will learn how to initialize a vector store, ingest documents, and perform queries based on semantic similarity.</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-6-6-jupyter-chromadb.png" alt="Starting Jupyter notebook for ChromaDB demo.">
+          <figcaption><strong>Figure M3.6.</strong> Launching the Jupyter notebook for the practical ChromaDB and RAG fundamentals demonstration.</figcaption>
+        </figure>
+
+        <p>Access the materials here:</p>
+        <ul>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch06" target="_blank" rel="noopener noreferrer">Code Examples - Module 3 (Ch06)</a></li>
+        </ul>
       </section>
 
       <section class="panel">
@@ -190,5 +231,7 @@
         <ul>
           <li>Yikun Han et al.: <a href="https://arxiv.org/pdf/2310.11703.pdf" target="_blank" rel="noopener noreferrer">Comprehensive Survey on Vector Database Management Systems</a></li>
           <li>Erika Shorten: <a href="https://mng.bz/BzQ2" target="_blank" rel="noopener noreferrer">Distance Metrics in Vector Search</a></li>
+          <li>LangChain Hub: <a href="https://smith.langchain.com/hub" target="_blank" rel="noopener noreferrer">Open Source Prompt Repository</a></li>
+          <li>Safe RAG Prompt: <a href="https://smith.langchain.com/hub/rlm/rag-prompt" target="_blank" rel="noopener noreferrer">rlm/rag-prompt on LangChain Hub</a></li>
         </ul>
       </section>

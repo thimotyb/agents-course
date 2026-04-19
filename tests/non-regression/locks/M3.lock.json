@@ -10,6 +10,7 @@
     "2. Evolution of Q&A Chatbots",
     "3. The RAG Design Pattern",
     "4. Vector Stores",
+    "5. Building a RAG System with ChromaDB",
     "Guided lab",
     "Key takeaways",
     "Further reading",
@@ -23,14 +24,17 @@
     "4.2 Vector Libraries vs. Vector Databases",
     "4.3 Popular Vector Store Providers",
     "4.4 Understanding Semantic Distance",
-    "Connect LLMs to external data sources using Retrieval-Augmented Generation for grounded and accurate information retrieval."
+    "5.1 Architectural Components",
+    "5.2 The Retrieval and Generation Loop"
   ],
   "required_images": [
     "../assets/images/m3-figure-6-1-simple-qa-chatbot.png",
     "../assets/images/m3-figure-6-2-enterprise-qa-chatbot.png",
     "../assets/images/m3-figure-6-3-rag-ingestion.png",
     "../assets/images/m3-figure-6-4-rag-qa-stage.png",
-    "../assets/images/m3-figure-6-5-semantic-distance.png"
+    "../assets/images/m3-figure-6-5-semantic-distance.png",
+    "../assets/images/m3-figure-6-7-rag-architecture-chromadb.png",
+    "../assets/images/m3-figure-6-6-jupyter-chromadb.png"
   ],
   "required_links": [
     "../index.html",
@@ -40,6 +44,9 @@
     "https://www.pinecone.io/",
     "https://www.mongodb.com/products/platform/atlas-vector-search",
     "https://github.com/facebookresearch/faiss/wiki/",
+    "https://smith.langchain.com/hub",
+    "https://smith.langchain.com/hub/rlm/rag-prompt",
+    "https://github.com/thimotyb/building-llm-applications/tree/main/ch06",
     "https://arxiv.org/pdf/2310.11703.pdf",
     "https://mng.bz/BzQ2"
   ]
