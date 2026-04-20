@@ -17,6 +17,7 @@ sudo systemctl status ollama
 
 ## M1 - Setup 3: Modello locale Gemma
 ollama pull gemma4:e4b
+ollama pull nomic-embed-text
 ollama list
 ollama run gemma4:e4b "Write one sentence about AI agents."
 
