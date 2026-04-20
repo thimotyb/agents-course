@@ -167,6 +167,68 @@
         </figure>
 
         <p>In this "embedding space," the mathematical <strong>closeness</strong> between two vectors reflects their similarity in meaning. When a user submits a query, the system calculates the distance between the query vector and the stored document vectors. It then retrieves the "top-k" results—those with the smallest semantic distance—ensuring that the AI understands context and intent rather than just matching characters.</p>
+
+        <h3>4.5 Decoupling Embeddings and Generation</h3>
+        <p>A common misconception in RAG architecture is that you must use the same provider for both the embedding model and the LLM (e.g., using only OpenAI or only Gemini). In reality, these two components are mathematically decoupled, providing significant architectural flexibility.</p>
+        
+        <p><strong>The Consistency Rule:</strong> While you can mix providers, you <strong>must</strong> use the exact same embedding model for both <em>Ingestion</em> (loading documents into the database) and <em>Retrieval</em> (processing the user's question). If you index your data with an OpenAI model and attempt to query it using a Gemini embedding model, the search will fail because the two models use different dimensionalities and mathematical spaces.</p>
+        
+        <div class="note">
+          <p><strong>Why Decoupling Works:</strong> The LLM responsible for generation receives <strong>text</strong>, not vectors. Once the vector store identifies the relevant chunks based on semantic distance, it returns the original text in clear language. This text is then injected into the prompt. Because the LLM reads natural language, it doesn't need to know which model was used to find that information.</p>
+        </div>
+
+        <p>This decoupling offers a major strategic advantage: you can keep your "Knowledge Base" (Vector DB) stable and avoid the high cost of re-indexing millions of documents, even if you decide to switch your generative "brain" from OpenAI to Gemini, Claude, or a local model via Ollama.</p>
+
+        <p>The following table summarizes the most common pairings and recommended models as of 2024-2025:</p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Provider</th>
+                <th>Common LLM (Generation)</th>
+                <th>Recommended Embedding Model</th>
+                <th>Dimensions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>OpenAI</strong></td>
+                <td>GPT-4o, GPT-4o mini</td>
+                <td><a href="https://platform.openai.com/docs/guides/embeddings" target="_blank" rel="noopener noreferrer">text-embedding-3-small / large</a></td>
+                <td>1536 / 3072</td>
+              </tr>
+              <tr>
+                <td><strong>Google Gemini</strong></td>
+                <td>Gemini 1.5 Pro / Flash</td>
+                <td><a href="https://ai.google.dev/gemini-api/docs/embeddings" target="_blank" rel="noopener noreferrer">text-embedding-004</a></td>
+                <td>768</td>
+              </tr>
+              <tr>
+                <td><strong>Anthropic</strong></td>
+                <td>Claude 3.5 Sonnet / Haiku</td>
+                <td><a href="https://docs.anthropic.com/en/docs/build-with-claude/embeddings" target="_blank" rel="noopener noreferrer">Voyage AI (voyage-3)</a></td>
+                <td>1024</td>
+              </tr>
+              <tr>
+                <td><strong>Cohere</strong></td>
+                <td>Command R / R+</td>
+                <td><a href="https://docs.cohere.com/docs/embed-v3" target="_blank" rel="noopener noreferrer">embed-english-v3.0</a></td>
+                <td>1024</td>
+              </tr>
+              <tr>
+                <td><strong>Ollama (Local)</strong></td>
+                <td>Llama 3.1, Mistral, Phi-4</td>
+                <td><a href="https://ollama.com/library/mxbai-embed-large" target="_blank" rel="noopener noreferrer">mxbai-embed-large / nomic-embed-text</a></td>
+                <td>1024 / 768</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note">
+          <p><strong>Note:</strong> For a comprehensive comparison of embedding model performance across various tasks, refer to the <a href="https://huggingface.co/spaces/mteb/leaderboard" target="_blank" rel="noopener noreferrer">MTEB (Massive Text Embedding Benchmark) Leaderboard</a> on Hugging Face.</p>
+        </div>
       </section>
 
       <section class="panel">
@@ -250,6 +312,98 @@
       </section>
 
       <section class="panel">
+        <h2>7. Implementing RAG with LangChain Chains</h2>
+        <p>With LangChain, you don’t need to manually craft a prompt and configure it with the original question and the context from the vector store. You can set up a <strong>RAG chain</strong>, which will automatically instantiate and execute a prompt template by packaging all necessary parameters into a single flow.</p>
+
+        <h3>7.1 Packaging the Prompt</h3>
+        <p>A LangChain RAG chain simplifies the generation process by treating the prompt as a component that accepts dynamic inputs (context and question).</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-7-5-rag-chain-prompt-packaging.png" alt="LangChain RAG chain prompt packaging.">
+          <figcaption><strong>Figure M3.12.</strong> LangChain RAG chain packaging prompt parameters into a prompt instance, which is then sent to the LLM model.</figcaption>
+        </figure>
+
+        <p>You can set up a safe prompt by explicitly defining a template or pulling one from the <strong>LangChain Hub</strong>:</p>
+        <pre><code>from langchain_core.prompts import PromptTemplate
+
+# Explicit definition
+template = """Use the following context to answer the question.
+If you don't know the answer, just say so.
+{context}
+Question: {question}
+Helpful Answer:"""
+
+rag_prompt = PromptTemplate.from_template(template)
+
+# OR: Pull from LangChain Hub
+from langchain import hub
+rag_prompt = hub.pull("rlm/rag-prompt")</code></pre>
+
+        <h3>7.2 The Complete RAG Chain</h3>
+        <p>To complete the setup, we coordinate several components using <strong>LCEL (LangChain Expression Language)</strong>. The chain orchestrates the flow from the user's question through retrieval and prompt synthesis to the final response.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-7-6-amended-rag-chain.png" alt="Amended RAG chain with retriever and feeder.">
+          <figcaption><strong>Figure M3.13.</strong> Complete RAG chain including a retriever and a <code>RunnablePassthrough</code> for the user question.</figcaption>
+        </figure>
+
+        <p>The final orchestration uses a dictionary to feed both the context (from the retriever) and the question into the prompt:</p>
+        <pre><code>from langchain_core.runnables import RunnablePassthrough
+
+rag_chain = (
+    {"context": retriever, "question": RunnablePassthrough()}
+    | rag_prompt
+    | chatbot
+)
+
+# Execution
+answer = rag_chain.invoke("Where was Poseidonia?")</code></pre>
+      </section>
+
+      <section class="panel">
+        <h2>8. Chatbot Memory and History</h2>
+        <p>A key feature of LLM-based chatbots is their ability to remember previous exchanges. This stateful interaction allows users to refine their queries without resubmitting the entire context or previous questions.</p>
+
+        <h3>8.1 Modeling Chat Messages</h3>
+        <p>LangChain uses a structured format for messages, assigning specific roles to each part of the conversation. This is typically implemented using the <a href="https://reference.langchain.com/python/langchain-core/prompts/chat/ChatPromptTemplate" target="_blank" rel="noopener noreferrer"><code>ChatPromptTemplate</code></a>:</p>
+        <ul>
+          <li><strong>System:</strong> Sets the assistant's persona and primary instructions.</li>
+          <li><strong>Human:</strong> Represents the user's input/question.</li>
+          <li><strong>AI:</strong> The model's synthesized response.</li>
+        </ul>
+
+        <h3>8.2 Managing History with ChatMessageHistory</h3>
+        <p>To track these messages, LangChain provides the <a href="https://reference.langchain.com/python/langchain-community/chat_message_histories/in_memory/ChatMessageHistory" target="_blank" rel="noopener noreferrer"><code>ChatMessageHistory</code></a> class. It stores the sequence of <code>HumanMessage</code> and <code>AIMessage</code> objects, which can then be injected into the prompt for subsequent interactions.</p>
+        
+        <pre><code>from langchain_community.chat_message_histories import ChatMessageHistory
+
+chat_history_memory = ChatMessageHistory()
+
+# Update history during execution
+chat_history_memory.add_user_message("Where was Poseidonia?")
+answer = rag_chain.invoke("Where was Poseidonia?")
+chat_history_memory.add_ai_message(answer)</code></pre>
+
+        <h3>8.3 Integrating Memory into the LCEL Chain</h3>
+        <p>Using <strong>LCEL</strong>, you can dynamically feed the message history into your RAG chain. By redefining the input dictionary, the chain automatically pulls the latest messages before generation:</p>
+        
+        <pre><code>from langchain_core.runnables import RunnableLambda
+
+def get_history(x):
+    return chat_history_memory.messages
+
+rag_chain_with_memory = (
+    {
+        "retrieved_context": retriever,
+        "question": RunnablePassthrough(),
+        "chat_history_messages": RunnableLambda(get_history)
+    }
+    | rag_prompt
+    | chatbot
+)</code></pre>
+      </section>
+
+      <section class="panel">
         <h2>Guided lab</h2>
         <p>In this lab, you will explore a practical implementation of semantic search using ChromaDB. You will learn how to initialize a vector store, ingest documents, and perform queries based on semantic similarity.</p>
         
@@ -261,6 +415,7 @@
         <p>Access the materials here:</p>
         <ul>
           <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch06" target="_blank" rel="noopener noreferrer">Code Examples - Module 3 (Ch06)</a></li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch07" target="_blank" rel="noopener noreferrer">Code Examples - Module 3 (Ch07)</a></li>
         </ul>
       </section>
 

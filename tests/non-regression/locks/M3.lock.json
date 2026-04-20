@@ -12,6 +12,8 @@
     "4. Vector Stores",
     "5. Building a RAG System with ChromaDB",
     "6. The LangChain Object Model for RAG",
+    "7. Implementing RAG with LangChain Chains",
+    "8. Chatbot Memory and History",
     "Guided lab",
     "Key takeaways",
     "Further reading",
@@ -23,9 +25,7 @@
     "3.2 Question-Answering Stage (Retrieval and Generation)",
     "4.1 How Vector Stores Work",
     "4.2 Vector Libraries vs. Vector Databases",
-    "4.3 Popular Vector Store Providers",
-    "4.4 Understanding Semantic Distance",
-    "5.1 Architectural Components"
+    "4.3 Popular Vector Store Providers"
   ],
   "required_images": [
     "../assets/images/m3-figure-6-1-simple-qa-chatbot.png",
@@ -38,6 +38,8 @@
     "../assets/images/m3-figure-7-2-ingestion-sequence.png",
     "../assets/images/m3-figure-7-3-qa-object-model.png",
     "../assets/images/m3-figure-7-4-qa-sequence.png",
+    "../assets/images/m3-figure-7-5-rag-chain-prompt-packaging.png",
+    "../assets/images/m3-figure-7-6-amended-rag-chain.png",
     "../assets/images/m3-figure-6-6-jupyter-chromadb.png"
   ],
   "required_links": [
@@ -48,6 +50,12 @@
     "https://www.pinecone.io/",
     "https://www.mongodb.com/products/platform/atlas-vector-search",
     "https://github.com/facebookresearch/faiss/wiki/",
+    "https://platform.openai.com/docs/guides/embeddings",
+    "https://ai.google.dev/gemini-api/docs/embeddings",
+    "https://docs.anthropic.com/en/docs/build-with-claude/embeddings",
+    "https://docs.cohere.com/docs/embed-v3",
+    "https://ollama.com/library/mxbai-embed-large",
+    "https://huggingface.co/spaces/mteb/leaderboard",
     "https://smith.langchain.com/hub",
     "https://smith.langchain.com/hub/rlm/rag-prompt",
     "https://reference.langchain.com/python/langchain-core/documents/base/Document",
@@ -58,7 +66,10 @@
     "https://reference.langchain.com/python/langchain-core/retrievers/base/BaseRetriever",
     "https://reference.langchain.com/python/langchain-core/prompts/prompt/PromptTemplate",
     "https://reference.langchain.com/python/langchain-core/language_models/base/BaseLanguageModel",
+    "https://reference.langchain.com/python/langchain-core/prompts/chat/ChatPromptTemplate",
+    "https://reference.langchain.com/python/langchain-community/chat_message_histories/in_memory/ChatMessageHistory",
     "https://github.com/thimotyb/building-llm-applications/tree/main/ch06",
+    "https://github.com/thimotyb/building-llm-applications/tree/main/ch07",
     "https://arxiv.org/pdf/2310.11703.pdf",
     "https://mng.bz/BzQ2"
   ]
