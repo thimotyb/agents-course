@@ -413,6 +413,48 @@ rag_chain_with_memory = (
       </section>
 
       <section class="panel">
+        <h2>9. Tracing and Monitoring with LangSmith</h2>
+        <p>As LLM applications grow in complexity, debugging and monitoring become critical. <strong>LangSmith</strong> is a developer platform designed to trace every step of your LLM workflow, providing visibility into the exact inputs and outputs of each component in your chain.</p>
+
+        <h3>9.1 Key Capabilities</h3>
+        <ul>
+          <li><strong>Debugging:</strong> Inspect the execution of chains to identify where errors or hallucinations occur.</li>
+          <li><strong>Evaluation:</strong> Use built-in evaluators to test the relevance and correctness of LLM responses.</li>
+          <li><strong>Monitoring:</strong> Track real-time performance and user feedback in production environments.</li>
+        </ul>
+
+        <h3>9.2 Enabling Tracing</h3>
+        <p>To enable tracing, you must configure your environment with a LangSmith API key. This can be done by setting environment variables before running your application:</p>
+        <pre><code>export LANGSMITH_TRACING=true
+export LANGSMITH_ENDPOINT=https://api.smith.langchain.com
+export LANGSMITH_PROJECT="Q&A Chatbot"
+export LANGSMITH_API_KEY="&lt;YOUR_API_KEY&gt;"</code></pre>
+
+        <h3>9.3 Analyzing Traces</h3>
+        <p>Once enabled, every execution of your chain is captured as a "trace" in the LangSmith dashboard. This allows you to drill down into the performance of specific components like the retriever or the LLM.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-7-7-langsmith-runs.png" alt="LangSmith high-level trace view.">
+          <figcaption><strong>Figure M3.14.</strong> LangSmith dashboard showing high-level trace details for a Q&amp;A chatbot project.</figcaption>
+        </figure>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-7-8-langsmith-trace.png" alt="Detailed trace details in LangSmith.">
+          <figcaption><strong>Figure M3.15.</strong> Detailed trace view: the left panel shows all project traces, while the middle panel displays specific execution runs.</figcaption>
+        </figure>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-7-9-langsmith-metadata.png" alt="Input and output analysis in LangSmith.">
+          <figcaption><strong>Figure M3.16.</strong> The right-hand panel in LangSmith displays the specific input question and the resulting synthesized response.</figcaption>
+        </figure>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-7-10-run-details.png" alt="Retriever run details in LangSmith.">
+          <figcaption><strong>Figure M3.17.</strong> Drill-down into a Retriever run: inspecting the original query and the specific document chunks retrieved from the vector store.</figcaption>
+        </figure>
+      </section>
+
+      <section class="panel">
         <h2>Guided lab</h2>
         <p>In this lab, you will explore a practical implementation of semantic search using ChromaDB. You will learn how to initialize a vector store, ingest documents, and perform queries based on semantic similarity.</p>
         

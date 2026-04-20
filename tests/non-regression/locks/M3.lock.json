@@ -14,6 +14,7 @@
     "6. The LangChain Object Model for RAG",
     "7. Implementing RAG with LangChain Chains",
     "8. Chatbot Memory and History",
+    "9. Tracing and Monitoring with LangSmith",
     "Guided lab",
     "Key takeaways",
     "Further reading",
@@ -24,8 +25,7 @@
     "3.1 Content Ingestion Stage (Indexing)",
     "3.2 Question-Answering Stage (Retrieval and Generation)",
     "4.1 How Vector Stores Work",
-    "4.2 Vector Libraries vs. Vector Databases",
-    "4.3 Popular Vector Store Providers"
+    "4.2 Vector Libraries vs. Vector Databases"
   ],
   "required_images": [
     "../assets/images/m3-figure-6-1-simple-qa-chatbot.png",
@@ -40,6 +40,10 @@
     "../assets/images/m3-figure-7-4-qa-sequence.png",
     "../assets/images/m3-figure-7-5-rag-chain-prompt-packaging.png",
     "../assets/images/m3-figure-7-6-amended-rag-chain.png",
+    "../assets/images/m3-figure-7-7-langsmith-runs.png",
+    "../assets/images/m3-figure-7-8-langsmith-trace.png",
+    "../assets/images/m3-figure-7-9-langsmith-metadata.png",
+    "../assets/images/m3-figure-7-10-run-details.png",
     "../assets/images/m3-figure-6-6-jupyter-chromadb.png"
   ],
   "required_links": [
