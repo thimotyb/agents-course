@@ -42,15 +42,17 @@
         <div>
           <h2>Learning outcomes</h2>
           <ul>
-            <li>Understand the foundational principles of Retrieval-Augmented Generation (RAG).</li>
-            <li>Define and differentiate between traditional keyword search and Semantic Search.</li>
-            <li>Explain the role of Vector Databases and ChromaDB in grounding LLM responses.</li>
-            <li>Analyze the transition from simple Q&A over single documents to enterprise-scale knowledge bases.</li>
+            <li>Understand the foundational principles and design patterns of Retrieval-Augmented Generation (RAG).</li>
+            <li>Master the concepts of Semantic Search and mathematical semantic distance in embedding space.</li>
+            <li>Explain the role of Vector Databases, ChromaDB, and the decoupling of retrieval from generation.</li>
+            <li>Implement RAG workflows using the LangChain Object Model, including Loaders, Splitters, and Retrievers.</li>
+            <li>Incorporate persistent chat memory and history into conversational RAG applications.</li>
+            <li>Utilize LangSmith for tracing, debugging, and monitoring complex LLM chains.</li>
           </ul>
         </div>
         <div>
           <h2>Topics</h2>
-          <p>Semantic Search, RAG fundamentals, Vector Databases, ChromaDB, Context-based grounding, Enterprise Q&A architectures.</p>
+          <p>Semantic Search, RAG Design Patterns (Ingestion & Q&A), Vector Stores, ChromaDB, Embedding-LLM Decoupling, LangChain Object Model, Chat Memory & History, LangSmith Tracing.</p>
         </div>
       </section>
 
@@ -373,6 +375,11 @@ answer = rag_chain.invoke("Where was Poseidonia?")</code></pre>
         <h2>8. Chatbot Memory and History</h2>
         <p>A key feature of LLM-based chatbots is their ability to remember previous exchanges. This stateful interaction allows users to refine their queries without resubmitting the entire context or previous questions.</p>
 
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-8-1-stateless-rag-limitations.png" alt="Stateless RAG execution failing to resolve context.">
+          <figcaption><strong>Figure M3.18.</strong> Limitations of stateless RAG: without conversation history, the model cannot resolve pronouns or references (like "they") from previous turns, leading to incomplete or disconnected answers.</figcaption>
+        </figure>
+
         <h3>8.1 Modeling Chat Messages</h3>
         <p>LangChain uses a structured format for messages, assigning specific roles to each part of the conversation. This is typically implemented using the <a href="https://reference.langchain.com/python/langchain-core/prompts/chat/ChatPromptTemplate" target="_blank" rel="noopener noreferrer"><code>ChatPromptTemplate</code></a>:</p>
         <ul>
@@ -473,11 +480,12 @@ export LANGSMITH_API_KEY="&lt;YOUR_API_KEY&gt;"</code></pre>
       <section class="panel">
         <h2>Key takeaways</h2>
         <ul>
-          <li>RAG combines information retrieval with LLM-based response generation.</li>
-          <li>Semantic search identifies relevant information based on meaning and intent, surpassing keyword-based limitations.</li>
-          <li>Vector stores like ChromaDB are essential for storing and querying document fragments efficiently.</li>
-          <li>Grounding answers in provided context reduces hallucinations and improves accuracy.</li>
-          <li>Vector databases offer advanced features like CRUD support and metadata storage compared to simple vector libraries.</li>
+          <li><strong>RAG Pattern:</strong> Combines information retrieval with generative synthesis to provide factual, grounded answers.</li>
+          <li><strong>Semantic Search:</strong> Uses high-dimensional embeddings to identify relevant content based on intent rather than keywords.</li>
+          <li><strong>Architectural Decoupling:</strong> Allows using different providers for embeddings and generation, provided the embedding model is consistent across ingestion and retrieval.</li>
+          <li><strong>LangChain Abstraction:</strong> Simplifies RAG development through standardized interfaces for loaders, splitters, and vector stores.</li>
+          <li><strong>Stateful Chatbots:</strong> Implementing <code>ChatMessageHistory</code> enables multi-turn conversations that preserve context over time.</li>
+          <li><strong>Observability:</strong> LangSmith provides essential visibility into chain execution, making it possible to debug and optimize production-grade LLM applications.</li>
         </ul>
       </section>
 
