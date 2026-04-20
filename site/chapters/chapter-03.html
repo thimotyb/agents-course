@@ -277,7 +277,16 @@
         <p>Key components in this stage include:</p>
         <ul>
           <li><a href="https://reference.langchain.com/python/langchain-core/documents/base/Document" target="_blank" rel="noopener noreferrer"><strong>Document:</strong></a> Models the text content and related metadata.</li>
-          <li><a href="https://reference.langchain.com/python/langchain-core/document_loaders/base/BaseLoader" target="_blank" rel="noopener noreferrer"><strong>BaseLoader:</strong></a> Loads text from external sources (e.g., PDFs, CSVs, URLs) into the Document model.</li>
+          <li><a href="https://reference.langchain.com/python/langchain-core/document_loaders/base/BaseLoader" target="_blank" rel="noopener noreferrer"><strong>BaseLoader:</strong></a> The standard interface for loading text from external sources into the Document model. LangChain provides many specialized implementations, including:
+            <ul>
+              <li><a href="https://reference.langchain.com/python/langchain-community/document_loaders/wikipedia/WikipediaLoader" target="_blank" rel="noopener noreferrer"><code>WikipediaLoader</code></a> for web-based knowledge.</li>
+              <li><a href="https://reference.langchain.com/python/langchain-community/document_loaders/word_2txt/Docx2txtLoader" target="_blank" rel="noopener noreferrer"><code>Docx2txtLoader</code></a> for Word documents.</li>
+              <li><a href="https://reference.langchain.com/python/langchain-community/document_loaders/pdf/PyPDFLoader" target="_blank" rel="noopener noreferrer"><code>PyPDFLoader</code></a> for PDF files.</li>
+              <li><a href="https://reference.langchain.com/python/langchain-community/document_loaders/csv/CSVLoader" target="_blank" rel="noopener noreferrer"><code>CSVLoader</code></a> for structured data.</li>
+              <li><a href="https://reference.langchain.com/python/langchain-community/document_loaders/text/TextLoader" target="_blank" rel="noopener noreferrer"><code>TextLoader</code></a> for simple text files.</li>
+              <li><a href="https://reference.langchain.com/python/langchain-community/document_loaders/directory/DirectoryLoader" target="_blank" rel="noopener noreferrer"><code>DirectoryLoader</code></a> for batch processing entire folders.</li>
+            </ul>
+          </li>
           <li><a href="https://reference.langchain.com/python/langchain-text-splitters/base/TextSplitter" target="_blank" rel="noopener noreferrer"><strong>TextSplitter:</strong></a> Divides documents into smaller chunks for efficient processing. Consequently, a <code>TextSplitter</code> has the following signature: <code>Document -> list[Document]</code>.</li>
           <li><a href="https://reference.langchain.com/python/langchain-core/embeddings/embeddings/Embeddings" target="_blank" rel="noopener noreferrer"><strong>Embeddings:</strong></a> Converts text chunks into numerical vector representations (embedding models).</li>
           <li><a href="https://reference.langchain.com/python/langchain-core/vectorstores/base/VectorStore" target="_blank" rel="noopener noreferrer"><strong>VectorStore:</strong></a> Stores text chunks and their embeddings for efficient retrieval.</li>
