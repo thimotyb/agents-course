@@ -34,6 +34,7 @@
     "../assets/images/m3-figure-6-4-rag-qa-stage.png",
     "../assets/images/m3-figure-6-5-semantic-distance.png",
     "../assets/images/m3-figure-6-7-rag-architecture-chromadb.png",
+    "../assets/images/m3-figure-5-3-gemini-rag-input.png",
     "../assets/images/m3-figure-7-1-indexing-object-model.png",
     "../assets/images/m3-figure-7-2-ingestion-sequence.png",
     "../assets/images/m3-figure-7-3-qa-object-model.png",
@@ -45,6 +46,7 @@
     "../assets/images/m3-figure-7-8-langsmith-trace.png",
     "../assets/images/m3-figure-7-9-langsmith-metadata.png",
     "../assets/images/m3-figure-7-10-run-details.png",
+    "../assets/images/m3-figure-9-5-langsmith-qachatbot-trace.png",
     "../assets/images/m3-figure-6-6-jupyter-chromadb.png"
   ],
   "required_links": [

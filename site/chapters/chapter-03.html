@@ -245,6 +245,11 @@
           <figcaption><strong>Figure M3.7.</strong> RAG architectural workflow: the orchestrating chatbot queries ChromaDB, retrieves the best-matching content, and feeds it into the LLM alongside the original user question.</figcaption>
         </figure>
 
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-5-3-gemini-rag-input.png" alt="Example of RAG-augmented prompt sent to Google Gemini.">
+          <figcaption><strong>Figure M3.20.</strong> Practical example of a RAG-augmented prompt sent to Google Gemini: notice how the retrieved context from the vector database is injected directly into the prompt to ground the model's response.</figcaption>
+        </figure>
+
         <h3>5.2 The Retrieval and Generation Loop</h3>
         <p>In a production-ready RAG system, the process is streamlined for reliability and speed:</p>
         <ol>
@@ -458,6 +463,11 @@ export LANGSMITH_API_KEY="&lt;YOUR_API_KEY&gt;"</code></pre>
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m3-figure-7-10-run-details.png" alt="Retriever run details in LangSmith.">
           <figcaption><strong>Figure M3.17.</strong> Drill-down into a Retriever run: inspecting the original query and the specific document chunks retrieved from the vector store.</figcaption>
+        </figure>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m3-figure-9-5-langsmith-qachatbot-trace.png" alt="LangSmith trace for the example Q&A Chatbot project.">
+          <figcaption><strong>Figure M3.19.</strong> Example trace of the Q&amp;A Chatbot project in LangSmith, showing the sequence of operations from input to grounded response.</figcaption>
         </figure>
       </section>
 
