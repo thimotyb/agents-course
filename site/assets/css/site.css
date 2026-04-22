@@ -514,3 +514,50 @@ body {
     border-color: #d1d1d1;
   }
 }
+
+/* Modern Table Styling */
+.table-container {
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+
+.modern-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  background: var(--surface);
+}
+
+.modern-table th {
+  background: var(--accent);
+  color: #ffffff;
+  font-family: "Space Grotesk", sans-serif;
+  text-align: left;
+  padding: 0.8rem 1rem;
+  font-weight: 600;
+}
+
+.modern-table td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.modern-table tr:last-child td {
+  border-bottom: none;
+}
+
+.modern-table tr:nth-child(even) {
+  background: rgba(10, 109, 136, 0.03);
+}
+
+body[data-theme="dark"] .modern-table tr:nth-child(even) {
+  background: rgba(83, 184, 214, 0.05);
+}
+
+.modern-table td strong {
+  color: var(--accent-strong);
+}

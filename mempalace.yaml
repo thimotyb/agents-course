@@ -74,6 +74,7 @@ memory:
   project_progress:
     - M1: Finished, verified, and locked. Fixed broken GitHub links.
     - M2: Finished, verified, and locked. Added full LangGraph section (5.1-5.10) with execution figures (M2.19-M2.23).
-    - M3: Completed RAG fundamentals, Design Patterns, Vector Stores, safe prompt strategies, and detailed LangChain Object Model. Added Memory/History (Section 8), Embedding-LLM decoupling with model pairings table (Section 4.5), and Stateless vs. Stateful execution figures. Figures M3.1-M3.18 finalized.
+    - M3: Finished, verified, and locked. Covered RAG fundamentals, Design Patterns, Vector Stores, safe prompts, LangChain Object Model, Memory/History, and LangSmith Tracing. Figures M3.1-M3.20 finalized.
+    - M4: Started Advanced RAG. Covered Evolution to Production-Grade RAG (Section 1), Accuracy Gaps (Section 2), Advanced Indexing (Section 3), Splitting Strategy with practical HTML/Coarse examples (Section 4), and Advanced Embedding Strategies (Section 5). Figures M4.1-M4.9 finalized. Refined table layouts and direct technical tone.
     - Infrastructure: Non-regression guard now checks broken images and external GitHub links. MemPalace centralized sync active.
-    - Next step: Move to Module M4 (Advanced RAG).
+    - Next step: Continue Module M4 (Query transformation and intelligent routing).

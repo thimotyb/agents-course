@@ -18,7 +18,7 @@
       <section class="hero">
         <p><a href="../index.html">Home</a></p>
         <h1>M4 - Advanced RAG</h1>
-        <p class="hero-copy">Move from baseline retrieval to production-grade retrieval quality and measurable system behavior.</p>
+        <p class="hero-copy">Beyond basics: building robust, production-grade knowledge systems with intelligent indexing, query transformation, and reranking.</p>
       </section>
     </div>
   </header>
@@ -42,41 +42,248 @@
         <div>
           <h2>Learning outcomes</h2>
           <ul>
-            <li>Explain the core concepts and design choices for this module.</li>
-            <li>Implement a working example with LangChain or LangGraph.</li>
-            <li>Evaluate output quality and identify iteration points.</li>
+            <li>Design smarter indexing pipelines for hierarchical data structures like HTML and Markdown.</li>
+            <li>Apply query transformation techniques including rewriting, step-back reasoning, and HyDE.</li>
+            <li>Implement intelligent routing between vector databases, SQL systems, and knowledge graphs.</li>
+            <li>Optimize retrieval results using post-retrieval reranking and Reciprocal Rank Fusion (RRF).</li>
           </ul>
         </div>
         <div>
           <h2>Topics</h2>
-          <p>Hybrid search, reranking, metadata filtering, query rewriting, contextual compression, and retrieval evaluation.</p>
+          <p>Multi-vector retrieval, Context expansion, HyDE, Question decomposition, Intelligent routing, Reranking, RRF, Hybrid search.</p>
         </div>
       </section>
 
       <section class="panel">
+        <h2>1. Evolution to Production-Grade RAG</h2>
+        <p>Production-grade RAG systems must go beyond simple chunking and keyword retrieval to address inconsistent answers caused by vague queries, inadequate indexing, and shallow retrieval logic.</p>
+
+        <h3>1.1 Engineering Robust Retrieval</h3>
+        <p>Real-world RAG implementation requires a systematic approach to:</p>
+        <ul>
+          <li><strong>Intelligent Indexing:</strong> Designing pipelines that account for document structure and hierarchy.</li>
+          <li><strong>Query Refinement:</strong> Implementing rewriting and routing to ensure the system surfaces the correct evidence.</li>
+          <li><strong>Post-Retrieval Processing:</strong> Using reranking to maintain meaningful context for the generator.</li>
+        </ul>
+
+        <h3>1.2 Advanced Strategy Toolkit</h3>
+        <p>A production-ready toolkit includes several advanced methods:</p>
+        <ul>
+          <li><strong>Structural Awareness:</strong> Handling text, HTML, Markdown, and tables through hierarchical indexing.</li>
+          <li><strong>Enhanced Context:</strong> Using multi-vector retrieval and context expansion to maintain coherence across chunks.</li>
+          <li><strong>Intelligent Routing:</strong> Navigating between vector databases, SQL systems, and knowledge graphs.</li>
+          <li><strong>Fused Retrieval:</strong> Merging diverse data sources using techniques like Reciprocal Rank Fusion (RRF).</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>2. Identifying RAG Accuracy Gaps</h2>
+        <p>Improving accuracy requires analyzing potential failure points in both the <strong>Ingestion</strong> and <strong>Question-Answering</strong> workflows.</p>
+
+        <h3>2.1 Ingestion Stage Challenges</h3>
+        <p>Naive indexing often relies on a single embedding per text chunk, which may fail to capture the full semantic depth needed for precise retrieval.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-8-1-ingestion-issues.png" alt="Accuracy issues in the ingestion stage.">
+          <figcaption><strong>Figure M4.1.</strong> Ingestion failures: basic indexing depth is often insufficient for complex documents. Advanced techniques use multiple embeddings and feature-based linking.</figcaption>
+        </figure>
+
+        <h3>2.2 Q&A Stage Challenges</h3>
+        <p>Accuracy during the Q&amp;A stage is impacted by how the system interprets user intent and coordinates across content stores.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-8-2-qa-stage-issues.png" alt="Common issues in the Q&A stage.">
+          <figcaption><strong>Figure M4.2.</strong> Q&amp;A Stage bottlenecks: (1) Ambiguous questions, (2) weak search transformation, (3) limited store integration, (4) query generation barriers, and (5) context noise.</figcaption>
+        </figure>
+
+        <div class="table-container">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>RAG Issue</th>
+                <th>Advanced Solution</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Inefficient Indexing:</strong> Wrong or irrelevant content chunks.</td>
+                <td>Advanced indexing (Multi-vector, Hierarchical).</td>
+              </tr>
+              <tr>
+                <td><strong>Vague Queries:</strong> Weak semantic matches from user input.</td>
+                <td>Question transformation and query rewriting.</td>
+              </tr>
+              <tr>
+                <td><strong>Broad Questions:</strong> Ineffective retrieval from abstract queries.</td>
+                <td>Question decomposition and Step-back reasoning.</td>
+              </tr>
+              <tr>
+                <td><strong>Siloed Data:</strong> Limited relevance in a single vector store.</td>
+                <td>Intelligent routing to multiple content stores.</td>
+              </tr>
+              <tr>
+                <td><strong>Unstructured Barriers:</strong> Difficulty querying SQL/Graph stores.</td>
+                <td>Automated LLM-based query generation.</td>
+              </tr>
+              <tr>
+                <td><strong>Retrieved Noise:</strong> Irrelevant results fed to the generator.</td>
+                <td>Context refinement and post-retrieval reranking.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>3. Advanced Document Indexing Factors</h2>
+        <p>The relevance of retrieved chunks depends on the synergy between splitting and embedding strategies.</p>
+        
+        <ul>
+          <li><strong>Granularity:</strong> Balancing chunk size based on expected query types (detailed vs. broad).</li>
+          <li><strong>Multi-Indexing:</strong> Using child document embeddings, summaries, or hypothetical questions to capture fine-grained details.</li>
+          <li><strong>Sentence Expansion:</strong> Providing the LLM with surrounding context sentences during retrieval without losing chunk specificity.</li>
+          <li><strong>Hybrid Data Handling:</strong> Specialized techniques for retrieving database rows, images, and semi-structured content.</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>4. Splitting Strategy Implementation</h2>
+        <p>Choosing a splitting strategy is a trade-off between semantic integrity and consistent chunk sizing.</p>
+
+        <h3>4.1 Chunk Size Impact</h3>
+        <p>Chunk size directly influences the focus and context available to the LLM during generation.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-8-3-chunk-size-accuracy.png" alt="Impact of chunk size on answer accuracy.">
+          <figcaption><strong>Figure M4.3.</strong> Chunk trade-offs: coarse chunks provide context for broad queries, while granular chunks provide focus for detailed questions.</figcaption>
+        </figure>
+
+        <h3>4.2 Technical Strategy Comparison</h3>
+        <div class="table-container">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Strategy</th>
+                <th>Pros</th>
+                <th>Cons</th>
+                <th>LangChain Classes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Document Hierarchy</strong></td>
+                <td>Preserves structural semantic meaning.</td>
+                <td>Variable chunk sizes.</td>
+                <td>
+                  <a href="https://reference.langchain.com/python/langchain-text-splitters/html/HTMLHeaderTextSplitter" target="_blank" rel="noopener noreferrer"><code>HTMLHeaderTextSplitter</code></a>,<br>
+                  <a href="https://reference.langchain.com/python/langchain-text-splitters/markdown/MarkdownHeaderTextSplitter" target="_blank" rel="noopener noreferrer"><code>MarkdownHeaderTextSplitter</code></a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Absolute Size (Tokens)</strong></td>
+                <td>Predictable context window usage.</td>
+                <td>Potential sentence fragmentation.</td>
+                <td>
+                  <a href="https://reference.langchain.com/python/langchain-text-splitters/base/TokenTextSplitter" target="_blank" rel="noopener noreferrer"><code>TokenTextSplitter</code></a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Absolute Size (Chars)</strong></td>
+                <td>Simplest implementation.</td>
+                <td>High risk of breaking semantic flow.</td>
+                <td>
+                  <a href="https://reference.langchain.com/python/langchain-text-splitters/character/CharacterTextSplitter" target="_blank" rel="noopener noreferrer"><code>CharacterTextSplitter</code></a>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Recursive Semantic</strong></td>
+                <td>Maintains integrity through logical breaks.</td>
+                <td>May require fine-tuning of separators.</td>
+                <td>
+                  <a href="https://reference.langchain.com/python/langchain-text-splitters/character/RecursiveCharacterTextSplitter" target="_blank" rel="noopener noreferrer"><code>RecursiveCharacterTextSplitter</code></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>4.3 Key Considerations for Splitting</h3>
+        <p>The selection of a splitting strategy depends on several technical factors:</p>
+        <ul>
+          <li><strong>Document Type:</strong> Mixed content (text, tables, images) requires maintaining logical relationships within the same chunk. In these cases, document hierarchy splitting is more effective than fixed-size approaches.</li>
+          <li><strong>Search Methodology:</strong> Metadata-based searches benefit from specific chunk granularity. Attaching a combination of broad and detailed tags to each chunk increases retrieval flexibility and precision.</li>
+        </ul>
+
+        <h3>4.4 Practical HTML Header Splitting</h3>
+        <p>The following process utilizes content from the <a href="https://en.wikivoyage.org/wiki/Cornwall" target="_blank" rel="noopener noreferrer">Wikivoyage Cornwall page</a>. Figure M4.4 illustrates the results of an automated splitting process using the <code>HTMLHeaderTextSplitter</code>.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-8-4-html-header-splitting.png" alt="HTML header splitting results in the Jupyter lab.">
+          <figcaption><strong>Figure M4.4.</strong> Results of HTML header splitting: content is organized into granular chunks based on H1 and H2 tags, preserving the document's original structure for more precise retrieval.</figcaption>
+        </figure>
+
+        <h3>4.5 Granular Retrieval Examples</h3>
+        <p>By splitting content into granular chunks, the vector database can pinpoint specific sections of a document. For example, a query regarding "festivals" will retrieve only the relevant text fragments associated with that topic, rather than a coarse chunk containing unrelated information.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-8-5-granular-search-results.png" alt="Granular search results for festivals in Cornwall.">
+          <figcaption><strong>Figure M4.5.</strong> Semantic search targeting specific content: the system retrieves granular chunks related specifically to events and festivals from the Cornwall knowledge base.</figcaption>
+        </figure>
+
+        <h3>4.6 Coarse Chunking with Overlap</h3>
+        <p>An alternative strategy involves using fixed-size "coarse" chunks with a specified <strong>overlap</strong>. This technique ensures that semantic context is not lost at the boundaries of a chunk, though it introduces some data redundancy.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-8-6-coarse-chunking-overlap.png" alt="Coarse chunking results with text overlap.">
+          <figcaption><strong>Figure M4.6.</strong> Coarse chunking execution: the highlighted red sections show the overlapping text between consecutive chunks, used to maintain context continuity across logical breaks.</figcaption>
+        </figure>
+      </section>
+
+      <section class="panel">
+        <h2>5. Advanced Embedding Strategies</h2>
+        <p>Multi-vector strategies increase retrieval flexibility and accuracy by storing multiple vectors per document. This approach typically uses a two-layer structure: <strong>retrieval chunks</strong> (small segments for precise matching) and <strong>synthesis chunks</strong> (larger fragments fed into the LLM for context-rich generation).</p>
+
+        <h3>5.1 Child Chunk Embeddings</h3>
+        <p>The <a href="https://reference.langchain.com/python/langchain-core/retrievers/base/BaseRetriever" target="_blank" rel="noopener noreferrer"><code>ParentDocumentRetriever</code></a> addresses the tradeoff between precision and context. It indexes small child chunks to ensure precise retrieval while returning the broader parent chunk to provide the LLM with sufficient background.</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-8-4-child-chunk-embeddings.png" alt="Multi-vector strategy using child chunk embeddings.">
+          <figcaption><strong>Figure M4.7.</strong> Child chunk indexing: a parent document is linked to multiple granular embeddings, allowing for precise matching while maintaining rich contextual synthesis.</figcaption>
+        </figure>
+
+        <h3>5.2 Embedding Document Summaries</h3>
+        <p>Coarse chunks often contain irrelevant content that dilutes semantic value. By generating and indexing <strong>summaries</strong> of these chunks using the <a href="https://reference.langchain.com/python/langchain-core/retrievers/base/BaseRetriever" target="_blank" rel="noopener noreferrer"><code>MultiVectorRetriever</code></a>, the system can perform more focused searches while still delivering the full chunk for generation.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-8-5-chunk-summary-embedding.png" alt="Embedding summaries for more accurate retrieval.">
+          <figcaption><strong>Figure M4.8.</strong> Summary-based indexing: indexing concise summaries alongside original chunks reduces retrieval noise and improves semantic alignment.</figcaption>
+        </figure>
+
+        <h3>5.3 Hypothetical Question Embeddings</h3>
+        <p>Retrieval often fails when the user's question phrasing doesn't match the document content. By generating <strong>hypothetical questions</strong> that a chunk can answer and indexing those questions, the system increases the likelihood of a high-similarity match during query time.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-8-6-hypothetical-question-embeddings.png" alt="Indexing hypothetical questions to improve matching.">
+          <figcaption><strong>Figure M4.9.</strong> Hypothetical question indexing: document chunks are indexed using derived questions, aligning the vector space more closely with natural user queries.</figcaption>
+        </figure>
+      </section>
+
+      <section class="panel">
         <h2>Guided lab</h2>
-        <h3>Execution steps</h3>
-        <p>Extend the M3 pipeline with reranking and query transformation stages; compare before and after outputs.</p>
-      </section>
-
-      <section class="panel">
-        <h2>Exercises</h2>
-        <h3>Practice tasks</h3>
-        <p>Design a compact evaluation set with expected answers and run side-by-side scoring for multiple retrieval variants.</p>
-      </section>
-
-      <section class="panel">
-        <h2>Deliverable</h2>
-        <h3>Submission output</h3>
-        <p>An advanced RAG branch with at least two retrieval strategies and a concise evaluation report.</p>
+        <p>In this lab, you will explore advanced RAG techniques, focusing on query transformation and intelligent retrieval orchestration.</p>
+        <p>Access the materials here:</p>
+        <ul>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch08" target="_blank" rel="noopener noreferrer">Code Examples - Module 4 (Ch08)</a></li>
+        </ul>
       </section>
 
       <section class="panel">
         <h2>Key takeaways</h2>
         <ul>
-          <li>A clear implementation path from concept to runnable artifact.</li>
-          <li>A repeatable structure for quality checks and improvements.</li>
-          <li>An incremental bridge to the next module.</li>
+          <li><strong>Beyond Baseline:</strong> Real-world RAG requires solving vague queries and shallow indexing depth.</li>
+          <li><strong>Structural Integrity:</strong> Using document hierarchy during splitting improves semantic accuracy.</li>
+          <li><strong>Multi-Store Orchestration:</strong> Effective RAG often requires routing between vector, SQL, and graph databases.</li>
+          <li><strong>Traceability:</strong> Iterative improvement is impossible without monitoring chain execution (LangSmith).</li>
         </ul>
       </section>
     </article>
