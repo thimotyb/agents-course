@@ -241,15 +241,21 @@
 
       <section class="panel">
         <h2>5. Advanced Embedding Strategies</h2>
-        <p>Multi-vector strategies increase retrieval flexibility and accuracy by storing multiple vectors per document. This approach typically uses a two-layer structure: <strong>retrieval chunks</strong> (small segments for precise matching) and <strong>synthesis chunks</strong> (larger fragments fed into the LLM for context-rich generation).</p>
+        <p>Multi-vector strategies increase retrieval flexibility and accuracy by storing multiple vectors per document. This approach relies on a decoupled <strong>Two-Layer Chunk Architecture</strong> that separates the <em>search</em> process from the <em>generation</em> process, addressing the inherent conflict between small chunks (optimized for precise search) and large chunks (optimized for coherent context).</p>
 
-        <h3>5.1 Child Chunk Embeddings</h3>
-        <p>The <a href="https://reference.langchain.com/python/langchain-core/retrievers/base/BaseRetriever" target="_blank" rel="noopener noreferrer"><code>ParentDocumentRetriever</code></a> addresses the tradeoff between precision and context. It indexes small child chunks to ensure precise retrieval while returning the broader parent chunk to provide the LLM with sufficient background.</p>
+        <h3>5.1 Two-Layer Architecture and Parent-Child Chunks</h3>
+        <p>A common challenge in RAG is balancing context and detail. Large chunks work well for broad questions but struggle with specific queries. Conversely, small granular chunks support detailed questions but often lack the context needed for comprehensive synthesis. This creates a tradeoff: if chunks are too small, responses may be incomplete; if they are too large, retrieval precision drops.</p>
         
+        <p>The <strong>Parent-Child</strong> strategy solves this by splitting documents into large <strong>Synthesis Chunks</strong> (Parent) and further dividing them into smaller <strong>Retrieval Chunks</strong> (Child). The child chunks are used solely for generating precise embeddings, while the parent chunks provide the LLM with full context during generation.</p>
+
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m4-figure-8-4-child-chunk-embeddings.png" alt="Multi-vector strategy using child chunk embeddings.">
-          <figcaption><strong>Figure M4.7.</strong> Child chunk indexing: a parent document is linked to multiple granular embeddings, allowing for precise matching while maintaining rich contextual synthesis.</figcaption>
+          <figcaption><strong>Figure M4.7.</strong> Parent-Child indexing: a parent document is linked to multiple granular child embeddings, allowing for precise matching while returning context-rich synthesis fragments.</figcaption>
         </figure>
+
+        <div class="note">
+          <p><strong>Synergy:</strong> When a child retrieval chunk matches a query, the system automatically returns its associated parent synthesis chunk. This hybrid approach allows the model to handle both broad and detailed queries effectively within the same index.</p>
+        </div>
 
         <h3>5.2 Embedding Document Summaries</h3>
         <p>Coarse chunks often contain irrelevant content that dilutes semantic value. By generating and indexing <strong>summaries</strong> of these chunks using the <a href="https://reference.langchain.com/python/langchain-core/retrievers/base/BaseRetriever" target="_blank" rel="noopener noreferrer"><code>MultiVectorRetriever</code></a>, the system can perform more focused searches while still delivering the full chunk for generation.</p>
@@ -269,11 +275,112 @@
       </section>
 
       <section class="panel">
-        <h2>Guided lab</h2>
-        <p>In this lab, you will explore advanced RAG techniques, focusing on query transformation and intelligent retrieval orchestration.</p>
-        <p>Access the materials here:</p>
+        <h2>6. Query Transformation Strategies</h2>
+        <p>Even with optimized indexing, RAG systems can fail if the user's initial question is poorly phrased, vague, or overly complex. Query transformation techniques use an LLM to refine or decompose the question before it reaches the retriever, significantly improving the quality of the surfaced context.</p>
+
+        <h3>6.1 Rewrite-Retrieve-Read</h3>
+        <p>The <strong>Rewrite-Retrieve-Read</strong> workflow introduces a dedicated "Rewrite" step before the retrieval process. A rewriter (typically an LLM) reformulates the original user question into a clearer, more search-optimized query. This ensures that the vector store receives a targeted input that aligns better with the stored embeddings.</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-9-1-rewrite-retrieve-read.png" alt="Comparison between standard RAG and Rewrite-Retrieve-Read.">
+          <figcaption><strong>Figure M4.10.</strong> The Rewrite-Retrieve-Read workflow: adding an initial LLM-based rewrite step enhances query clarity before retrieval, leading to more relevant results compared to the standard Retrieve-and-Read setup.</figcaption>
+        </figure>
+
+        <p>In practice, the rewritten query is used specifically for the vector store lookup, while the original user question is preserved for the final answer synthesis. This combination leverages the optimized search parameters while maintaining the user's original intent.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-9-2-query-rewriting-workflow.png" alt="Optimized query rewriting workflow.">
+          <figcaption><strong>Figure M4.11.</strong> Implementation of query rewriting: the system generates an optimized search query while retaining the original question to guide the LLM's final synthesis.</figcaption>
+        </figure>
+
+        <div class="note">
+          <p><strong>Reference:</strong> This approach is detailed in the research paper <a href="https://arxiv.org/pdf/2305.14283.pdf" target="_blank" rel="noopener noreferrer">"Query Rewriting for Retrieval-Augmented Large Language Models"</a> by Xinbei Ma et al.</p>
+        </div>
+
+        <h3>6.2 Generating Multiple Queries</h3>
+        <p>If a question is well-formed but contains multiple implicit queries, a single rewrite may not be sufficient. In such cases, the <a href="https://reference.langchain.com/python/langchain-community/retrievers/multi_query/MultiQueryRetriever" target="_blank" rel="noopener noreferrer"><code>MultiQueryRetriever</code></a> uses an LLM to break down the original question into several explicit sub-questions. Each sub-query is executed independently, and the results are combined to provide a comprehensive context.</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-9-3-multi-query-workflow.png" alt="Workflow for multiple query generation.">
+          <figcaption><strong>Figure M4.12.</strong> Multiple query generation: the LLM reformulates the user question into various perspectives, enabling the system to overcome limitations of distance-based similarity search by exploring different semantic paths.</figcaption>
+        </figure>
+
+        <h3>6.3 Step-Back Questioning</h3>
+        <p>Detailed questions can sometimes be too specific, leading to the retrieval of chunks that lack broader context. The <strong>Step-Back</strong> technique prompts the LLM to generate a more abstract, higher-level question based on the user's detailed query. The system then retrieves both detailed and abstract context to ground the final answer.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-9-4-step-back-workflow.png" alt="Step-back question workflow.">
+          <figcaption><strong>Figure M4.13.</strong> Step-back workflow: the system retrieves detailed context (C_D) for the specific question and abstract context (C_A) for the broader question, combining both to synthesize a well-rounded response.</figcaption>
+        </figure>
+
+        <div class="note">
+          <p><strong>Reference:</strong> This reasoning technique was developed by Google DeepMind. See <a href="https://mng.bz/rZEy" target="_blank" rel="noopener noreferrer">"Take a Step Back: Evoking Reasoning via Abstraction in Large Language Models"</a> by Huaixiu Steven Zheng et al.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>7. Retrieving from Diverse Content Stores</h2>
+        <p>Production-grade RAG often requires accessing information beyond a single vector store. Advanced systems coordinate between multiple types of databases, using LLMs to bridge the gap between unstructured user questions and the structured queries required by specialized content stores.</p>
+
+        <h3>7.1 Types of Content Stores</h3>
         <ul>
-          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch08" target="_blank" rel="noopener noreferrer">Code Examples - Module 4 (Ch08)</a></li>
+          <li><strong>Vector Stores (Dense & Sparse Retrieval):</strong> 
+            <ul>
+              <li><em>Dense Retrieval:</em> Uses embeddings to capture semantic meaning. Similarity is computed based on the mathematical distance between vectors.</li>
+              <li><em>Sparse Retrieval (Lexical):</em> Based on word-level similarity using inverted indexes (e.g., BM25 or TF-IDF). Excels at precise keyword matches and Boolean logic.</li>
+            </ul>
+          </li>
+          <li><strong>Relational (SQL) Databases:</strong> Stores structured facts in tables. LLMs facilitate retrieval through <strong>text-to-SQL</strong>, generating structured queries from natural language to access data like seasonal temperatures or inventory lists.</li>
+          <li><strong>Document & Key-Value Stores:</strong> Databases (e.g., MongoDB) that store data in JSON or BSON formats. LLMs can accurately convert user questions into JSON-based queries that align with the database schema. Many of these have recently added vector search capabilities.</li>
+          <li><strong>Knowledge Graphs:</strong> Represent data as entities (nodes) and relationships (edges). <strong>Knowledge Graph-Enhanced RAG</strong> transforms unstructured text into a compact, structured graph, allowing for complex relationship-based querying.</li>
+        </ul>
+
+        <h3>7.2 Self-Querying and Metadata Enrichment</h3>
+        <p>A vector store typically indexes document chunks by embedding for dense search, but it can be significantly enhanced through <strong>metadata query enrichment</strong>. This technique, known as self-querying, allows the system to filter results based on structured attributes before performing semantic similarity search.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-10-1-self-querying-workflow.png" alt="Self-querying workflow diagram.">
+          <figcaption><strong>Figure M4.14.</strong> Self-querying workflow: the user's natural language question is converted into a semantic query with an embedded metadata filter. The system first selects chunks matching the filter and then applies semantic search on this refined subset.</figcaption>
+        </figure>
+
+        <p>Metadata indexing can be achieved through several methods:</p>
+        <ul>
+          <li><strong>Explicit Metadata Tags:</strong> Manually or programmatically adding attributes such as timestamps, source URLs, and specific topics to each chunk.</li>
+          <li><strong>Algorithmic Extraction:</strong> Using techniques like TF-IDF or BM25 to automatically identify relevant keywords based on term frequency and importance.</li>
+          <li><strong>LLM Suggestions:</strong> Leveraging an LLM to generate descriptive tags and summaries during the ingestion phase, creating a richer set of searchable attributes.</li>
+        </ul>
+
+        <p><strong>Relational Schema Enrichment</strong></p>
+        <p>Before an LLM can generate accurate SQL, it must understand the underlying database structure. Providing the model with an entity-relationship diagram and schema details (Primary Keys, Foreign Keys) minimizes incorrect column and table references.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-10-3-rag-with-sql-workflow.png" alt="RAG with SQL workflow diagram.">
+          <figcaption><strong>Figure M4.15.</strong> Relational schema for the <code>UkBooking</code> database: showing tables for destinations, accommodations, and offers, including their primary and foreign key relationships.</figcaption>
+        </figure>
+
+        <h3>7.3 Relational Database Querying (Text-to-SQL)</h3>
+        <p>Accessing structured facts stored in relational tables requires converting natural language into structured queries. LLMs facilitate this through <strong>text-to-SQL</strong> generation, allowing the application to retrieve precise data points like pricing, inventory, or historical records.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m4-figure-10-2-relational-diagram.png" alt="Entity-relationship diagram for the UkBooking database.">
+          <figcaption><strong>Figure M4.16.</strong> RAG with SQL workflow: the LLM converts the user's question into a SQL query, which is executed against the database. The resulting records are then processed by the LLM to synthesize the final grounded response.</figcaption>
+        </figure>
+
+        <p>LangChain provides specialized tools like the <a href="https://reference.langchain.com/python/langchain-experimental/sql/langchain_experimental.sql.base.SQLDatabaseChain.html" target="_blank" rel="noopener noreferrer"><code>SQLDatabaseChain</code></a> to automate this process. By providing the LLM with the database schema and sample records, the system can generate accurate queries while minimizing hallucinations of table or column names.</p>
+
+        <div class="note">
+          <p><strong>Reference:</strong> For insights into optimizing this process, see <a href="https://arxiv.org/pdf/2204.00498.pdf" target="_blank" rel="noopener noreferrer">"Evaluating the Text-to-SQL Capabilities of Large Language Models"</a> by Nitarshan Rajkumar et al.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Guided lab</h2>
+        <p>In this lab, you will explore advanced RAG techniques, focusing on hierarchical indexing, multi-vector strategies, and query transformation orchestration.</p>
+        <p>Access the practical materials here:</p>
+        <ul>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch08" target="_blank" rel="noopener noreferrer">Advanced Indexing & Multi-Vector Retrieval (Ch08)</a></li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch09" target="_blank" rel="noopener noreferrer">Query Transformation & Rewriting Techniques (Ch09)</a></li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch10" target="_blank" rel="noopener noreferrer">Diverse Content Stores & Text-to-SQL (Ch10)</a></li>
         </ul>
       </section>
 

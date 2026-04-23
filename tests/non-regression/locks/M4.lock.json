@@ -11,6 +11,8 @@
     "3. Advanced Document Indexing Factors",
     "4. Splitting Strategy Implementation",
     "5. Advanced Embedding Strategies",
+    "6. Query Transformation Strategies",
+    "7. Retrieving from Diverse Content Stores",
     "Guided lab",
     "Key takeaways",
     "1.1 Engineering Robust Retrieval",
@@ -23,9 +25,7 @@
     "4.4 Practical HTML Header Splitting",
     "4.5 Granular Retrieval Examples",
     "4.6 Coarse Chunking with Overlap",
-    "5.1 Child Chunk Embeddings",
-    "5.2 Embedding Document Summaries",
-    "5.3 Hypothetical Question Embeddings"
+    "5.1 Two-Layer Architecture and Parent-Child Chunks"
   ],
   "required_images": [
     "../assets/images/m4-figure-8-1-ingestion-issues.png",
@@ -36,7 +36,14 @@
     "../assets/images/m4-figure-8-6-coarse-chunking-overlap.png",
     "../assets/images/m4-figure-8-4-child-chunk-embeddings.png",
     "../assets/images/m4-figure-8-5-chunk-summary-embedding.png",
-    "../assets/images/m4-figure-8-6-hypothetical-question-embeddings.png"
+    "../assets/images/m4-figure-8-6-hypothetical-question-embeddings.png",
+    "../assets/images/m4-figure-9-1-rewrite-retrieve-read.png",
+    "../assets/images/m4-figure-9-2-query-rewriting-workflow.png",
+    "../assets/images/m4-figure-9-3-multi-query-workflow.png",
+    "../assets/images/m4-figure-9-4-step-back-workflow.png",
+    "../assets/images/m4-figure-10-1-self-querying-workflow.png",
+    "../assets/images/m4-figure-10-3-rag-with-sql-workflow.png",
+    "../assets/images/m4-figure-10-2-relational-diagram.png"
   ],
   "required_links": [
     "../index.html",
@@ -49,6 +56,13 @@
     "https://reference.langchain.com/python/langchain-text-splitters/character/RecursiveCharacterTextSplitter",
     "https://en.wikivoyage.org/wiki/Cornwall",
     "https://reference.langchain.com/python/langchain-core/retrievers/base/BaseRetriever",
-    "https://github.com/thimotyb/building-llm-applications/tree/main/ch08"
+    "https://arxiv.org/pdf/2305.14283.pdf",
+    "https://reference.langchain.com/python/langchain-community/retrievers/multi_query/MultiQueryRetriever",
+    "https://mng.bz/rZEy",
+    "https://reference.langchain.com/python/langchain-experimental/sql/langchain_experimental.sql.base.SQLDatabaseChain.html",
+    "https://arxiv.org/pdf/2204.00498.pdf",
+    "https://github.com/thimotyb/building-llm-applications/tree/main/ch08",
+    "https://github.com/thimotyb/building-llm-applications/tree/main/ch09",
+    "https://github.com/thimotyb/building-llm-applications/tree/main/ch10"
   ]
 }
