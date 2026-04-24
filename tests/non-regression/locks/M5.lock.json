@@ -1,0 +1,52 @@
+{
+  "id": "M5",
+  "file": "site/chapters/chapter-05.html",
+  "required_texts": [
+    "M5 - AI Agent Architectures",
+    "Outline",
+    "Learning outcomes",
+    "Topics",
+    "1. From Workflows to Autonomous Agents",
+    "2. Core Concepts: Tools and Agent Reasoning",
+    "3. Managing Agent State",
+    "4. The Tool Execution Phase",
+    "5. Assembling the Agent Graph",
+    "6. Executing the Agent Chatbot",
+    "7. Scaling to Multi-Tool Agents",
+    "8. Simplifying with LangGraph Prebuilt Components",
+    "Guided lab",
+    "Key takeaways",
+    "1.1 Dynamic Decision-Making and Multi-Agent Systems",
+    "1.2 Ecosystem Integration via MCP",
+    "1.3 Ensuring Production Readiness",
+    "2.1 Defining Tools and the ReAct Pattern",
+    "2.2 Tool Registration and LLM Binding",
+    "2.3 Technical Implementation: The @tool Decorator",
+    "3.1 Defining the AgentState",
+    "4.1 Logical Flow of Execution",
+    "4.2 Prebuilt ToolNode",
+    "5.1 Registering Graph Nodes"
+  ],
+  "required_images": [
+    "../assets/images/m5-figure-11-1-react-pattern.png",
+    "../assets/images/m5-figure-11-2-conditional-logic.png",
+    "../assets/images/m5-figure-11-3-initial-agent-run.png",
+    "../assets/images/m5-figure-11-4-langsmith-trace.png",
+    "../assets/images/m5-figure-11-5-multi-tool-selection.png"
+  ],
+  "required_links": [
+    "../index.html",
+    "chapter-04.html",
+    "https://arxiv.org/abs/2210.03629",
+    "https://reference.langchain.com/python/langchain-core/tools/langchain_core.tools.base.tool.html",
+    "https://langchain-ai.github.io/langgraph/concepts/low_level/#stategraph",
+    "https://langchain-ai.github.io/langgraph/how-tos/define-state/",
+    "https://reference.langchain.com/python/langgraph.prebuilt/tool_node/ToolNode",
+    "https://langchain-ai.github.io/langgraph/reference/prebuilt/#tools_condition",
+    "https://smith.langchain.com/",
+    "https://langchain-ai.github.io/langgraph/reference/prebuilt/#create_react_agent",
+    "https://github.com/thimotyb/building-llm-applications/blob/main/ch11/main_01_01.py",
+    "https://github.com/thimotyb/building-llm-applications/blob/main/ch11/main_02_02.py",
+    "https://github.com/thimotyb/building-llm-applications/blob/main/ch11/main_03_01.py"
+  ]
+}

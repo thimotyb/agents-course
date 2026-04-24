@@ -76,5 +76,6 @@ memory:
     - M2: Finished, verified, and locked. Added full LangGraph section (5.1-5.10) with execution figures (M2.19-M2.23).
     - M3: Finished, verified, and locked. Covered RAG fundamentals, Design Patterns, Vector Stores, safe prompts, LangChain Object Model, Memory/History, and LangSmith Tracing. Figures M3.1-M3.20 finalized.
     - M4: Finished, verified, and locked. Covered Evolution to Production-Grade RAG, Accuracy Gaps, Advanced Indexing, Splitting Strategy (practical HTML/Coarse examples), Advanced Embedding Strategies (Parent-Child, Summaries, Hypothetical Questions), and Diverse Content Stores (Self-Querying, Text-to-SQL). Figures M4.1-M4.16 finalized.
+    - M5: Finished core logic, verified, and locked. Covered transition to Autonomous Agents, Core Tool concepts (ReAct, Registration, @tool), AgentState management, Tool Execution logic (ToolNode), Graph Assembly (START/END, tools_condition), and Multi-Tool Scaling. Added handling for Rate Limits (429 errors) and observability with LangSmith Tracing. Figures M5.1-M5.5 finalized.
     - Infrastructure: Non-regression guard now checks broken images and external GitHub links. MemPalace centralized sync active.
-    - Next step: Start Module M5 (Graph-based RAG and Advanced Architectures).
+    - Next step: Start Module M6 (Multi-agent systems and advanced orchestration).

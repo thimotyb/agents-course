@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>M5 - AI Agents Architectures with LangGraph</title>
+  <title>M5 - AI Agent Architectures</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
@@ -17,8 +17,8 @@
     <div class="shell">
       <section class="hero">
         <p><a href="../index.html">Home</a></p>
-        <h1>M5 - AI Agents Architectures with LangGraph</h1>
-        <p class="hero-copy">Engineer multi-step agent architectures with explicit control flow, tool use, and stateful decision loops.</p>
+        <h1>M5 - AI Agent Architectures</h1>
+        <p class="hero-copy">Transitioning from structured workflows to autonomous, tool-using agents and multi-agent coordination systems.</p>
       </section>
     </div>
   </header>
@@ -34,7 +34,6 @@
         <nav class="module-nav" aria-label="Module navigation">
           <a href="chapter-04.html">M4 Previous</a>
           <span>M5</span>
-          <a href="chapter-06.html">M6 Next</a>
         </nav>
       </section>
 
@@ -42,41 +41,436 @@
         <div>
           <h2>Learning outcomes</h2>
           <ul>
-            <li>Explain the core concepts and design choices for this module.</li>
-            <li>Implement a working example with LangChain or LangGraph.</li>
-            <li>Evaluate output quality and identify iteration points.</li>
+            <li>Build dynamic, tool-using agents in LangGraph that reason and adapt based on context.</li>
+            <li>Design multi-agent systems for task coordination and role-based collaboration.</li>
+            <li>Implement the Model Context Protocol (MCP) for seamless integration with remote services.</li>
+            <li>Ensure production readiness using persistent memory, safety guardrails, and observability.</li>
           </ul>
         </div>
         <div>
           <h2>Topics</h2>
-          <p>State graphs, planner-executor patterns, tool adapters, memory boundaries, guardrails, and fallback logic.</p>
+          <p>Autonomous Agents, Tool Use, LangGraph Decision Loops, Multi-Agent Orchestration, MCP, Memory, Guardrails, Traceability.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>1. From Workflows to Autonomous Agents</h2>
+        <p>This module synthesizes previous concepts into fully capable agents that can think, decide, and act. The focus shifts from static, predefined flows to dynamic systems that utilize tools, interpret intermediate results, and adapt their execution paths based on real-time context.</p>
+
+        <h3>1.1 Dynamic Decision-Making and Multi-Agent Systems</h3>
+        <p>Beyond baseline automation, advanced architectures enable agents to coordinate across specialized roles. Task routing and collaborative problem-solving are implemented to scale single-agent capabilities into complex multi-agent ecosystems.</p>
+
+        <h3>1.2 Ecosystem Integration via MCP</h3>
+        <p>Connecting agents to external services is facilitated through the <strong>Model Context Protocol (MCP)</strong>. This protocol allows agents to discover and utilize remote tools with the same ease as local functions, fostering interoperability across diverse AI services without the overhead of custom integrations.</p>
+
+        <h3>1.3 Ensuring Production Readiness</h3>
+        <p>Transitioning from prototype to production requires a focus on reliability and safety. Key technical requirements include:</p>
+        <ul>
+          <li><strong>Persistent Memory:</strong> Maintaining long-term context across user interactions.</li>
+          <li><strong>Safety Guardrails:</strong> Enforcing operational boundaries and preventing unintended agent behaviors.</li>
+          <li><strong>Observability:</strong> Ensuring full traceability for debugging and performance optimization.</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>2. Core Concepts: Tools and Agent Reasoning</h2>
+        <p>Transitioning from static workflows to autonomous agents requires a fundamental shift in how the system interacts with external capabilities. Instead of hardcoded API calls, agents use <strong>tools</strong> to dynamically extend their abilities beyond text generation.</p>
+
+        <h3>2.1 Defining Tools and the ReAct Pattern</h3>
+        <p>A <strong>tool</strong> is any external function, service, or capability that an LLM can invoke through a standardized protocol. Tools allow the model to run code, query databases, or call third-party APIs by passing structured inputs and receiving structured outputs.</p>
+        
+        <p>This dynamic interplay is often implemented via the <strong>ReAct</strong> (Reasoning and Acting) pattern. ReAct enables the agent to interleave reasoning steps ("thoughts") with tool invocations ("actions"), allowing the system to decompose complex tasks and adapt based on intermediate results.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-11-1-react-pattern.png" alt="Process diagram of the ReAct pattern.">
+          <figcaption><strong>Figure M5.1.</strong> The ReAct pattern: the agent alternates between reasoning phases (analyzing input) and action phases (calling tools), cycling through these steps until a final answer is synthesized.</figcaption>
+        </figure>
+
+        <div class="note">
+          <p><strong>Reference:</strong> The ReAct pattern was introduced in the paper <a href="https://arxiv.org/abs/2210.03629" target="_blank" rel="noopener noreferrer">"ReAct: Synergizing Reasoning and Acting in Language Models"</a> by Yao et al. (2022).</p>
+        </div>
+
+        <h3>2.2 Tool Registration and LLM Binding</h3>
+        <p>To enable an agent to utilize a tool, the capability must be <strong>registered</strong> with the LLM. This process involves exposing the tool's <strong>function signature</strong> (name and parameters) and a detailed <strong>textual description</strong>. Modern models are explicitly trained to recognize these schemas and decide at runtime when a tool call is necessary.</p>
+
+        <p>In the LangChain/LangGraph ecosystem, this is typically handled in two steps:</p>
+        <ul>
+          <li><strong>Definition:</strong> Using the <a href="https://reference.langchain.com/python/langchain-core/tools/langchain_core.tools.base.tool.html" target="_blank" rel="noopener noreferrer"><code>@tool</code></a> decorator to wrap a Python function. The decorator automatically extracts the function's docstring as the tool's description and infers the parameter schema.</li>
+          <li><strong>Binding:</strong> Using the <code>.bind_tools()</code> protocol to attach the tool definitions to the LLM instance. This informs the model of the available tools and their usage constraints during the generation process.</li>
+        </ul>
+
+        <h3>2.3 Technical Implementation: The @tool Decorator</h3>
+        <p>The primary method for defining tools in LangChain is the <code>@tool</code> decorator. In Python, a <strong>decorator</strong> is a higher-order function that takes another function as an argument and extends its behavior without explicitly modifying its source code.</p>
+
+        <p><strong>Python Decorator Fundamentals</strong></p>
+        <p>Syntactically, decorators are applied using the <code>@</code> symbol. Below is a simplified example of a decorator that logs function calls:</p>
+
+        <pre><code>def log_call(func):
+    def wrapper(*args, **kwargs):
+        print(f"Executing: {func.__name__}")
+        return func(*args, **kwargs)
+    return wrapper
+
+@log_call
+def get_status():
+    return "System Operational"
+
+# Calling get_status() will print "Executing: get_status" 
+# and return "System Operational"</code></pre>
+
+        <p><strong>The @tool Mechanism</strong></p>
+        <p>The <code>@tool</code> decorator leverages Python's <strong>introspection</strong> capabilities to convert standard functions into structured tool schemas. When applied, it automatically extracts metadata to inform the LLM's reasoning engine:</p>
+
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Python Metadata</th>
+              <th>Tool Schema Component</th>
+              <th>Purpose for LLM</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Function Name</td>
+              <td><code>name</code></td>
+              <td>Identifies the specific tool in the LLM's response.</td>
+            </tr>
+            <tr>
+              <td>Docstring</td>
+              <td><code>description</code></td>
+              <td>Informs the model's decision on <em>when</em> to utilize the tool.</td>
+            </tr>
+            <tr>
+              <td>Type Hints (Arguments)</td>
+              <td><code>parameters</code></td>
+              <td>Defines the JSON schema for valid tool inputs.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note">
+          <p><strong>Best Practice:</strong> Because the LLM relies entirely on the <code>description</code> to select tools, docstrings must be highly descriptive and clearly state the tool's utility and operational constraints.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>3. Managing Agent State</h2>
+        <p>In a Reasoning-Action loop, the system must maintain a continuous record of the conversation, including user queries, model thoughts, and tool responses. In LangGraph, this is managed through a central <strong>Agent State</strong>.</p>
+
+        <h3>3.1 Defining the AgentState</h3>
+        <p>The <code>AgentState</code> is typically defined as a <code>TypedDict</code>. It serves as the "source of truth" for the graph, ensuring that every node has access to the accumulated context and can contribute new information to the sequence.</p>
+        
+        <pre><code>from typing import Annotated, Sequence
+from typing_extensions import TypedDict
+from langchain_core.messages import BaseMessage
+import operator
+
+class AgentState(TypedDict):
+    # Use Annotated and operator.add to append new messages 
+    # to the existing history instead of overwriting them.
+    messages: Annotated[Sequence[BaseMessage], operator.add]</code></pre>
+
+        <p><strong>The Role of Reducers</strong></p>
+        <p>In the example above, <code>operator.add</code> acts as a <strong>reducer</strong>. Reducers define how state updates are merged. By using <code>Annotated</code> with an addition operator, the graph automatically accumulates messages as they flow through different nodes, building a complete history of the interaction.</p>
+
+        <div class="note">
+          <p><strong>Documentation:</strong> For advanced state management and custom reducer logic, refer to the official <a href="https://langchain-ai.github.io/langgraph/concepts/low_level/#stategraph" target="_blank" rel="noopener noreferrer">LangGraph StateGraph concepts</a> and <a href="https://langchain-ai.github.io/langgraph/how-tos/define-state/" target="_blank" rel="noopener noreferrer">state definition guides</a>.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>4. The Tool Execution Phase</h2>
+        <p>The tool execution phase is the critical link between the LLM's reasoning and real-world action. In this stage, the system processes the model's intent and transforms it into executable code calls, updating the conversation state with the results.</p>
+
+        <h3>4.1 Logical Flow of Execution</h3>
+        <p>A standard tool execution node follows a specific sequence to ensure robustness and traceability:</p>
+        <ol>
+          <li><strong>Inspection:</strong> The node examines the most recent message in the <code>AgentState</code> (typically an <code>AIMessage</code>).</li>
+          <li><strong>Extraction:</strong> It identifies the <code>tool_calls</code> property, which contains the name of the tool and the arguments generated by the model.</li>
+          <li><strong>Invocation:</strong> The corresponding Python function is invoked with the provided arguments.</li>
+          <li><strong>Wrapping:</strong> The function's output is wrapped in a <code>ToolMessage</code>, which includes the <code>tool_call_id</code> to link the result back to the model's request.</li>
+          <li><strong>State Update:</strong> The <code>ToolMessage</code> is appended to the message sequence, providing the LLM with the context needed for its next reasoning step.</li>
+        </ol>
+
+        <h3>4.2 Prebuilt ToolNode</h3>
+        <p>While tool execution can be implemented from scratch, LangGraph provides a robust, prebuilt implementation called <a href="https://reference.langchain.com/python/langgraph.prebuilt/tool_node/ToolNode" target="_blank" rel="noopener noreferrer"><code>ToolNode</code></a>. This component handles the extraction and parallel invocation of tools automatically, ensuring consistent message formatting and error handling across different LLM providers.</p>
+
+        <div class="note">
+          <p><strong>Efficiency:</strong> Using <code>ToolNode</code> simplifies graph construction and allows the agent to execute multiple independent tool calls in a single turn, significantly reducing latency in complex reasoning tasks.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>5. Assembling the Agent Graph</h2>
+        <p>With the tools defined and the state management in place, the final structural step is to assemble the individual components into a cohesive <strong>Directed Graph</strong>. In LangGraph, each node represents a specific logic unit (e.g., an LLM processor or a tool executor).</p>
+
+        <h3>5.1 Registering Graph Nodes</h3>
+        <p>Nodes are registered using the <code>StateGraph.add_node()</code> method. This links a unique string identifier (the node name) to a specific Python function or runnable.</p>
+        
+        <pre><code>from langgraph.graph import StateGraph, START, END
+
+# Initialize the graph builder with the AgentState schema
+builder = StateGraph(AgentState)
+
+# Register the LLM node for reasoning
+builder.add_node("llm_node", llm_node_function)
+
+# Register the tools node for execution
+builder.add_node("tools", ToolNode(TOOLS))</code></pre>
+
+        <h3>5.2 The LLM Node: Coordinating Reasoning</h3>
+        <p>The <strong>LLM node</strong> is the central "brain" of the agent. Its primary responsibility is to receive the current <code>AgentState</code>, invoke the model, and decide the next course of action:</p>
+        <ul>
+          <li><strong>Initial Request:</strong> If the user has just asked a question, the LLM determines if external tools are required to formulate an answer.</li>
+          <li><strong>Reactive Logic:</strong> If the state contains results from previous tool calls, the LLM integrates this new context and decides whether to produce a final response or request additional actions.</li>
+        </ul>
+        <p>The model's response is returned as an <code>AIMessage</code>, which can either contain the final text answer or the <code>tool_calls</code> metadata for the next node in the graph.</p>
+
+        <h3>5.3 Defining Edges and Control Flow</h3>
+        <p>Edges represent the possible flow of control between nodes. Every LangGraph must define an entry point from the <code>START</code> node and at least one path leading to the <code>END</code> node, which signifies the completion of the agent's task.</p>
+        
+        <pre><code># Set the entry point to the reasoning node
+builder.add_edge(START, "llm_node")
+
+# Standard edges represent fixed transitions
+# (e.g., after executing tools, always return to the LLM for reasoning)
+builder.add_edge("tools", "llm_node")</code></pre>
+
+        <h3>5.4 Conditional Logic and Dynamic Routing</h3>
+        <p>The core of an autonomous agent's power lies in its ability to choose its own path. In LangGraph, this is implemented via <strong>conditional edges</strong>. A specialized router function (typically <a href="https://langchain-ai.github.io/langgraph/reference/prebuilt/#tools_condition" target="_blank" rel="noopener noreferrer"><code>tools_condition</code></a>) examines the LLM's last output to determine the next step.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-11-2-conditional-logic.png" alt="Conditional graph logic diagram.">
+          <figcaption><strong>Figure M5.2.</strong> Conditional routing: the system dynamically directs flow to the "tools" node if the LLM requests actions, or to the <code>END</code> node if a final answer is ready.</figcaption>
+        </figure>
+
+        <p>The logic follows two primary branches:</p>
+        <ul>
+          <li><strong>If <code>tool_calls</code> exist:</strong> The graph routes the flow to the <code>"tools"</code> node for execution.</li>
+          <li><strong>If no tool calls exist:</strong> The flow is directed to <code>END</code>, terminating the process and delivering the final answer to the user.</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>6. Executing the Agent Chatbot</h2>
+        <p>The final step in building an agent-powered system is implementing the user interface. A common pattern is the <strong>Read-Eval-Print Loop (REPL)</strong>, which continuously accepts user input, processes it through the agent graph, and returns the response until the session is terminated.</p>
+
+        <h3>6.1 Implementing the Chat Loop</h3>
+        <p>In a typical implementation, each user input is wrapped in a <code>HumanMessage</code> and passed as the initial state to the agent's <code>.invoke()</code> method. The loop then extracts the final message from the resulting state to display back to the user.</p>
+        
+        <pre><code>def chat_loop():
+    print("Agent Assistant (type 'exit' to quit)")
+    while True:
+        user_input = input("You: ").strip()
+        if user_input.lower() in {"exit", "quit"}:
+            break
+        
+        # Initialize state with the user's message
+        state = {"messages": [HumanMessage(content=user_input)]}
+        
+        # Invoke the compiled agent graph
+        result = agent.invoke(state)
+        
+        # Retrieve and print the final response
+        print(f"Assistant: {result['messages'][-1].content}\n")</code></pre>
+
+        <h3>6.2 Initial Agent Run</h3>
+        <p>In the first functional version of the agent, the system is equipped with a single <strong>Vector Search Tool</strong>. This allows the agent to reason about a user's travel query and decide when to query the knowledge base for specific destination details.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-11-3-initial-agent-run.png" alt="Screenshot of the agent's initial execution.">
+          <figcaption><strong>Figure M5.3.</strong> Initial agent execution: the system successfully processes a user question, decides to invoke the travel information tool, and synthesizes a grounded response based on the retrieved context.</figcaption>
+        </figure>
+
+        <h3>6.3 Observing Agent Execution with LangSmith</h3>
+        <p>For production-grade agents, visibility into the internal reasoning-action cycle is essential. <a href="https://smith.langchain.com/" target="_blank" rel="noopener noreferrer">LangSmith</a> provides a comprehensive tracing interface that captures every node execution, tool invocation, and state transition within the graph.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-11-4-langsmith-trace.png" alt="LangSmith trace of agent execution.">
+          <figcaption><strong>Figure M5.4.</strong> LangSmith execution trace: providing a step-by-step breakdown of the agent's calls, including the initial LLM reasoning, the subsequent tool invocation, and the final response synthesis.</figcaption>
+        </figure>
+
+        <div class="note">
+          <p><strong>Traceability:</strong> Tracing allows developers to debug complex loops, identify where the model might be failing to call the correct tool, and optimize prompt performance based on real-world interaction logs.</p>
+        </div>
+
+        <h3>6.4 Deep Dive: The ReAct Loop</h3>
+        <p>The agent implements the <strong>ReAct (Reasoning + Acting)</strong> pattern, following a cyclic execution path: <code>llm_node → tools → llm_node → tools → ... → END</code>. The LLM does not generate a response immediately; it first reasons about the user's intent, invokes the necessary tools, evaluates the results, and determines if it has gathered enough context to finalize the answer.</p>
+
+        <p><strong>Decision Logic: The Role of <code>tools_condition</code></strong></p>
+        <p>The flow is governed by the <code>tools_condition</code> function. This utility inspects the latest message in the graph's state:</p>
+        <ul>
+          <li><strong>Emitted <code>tool_calls</code>:</strong> The graph routes back to the <code>tools</code> node for execution.</li>
+          <li><strong>No <code>tool_calls</code>:</strong> The graph routes to <code>END</code>, signaling that the reasoning phase is complete.</li>
+        </ul>
+
+        <p><strong>Analyzing a Multi-Step Search Sequence</strong></p>
+        <p>In Figure M5.4, the LLM performed six consecutive searches. This thoroughness is driven by the model's objective to gather precise data before committing to an answer. Below is a breakdown of the observed reasoning steps:</p>
+
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Step</th>
+              <th>Generated Query</th>
+              <th>Observed Behavior</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>"best beaches in Cornwall"</td>
+              <td>Initial broad information gathering.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>"beaches in Cornwall"</td>
+              <td>Query reformulation to capture missing results.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>"beaches in St Ives Cornwall"</td>
+              <td>Narrowing scope to a specific coastal town.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>"beaches in Newquay Cornwall"</td>
+              <td>Exploring another key geographic area.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>"beaches in St Ives and Kynance Cove"</td>
+              <td>Retrieving granular details for identified hotspots.</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>"Sennen Cove beach details"</td>
+              <td>Final verification search for specific amenities.</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>—</td>
+              <td>Confidence threshold reached; generates Final Answer.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note">
+          <p><strong>Controlling Iterations:</strong> To prevent excessive tool calls or infinite loops, you can enforce a <code>recursion_limit</code> during invocation: <code>agent.invoke(state, config={"recursion_limit": 5})</code>.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>7. Scaling to Multi-Tool Agents</h2>
+        <p>Production agents often require access to multiple specialized capabilities. Extending an agent's toolkit involves not only adding new functions but also refining how the LLM perceives and chooses between available tools.</p>
+
+        <h3>7.1 Integrating API-Based Tools</h3>
+        <p>While semantic search provides historical or curated context, many tasks require real-time data. Adding an API-based tool (e.g., a weather service) allows the agent to synthesize answers that combine static knowledge with dynamic conditions.</p>
+        
+        <pre><code>@tool
+def weather_forecast(town: str) -> dict:
+    """Get a real-time weather forecast for a given town."""
+    # Logic to call an external Weather API
+    return {"town": town, "weather": "sunny", "temp": 24}
+
+# Toolkit expansion
+TOOLS = [search_travel_info, weather_forecast]
+llm_with_tools = llm.bind_tools(TOOLS)</code></pre>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-11-5-multi-tool-selection.png" alt="Agent choosing between multiple tools.">
+          <figcaption><strong>Figure M5.5.</strong> Multi-tool orchestration: the agent analyzes the user's request for real-time information and correctly selects the <code>weather_forecast</code> tool over the static knowledge base.</figcaption>
+        </figure>
+
+        <h3>7.2 Optimizing Tool Selection with Descriptions</h3>
+        <p>By default, the <code>@tool</code> decorator uses the function's docstring as the description. However, for complex multi-tool scenarios, you can use the <code>description</code> parameter to explicitly guide the LLM's choice, providing clearer instructions on when each tool should be utilized.</p>
+
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Tool Name</th>
+              <th>Optimized Description</th>
+              <th>LLM Guidance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>search_travel_info</code></td>
+              <td>"Search travel information about destinations in England."</td>
+              <td>Directs the model to this tool for general knowledge and location details.</td>
+            </tr>
+            <tr>
+              <td><code>weather_forecast</code></td>
+              <td>"Get the weather forecast, given a specific town name."</td>
+              <td>Ensures the model uses this tool only when numerical or condition data is requested.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>7.3 Refining the System Prompt</h3>
+        <p>To prevent the LLM from relying on its internal pre-trained knowledge (which may be outdated or inaccurate), the system prompt must be updated to enforce <strong>tool-first</strong> behavior. This ensures the agent retrieves grounded information before answering.</p>
+
+        <div class="note">
+          <p><strong>Example Prompt:</strong> "You are a helpful assistant that can search travel information and get the weather forecast. <strong>Only use the tools provided to find the information you need</strong> (including town names). Do not rely on your internal knowledge."</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>8. Simplifying with LangGraph Prebuilt Components</h2>
+        <p>While building agents from scratch provides deep control and understanding, production development often benefits from higher-level abstractions. LangGraph offers prebuilt components that encapsulate standard orchestration logic, significantly reducing boilerplate code.</p>
+
+        <h3>8.1 Refactoring with create_react_agent</h3>
+        <p>The <a href="https://langchain-ai.github.io/langgraph/reference/prebuilt/#create_react_agent" target="_blank" rel="noopener noreferrer"><code>create_react_agent</code></a> constructor replaces manual node registration, tool binding, and conditional edge wiring with a single instantiation call. This ensures your agent follows a standardized, well-tested ReAct interaction pattern.</p>
+        
+        <pre><code>from langgraph.prebuilt import create_react_agent
+
+# High-level agent construction
+agent = create_react_agent(
+    model=llm_model,
+    tools=TOOLS,
+    state_schema=AgentState,
+    prompt="""You are a helpful assistant..."""
+)</code></pre>
+
+        <p><strong>Key Simplifications:</strong></p>
+        <ul>
+          <li><strong>Internal Binding:</strong> The model automatically binds the provided tools without requiring explicit <code>.bind_tools()</code> calls.</li>
+          <li><strong>Automated Orchestration:</strong> All internal nodes (LLM, ToolNode) and conditional routing (<code>tools_condition</code>) are managed internally.</li>
+          <li><strong>Managed State:</strong> High-level agents can utilize managed attributes like <code>RemainingSteps</code> to prevent infinite loops and manage recursion limits effectively.</li>
+        </ul>
+
+        <h3>8.2 Handling API Rate Limits (429 Errors)</h3>
+        <p>In production environments, and especially during agentic loops, you may encounter the <code>429 RESOURCE_EXHAUSTED</code> error. This occurs when the number of requests or tokens exceeds the provider's quota. Because agents often perform multiple iterations per user query, they can exhaust limits much faster than standard chatbots.</p>
+        
+        <p><strong>Mitigation Strategies:</strong></p>
+        <ul>
+          <li><strong>Exponential Backoff:</strong> Implement a retry mechanism that waits progressively longer between attempts.</li>
+          <li><strong>Recursion Limits:</strong> Strictly enforce <code>recursion_limit</code> in the <code>invoke</code> config to prevent runaway loops.</li>
+          <li><strong>Model Tiering:</strong> Use faster, higher-quota models (e.g., Gemini Flash) for intermediate reasoning steps and reserved "Pro" models for final synthesis.</li>
+        </ul>
+
+        <div class="note">
+          <p><strong>Implementation Tip:</strong> Use the <code>tenacity</code> library to wrap tool calls or LLM invocations with robust retry logic, ensuring the agent can recover gracefully from transient rate limit hits.</p>
         </div>
       </section>
 
       <section class="panel">
         <h2>Guided lab</h2>
-        <h3>Execution steps</h3>
-        <p>Implement a task-oriented agent that plans steps, calls tools, validates outputs, and handles recovery paths.</p>
-      </section>
-
-      <section class="panel">
-        <h2>Exercises</h2>
-        <h3>Practice tasks</h3>
-        <p>Add guardrails for tool misuse and define stop conditions to prevent infinite loops or low-value iterations.</p>
-      </section>
-
-      <section class="panel">
-        <h2>Deliverable</h2>
-        <h3>Submission output</h3>
-        <p>A LangGraph agent architecture with documented states, transitions, tools, and safety policies.</p>
+        <p>In this lab, you will implement a task-oriented travel agent using LangGraph, incorporating dynamic tool calling and stateful reasoning loops. You will evolve the implementation from a manual graph to a highly optimized multi-tool agent.</p>
+        <p>Access the implementation materials here:</p>
+        <ul>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch11/main_01_01.py" target="_blank" rel="noopener noreferrer">Initial Travel Agent - Manual Graph (main_01_01)</a></li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch11/main_02_02.py" target="_blank" rel="noopener noreferrer">Multi-Tool Agent - Guided Selection (main_02_02)</a></li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch11/main_03_01.py" target="_blank" rel="noopener noreferrer">Optimized Agent - Prebuilt Components (main_03_01)</a></li>
+        </ul>
       </section>
 
       <section class="panel">
         <h2>Key takeaways</h2>
         <ul>
-          <li>A clear implementation path from concept to runnable artifact.</li>
-          <li>A repeatable structure for quality checks and improvements.</li>
-          <li>An incremental bridge to the next module.</li>
+          <li><strong>Autonomy:</strong> Moving from fixed sequences to reasoning-based decision loops (LangGraph).</li>
+          <li><strong>Scalability:</strong> Utilizing multi-agent orchestration for complex, role-based tasks.</li>
+          <li><strong>Interoperability:</strong> Leveraging MCP to connect agents with a global ecosystem of tools.</li>
+          <li><strong>Operational Rigor:</strong> Implementing memory, guardrails, and tracing for resilient production systems.</li>
         </ul>
       </section>
     </article>
