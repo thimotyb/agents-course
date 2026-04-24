@@ -412,6 +412,16 @@ llm_with_tools = llm.bind_tools(TOOLS)</code></pre>
         <div class="note">
           <p><strong>Example Prompt:</strong> "You are a helpful assistant that can search travel information and get the weather forecast. <strong>Only use the tools provided to find the information you need</strong> (including town names). Do not rely on your internal knowledge."</p>
         </div>
+
+        <h3>7.4 Model Capabilities and Tool Orchestration</h3>
+        <p>The success of multi-tool orchestration depends heavily on the underlying LLM's reasoning depth. While smaller local models (e.g., <code>ollama:e2b</code>) can often handle single tool calls, they may struggle to chain multiple tools or decompose complex questions into sequential actions.</p>
+
+        <p>Advanced models like <strong>Google Gemini</strong> demonstrate superior performance in these scenarios, successfully combining results from diverse sources (such as curated travel data and live weather APIs) to produce a unified, context-aware response.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-11-6-gemini-multi-tool.png" alt="Gemini model successfully combining multiple tools.">
+          <figcaption><strong>Figure M5.6.</strong> Advanced orchestration with Gemini: the model identifies the need for both a knowledge base lookup and a real-time weather check, correctly sequencing the tool calls to satisfy a complex user intent.</figcaption>
+        </figure>
       </section>
 
       <section class="panel">

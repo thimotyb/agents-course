@@ -32,7 +32,8 @@
     "../assets/images/m5-figure-11-2-conditional-logic.png",
     "../assets/images/m5-figure-11-3-initial-agent-run.png",
     "../assets/images/m5-figure-11-4-langsmith-trace.png",
-    "../assets/images/m5-figure-11-5-multi-tool-selection.png"
+    "../assets/images/m5-figure-11-5-multi-tool-selection.png",
+    "../assets/images/m5-figure-11-6-gemini-multi-tool.png"
   ],
   "required_links": [
     "../index.html",
