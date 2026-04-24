@@ -464,13 +464,42 @@ agent = create_react_agent(
       </section>
 
       <section class="panel">
+        <h2>9. Scaling to Router Architectures</h2>
+        <p>As agent capabilities grow, single-agent systems often become overly complex and difficult to maintain. By integrating diverse resources—such as local databases and external <strong>REST APIs</strong> (e.g., a mocked BnB booking service)—the architecture must evolve into a <strong>Router-based multi-agent system</strong>.</p>
+
+        <h3>9.1 Coordinating Specialized Agents</h3>
+        <p>In a router architecture, a top-level <strong>Router Agent</strong> acts as a dispatcher. It evaluates the user's intent and directs the query to the most appropriate specialist agent (e.g., a Travel Information Specialist or an Accommodation Booking Specialist).</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-12-1-router-architecture.png" alt="Router-based multi-agent architecture diagram.">
+          <figcaption><strong>Figure M5.7.</strong> Router-based architecture: a hybrid system where a deterministic router evaluates intent and delegates tasks to specialized, tool-using agents.</figcaption>
+        </figure>
+
+        <p>This approach offers several technical advantages:</p>
+        <ul>
+          <li><strong>Modularity:</strong> Each specialist agent is developed and tested independently with its own set of tools and prompts.</li>
+          <li><strong>Accuracy:</strong> By narrowing the context for each agent, the risk of tool-selection errors and hallucinations is significantly reduced.</li>
+          <li><strong>Scalability:</strong> New capabilities (like flight booking or car rentals) can be added as new specialized nodes without redesigning the entire graph.</li>
+        </ul>
+
+        <h3>9.2 Router Logic and Execution Trace</h3>
+        <p>The router logic is typically implemented as a node that classifies the user question into predefined categories. Once a category is identified, the graph uses a conditional edge to hand off the <code>AgentState</code> to the target specialist.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-12-2-router-trace.png" alt="LangSmith trace of a multi-agent router execution.">
+          <figcaption><strong>Figure M5.8.</strong> Multi-agent execution trace: visualizing how the router agent intercepts a query about room availability and correctly dispatches it to the booking specialist for execution.</figcaption>
+        </figure>
+      </section>
+
+      <section class="panel">
         <h2>Guided lab</h2>
-        <p>In this lab, you will implement a task-oriented travel agent using LangGraph, incorporating dynamic tool calling and stateful reasoning loops. You will evolve the implementation from a manual graph to a highly optimized multi-tool agent.</p>
+        <p>In this lab, you will implement a task-oriented travel agent using LangGraph, incorporating dynamic tool calling and stateful reasoning loops. You will evolve the implementation from a manual graph to a highly optimized multi-tool agent and finally explore multi-agent routing.</p>
         <p>Access the implementation materials here:</p>
         <ul>
           <li><a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch11/main_01_01.py" target="_blank" rel="noopener noreferrer">Initial Travel Agent - Manual Graph (main_01_01)</a></li>
           <li><a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch11/main_02_02.py" target="_blank" rel="noopener noreferrer">Multi-Tool Agent - Guided Selection (main_02_02)</a></li>
           <li><a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch11/main_03_01.py" target="_blank" rel="noopener noreferrer">Optimized Agent - Prebuilt Components (main_03_01)</a></li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch11/main_04_01.py" target="_blank" rel="noopener noreferrer">Multi-Agent System - Router Implementation (main_04_01)</a></li>
         </ul>
       </section>
 
