@@ -15,7 +15,7 @@
     "7. Implementing RAG with LangChain Chains",
     "8. Chatbot Memory and History",
     "9. Tracing and Monitoring with LangSmith",
-    "Guided lab",
+    "10. Guided lab",
     "Key takeaways",
     "Further reading",
     "1.1 What is RAG?",
@@ -47,7 +47,8 @@
     "../assets/images/m3-figure-7-9-langsmith-metadata.png",
     "../assets/images/m3-figure-7-10-run-details.png",
     "../assets/images/m3-figure-9-5-langsmith-qachatbot-trace.png",
-    "../assets/images/m3-figure-6-6-jupyter-chromadb.png"
+    "../assets/images/m3-figure-6-6-jupyter-chromadb.png",
+    "../assets/images/m3-figure-6-8-chroma-admin.png"
   ],
   "required_links": [
     "../index.html",
