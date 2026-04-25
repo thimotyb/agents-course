@@ -96,3 +96,8 @@ mkdir -p vectorstore_db
 wget -O database_gemini.zip https://agents-course.netlify.app/assets/database_gemini.zip
 unzip database_gemini.zip -d vectorstore_db/
 rm database_gemini.zip
+
+## M13 - Model Context Protocol (MCP) Utility
+# Avvia l'interfaccia interattiva per testare i server MCP
+npx @modelcontextprotocol/inspector
+
