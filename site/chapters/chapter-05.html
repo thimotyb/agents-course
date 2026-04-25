@@ -536,7 +536,15 @@ agent = create_react_agent(
 
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m5-figure-12-7-supervisor-execution.png" alt="Supervisor agent coordinating multiple specialists.">
-          <figcaption><strong>Figure M5.14.</strong> Collaborative execution: the Supervisor receives a complex multi-part query, delegates sub-tasks to the Travel, Weather, and Booking agents, and synthesizes their collective outputs into a final, comprehensive answer.</figcaption>
+          <figcaption><strong>Figure M5.13.</strong> Collaborative execution (Gemini): the Supervisor delegates sub-tasks to the Travel, Weather, and Booking agents, synthesizing their collective outputs into a comprehensive answer.</figcaption>
+        </figure>
+
+        <h3>10.3 Model Constraints in Multi-Agent Reasoning</h3>
+        <p>The effectiveness of the Supervisor pattern is significantly influenced by the underlying LLM's reasoning depth. While advanced models like <strong>Gemini</strong> can autonomously coordinate complex interactions, smaller local models often struggle with high-level orchestration.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-12-8-ollama-supervisor.png" alt="Supervisor running on a small local model.">
+          <figcaption><strong>Figure M5.14.</strong> Reasoning constraints (Gemma 2B): a smaller model may fail to recognize task dependencies or prematurely terminate the loop. This highlights that model size and prompt engineering are critical factors for successful autonomous orchestration.</figcaption>
         </figure>
       </section>
 
@@ -549,7 +557,7 @@ agent = create_react_agent(
         
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m5-figure-13-1-mcp-architecture.png" alt="Model Context Protocol (MCP) architecture.">
-          <figcaption><strong>Figure M5.13.</strong> MCP architecture: a host process connecting to multiple local and remote MCP servers, enabling agents to flexibly access diverse resources through a unified, interoperable protocol.</figcaption>
+          <figcaption><strong>Figure M5.15.</strong> MCP architecture: a host process connecting to multiple local and remote MCP servers, enabling agents to flexibly access diverse resources through a unified protocol.</figcaption>
         </figure>
 
         <p><strong>The Context Integration Problem at Scale</strong></p>
@@ -608,7 +616,7 @@ agent = create_react_agent(
         
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m5-figure-13-2-capability-negotiation.png" alt="MCP capability negotiation process.">
-          <figcaption><strong>Figure M5.15.</strong> Capability negotiation: the handshake between the host client and the server ensures that features like tools, resources, and sampling permissions are correctly identified and agreed upon before execution.</figcaption>
+          <figcaption><strong>Figure M5.16.</strong> Capability negotiation: the handshake ensures that features like tools, resources, and sampling permissions are correctly identified before execution.</figcaption>
         </figure>
 
         <p><strong>The Exchange of Capabilities</strong></p>
