@@ -530,6 +530,14 @@ agent = create_react_agent(
           <li><strong>Iterative Refinement:</strong> The Supervisor can ask a worker to refine results that don't fully satisfy the user's multi-part intent.</li>
           <li><strong>Shared Context:</strong> The Supervisor maintains the high-level state, ensuring context gathered by one worker is available to others.</li>
         </ul>
+
+        <h3>10.2 Supervisor Collaboration in Action</h3>
+        <p>In a production environment, the Supervisor manages the complexity of multi-step reasoning. When faced with a request involving destination research, weather validation, and booking availability, the Supervisor sequences these tasks across the specialized worker pool.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-12-7-supervisor-execution.png" alt="Supervisor agent coordinating multiple specialists.">
+          <figcaption><strong>Figure M5.14.</strong> Collaborative execution: the Supervisor receives a complex multi-part query, delegates sub-tasks to the Travel, Weather, and Booking agents, and synthesizes their collective outputs into a final, comprehensive answer.</figcaption>
+        </figure>
       </section>
 
       <section class="panel">
