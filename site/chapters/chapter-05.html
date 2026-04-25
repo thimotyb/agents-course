@@ -602,6 +602,24 @@ agent = create_react_agent(
         <p>Implementing MCP from scratch is not recommended due to the complexity of the underlying message handling. Instead, developers should use high-level frameworks like <strong>FastMCP</strong> to streamline server creation.</p>
         
         <p>FastMCP provides a Pythonic way to define tools and resources, handling the protocol's intricate details (like JSON-RPC serialization) automatically. Explore the <a href="https://gofastmcp.com/getting-started/welcome" target="_blank" rel="noopener noreferrer">FastMCP Getting Started Guide</a> to begin building interoperable context providers.</p>
+
+        <h3>11.5 Capability Negotiation and Initialization</h3>
+        <p>Before stateful communication begins, an MCP Client (Host) and Server perform a foundational <strong>handshake</strong> inspired by the Language Server Protocol (LSP). Using <strong>JSON-RPC 2.0</strong>, both parties negotiate their supported features to establish a compatible operational boundary.</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-13-2-capability-negotiation.png" alt="MCP capability negotiation process.">
+          <figcaption><strong>Figure M5.15.</strong> Capability negotiation: the handshake between the host client and the server ensures that features like tools, resources, and sampling permissions are correctly identified and agreed upon before execution.</figcaption>
+        </figure>
+
+        <p><strong>The Exchange of Capabilities</strong></p>
+        <ul>
+          <li><strong>Server Capabilities:</strong> The server declares support for <em>Resources</em> (contextual data), <em>Prompts</em> (templated interactions), and <em>Tools</em> (executable functions).</li>
+          <li><strong>Client Capabilities:</strong> The client informs the server if it supports <em>Sampling</em> (allowing the server to request LLM completions), <em>Roots</em> (defining filesystem or URI access), and <em>Elicitation</em>.</li>
+        </ul>
+
+        <div class="note">
+          <p><strong>Significance:</strong> This negotiation ensures that the host understands exactly what tools are available, while the server knows which agentic behaviors the host permits, enabling truly composable AI workflows.</p>
+        </div>
       </section>
 
       <section class="panel">

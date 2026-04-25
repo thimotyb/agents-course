@@ -41,7 +41,8 @@
     "../assets/images/m5-figure-12-2-router-trace.png",
     "../assets/images/m5-figure-12-6-supervisor-architecture.png",
     "../assets/images/m5-figure-12-7-supervisor-execution.png",
-    "../assets/images/m5-figure-13-1-mcp-architecture.png"
+    "../assets/images/m5-figure-13-1-mcp-architecture.png",
+    "../assets/images/m5-figure-13-2-capability-negotiation.png"
   ],
   "required_links": [
     "../index.html",
