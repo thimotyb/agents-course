@@ -1,0 +1,68 @@
+      <section class="panel">
+        <h2>9. Scaling to Router Architectures</h2>
+        <p>As agent capabilities grow, single-agent systems often become overly complex. By integrating diverse resources—such as local databases and external <strong>REST APIs</strong>—the architecture must evolve into a <strong>Router-based multi-agent system</strong>.</p>
+
+        <h3>9.1 Coordinating Specialized Agents</h3>
+        <p>In a router architecture, a top-level <strong>Router Agent</strong> acts as a dispatcher, directing queries to the most appropriate specialist agent (e.g., a Travel Information Specialist or an Accommodation Booking Specialist).</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-12-1-router-architecture.png" alt="Router-based multi-agent architecture diagram.">
+          <figcaption><strong>Figure M5.7.</strong> Router-based architecture: a hybrid system where a deterministic router evaluates intent and delegates tasks to specialized, tool-using agents.</figcaption>
+        </figure>
+
+        <p>This approach offers several technical advantages:</p>
+        <ul>
+          <li><strong>Modularity:</strong> Each specialist agent is developed and tested independently with its own set of tools and prompts.</li>
+          <li><strong>Accuracy:</strong> Narrowing the context reduces the risk of tool-selection errors and hallucinations.</li>
+          <li><strong>Scalability:</strong> New capabilities can be added as new specialized nodes without redesigning the entire graph.</li>
+        </ul>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-12-3-booking-tools-action.png" alt="Booking specialist using diverse tools.">
+          <figcaption><strong>Figure M5.8.</strong> Specialist agent orchestration: the Accommodation Specialist evaluates a user request and sequentially invokes both the hotel database (SQLite) and the BnB service (REST).</figcaption>
+        </figure>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-12-5-sql-tool-execution.png" alt="Booking agent executing a SQL query.">
+          <figcaption><strong>Figure M5.9.</strong> SQL tool execution: a detailed view of the Booking Specialist autonomously generating and executing a SQL query against the SQLite hotel database.</figcaption>
+        </figure>
+
+        <h3>9.2 Router Logic and One-Way Routing</h3>
+        <p>A fundamental characteristic of the router design is that each user query takes a <strong>one-way ticket</strong> through the workflow. The router performs a clean handoff, ensuring the selected specialist responds directly to the user before the process terminates.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-12-4-one-way-routing.png" alt="One-way routing decision.">
+          <figcaption><strong>Figure M5.10.</strong> One-way ticket in action: the router identifies an accommodation request and dispatches it directly to the Booking Specialist, bypassing irrelevant agents.</figcaption>
+        </figure>
+
+        <p>For example, the system distinguishes between distinct intents:</p>
+        <ul>
+          <li><em>"What are the main attractions in St Ives?"</em> &rarr; Routed to <strong>Travel Information Specialist</strong>.</li>
+          <li><em>"Are there any rooms available in Penzance?"</em> &rarr; Routed to <strong>Accommodation Booking Specialist</strong>.</li>
+        </ul>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-12-2-router-trace.png" alt="LangSmith trace of a multi-agent router execution.">
+          <figcaption><strong>Figure M5.11.</strong> Multi-agent execution trace: visualizing how the router agent intercepts a query and correctly dispatches it to the appropriate specialist.</figcaption>
+        </figure>
+      </section>
+
+      <section class="panel">
+        <h2>10. The Supervisor Pattern</h2>
+        <p>While router architectures excel at simple intent classification, they struggle with queries that span multiple specialized domains. To address this, the architecture evolves into the <strong>Supervisor Pattern</strong>, moving from a "one-way ticket" to a <strong>"return ticket"</strong> approach.</p>
+
+        <h3>10.1 The Return Ticket Logic</h3>
+        <p>In the Supervisor pattern, a central orchestration node manages a group of workers. After a worker completes its task, it <strong>returns control to the Supervisor</strong> instead of finishing the interaction. This enables iterative, multi-step problem solving.</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-12-6-supervisor-architecture.png" alt="Supervisor multi-agent architecture diagram.">
+          <figcaption><strong>Figure M5.12.</strong> Supervisor-driven architecture: an advanced collaborative system where workers report back to a central supervisor, enabling complex, multi-domain workflows.</figcaption>
+        </figure>
+
+        <p>Advantages of the "return ticket" approach:</p>
+        <ul>
+          <li><strong>Domain Blending:</strong> Handles complex queries like <em>"Find a sunny town and book a hotel there"</em> by sequencing multiple specialists.</li>
+          <li><strong>Iterative Refinement:</strong> The Supervisor can ask a worker to refine results that don't fully satisfy the user's multi-part intent.</li>
+          <li><strong>Shared Context:</strong> The Supervisor maintains the high-level state, ensuring context gathered by one worker is available to others.</li>
+        </ul>
+      </section>

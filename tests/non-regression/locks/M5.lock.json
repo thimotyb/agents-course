@@ -15,6 +15,7 @@
     "7. Scaling to Multi-Tool Agents",
     "8. Simplifying with LangGraph Prebuilt Components",
     "9. Scaling to Router Architectures",
+    "10. The Supervisor Pattern",
     "Guided lab",
     "Key takeaways",
     "1.1 Dynamic Decision-Making and Multi-Agent Systems",
@@ -24,8 +25,7 @@
     "2.2 Tool Registration and LLM Binding",
     "2.3 Technical Implementation: The @tool Decorator",
     "3.1 Defining the AgentState",
-    "4.1 Logical Flow of Execution",
-    "4.2 Prebuilt ToolNode"
+    "4.1 Logical Flow of Execution"
   ],
   "required_images": [
     "../assets/images/m5-figure-11-1-react-pattern.png",
@@ -35,10 +35,11 @@
     "../assets/images/m5-figure-11-5-multi-tool-selection.png",
     "../assets/images/m5-figure-11-6-gemini-multi-tool.png",
     "../assets/images/m5-figure-12-1-router-architecture.png",
+    "../assets/images/m5-figure-12-3-booking-tools-action.png",
+    "../assets/images/m5-figure-12-5-sql-tool-execution.png",
     "../assets/images/m5-figure-12-4-one-way-routing.png",
     "../assets/images/m5-figure-12-2-router-trace.png",
-    "../assets/images/m5-figure-12-3-booking-tools-action.png",
-    "../assets/images/m5-figure-12-5-sql-tool-execution.png"
+    "../assets/images/m5-figure-12-6-supervisor-architecture.png"
   ],
   "required_links": [
     "../index.html",
