@@ -611,6 +611,14 @@ agent = create_react_agent(
         
         <p>FastMCP provides a Pythonic way to define tools and resources, handling the protocol's intricate details (like JSON-RPC serialization) automatically. Explore the <a href="https://gofastmcp.com/getting-started/welcome" target="_blank" rel="noopener noreferrer">FastMCP Getting Started Guide</a> and the <a href="https://github.com/PrefectHQ/fastmcp" target="_blank" rel="noopener noreferrer">FastMCP GitHub Repository</a> to begin building interoperable context providers.</p>
 
+        <p><strong>Starting the MCP Server with FastMCP</strong></p>
+        <p>Once implemented, the server can be launched using the <code>fastmcp run</code> command. This command initializes the server and makes its tools and resources available via the specified transport layer (typically SSE or STDIO).</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-13-5-fastmcp-accuweather.png" alt="FastMCP starting the AccuWeather MCP server locally.">
+          <figcaption><strong>Figure M5.18.</strong> FastMCP in action: launching the AccuWeather MCP server on the local machine, confirming successful tool registration and endpoint availability.</figcaption>
+        </figure>
+
         <h3>11.5 Capability Negotiation and Initialization</h3>
         <p>Before stateful communication begins, an MCP Client (Host) and Server perform a foundational <strong>handshake</strong> inspired by the Language Server Protocol (LSP). Using <strong>JSON-RPC 2.0</strong>, both parties negotiate their supported features to establish a compatible operational boundary.</p>
         
