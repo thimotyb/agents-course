@@ -533,6 +533,56 @@ agent = create_react_agent(
       </section>
 
       <section class="panel">
+        <h2>11. Connecting to the AI Ecosystem: Model Context Protocol (MCP)</h2>
+        <p>Modern AI agents depend on external context—databases, APIs, and specialized services. Traditionally, each integration required a custom wrapper, leading to duplicated effort and inconsistent protocols. The <strong>Model Context Protocol (MCP)</strong>, introduced by Anthropic, provides an open standard to solve this challenge.</p>
+
+        <h3>11.1 Standardizing Context Integration</h3>
+        <p>MCP allows context providers to expose their data and services through a universal interface. Instead of developers writing ad hoc tools for every new service, they can use standardized <strong>MCP Servers</strong> that agents can discover and utilize as seamlessly as local functions.</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-13-1-mcp-architecture.png" alt="Model Context Protocol (MCP) architecture.">
+          <figcaption><strong>Figure M5.13.</strong> MCP architecture: a host process connecting to multiple local and remote MCP servers, enabling agents to flexibly access diverse resources through a unified, interoperable protocol.</figcaption>
+        </figure>
+
+        <p><strong>The Context Integration Problem at Scale</strong></p>
+        <p>Without a standard like MCP, each new data source (weather APIs, document stores, search engines) requires a dedicated integration effort. This fragmented approach limits the scalability of agents and complicates the maintenance of complex multi-agent systems.</p>
+
+        <div class="note">
+          <p><strong>Reference:</strong> Explore official documentation and implementation guides at the <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">Anthropic MCP Portal</a>.</p>
+        </div>
+
+        <h3>11.2 The Growing MCP Ecosystem</h3>
+        <p>The interoperability of MCP has fostered a rapidly expanding ecosystem of servers and tools. Agents can now draw from a shared library of capabilities, whether they are community-driven or officially supported by major service providers.</p>
+
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>MCP Portal</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a href="https://github.com/modelcontextprotocol/servers" target="_blank" rel="noopener noreferrer">Anthropic Official Servers</a></td>
+              <td>GitHub repository listing official and community-tested MCP servers.</td>
+            </tr>
+            <tr>
+              <td><a href="https://mcp.so/" target="_blank" rel="noopener noreferrer">mcp.so</a></td>
+              <td>A community-driven directory featuring over 16,000 servers.</td>
+            </tr>
+            <tr>
+              <td><a href="https://smithery.ai/" target="_blank" rel="noopener noreferrer">Smithery.ai</a></td>
+              <td>A curated portal featuring thousands of MCP-compliant tools and integrations.</td>
+            </tr>
+            <tr>
+              <td><a href="https://mcpservers.org/" target="_blank" rel="noopener noreferrer">mcpservers.org</a></td>
+              <td>A collaborative collection of over 1,500 specialized MCP servers.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="panel">
         <h2>Guided lab</h2>
         <p>In this lab, you will implement a task-oriented travel agent using LangGraph, incorporating dynamic tool calling and stateful reasoning loops. You will evolve the implementation from a manual graph to a highly optimized multi-tool agent and finally explore multi-agent routing.</p>
         <p>Access the implementation materials here:</p>

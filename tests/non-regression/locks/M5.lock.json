@@ -16,6 +16,7 @@
     "8. Simplifying with LangGraph Prebuilt Components",
     "9. Scaling to Router Architectures",
     "10. The Supervisor Pattern",
+    "11. Connecting to the AI Ecosystem: Model Context Protocol (MCP)",
     "Guided lab",
     "Key takeaways",
     "1.1 Dynamic Decision-Making and Multi-Agent Systems",
@@ -24,8 +25,7 @@
     "2.1 Defining Tools and the ReAct Pattern",
     "2.2 Tool Registration and LLM Binding",
     "2.3 Technical Implementation: The @tool Decorator",
-    "3.1 Defining the AgentState",
-    "4.1 Logical Flow of Execution"
+    "3.1 Defining the AgentState"
   ],
   "required_images": [
     "../assets/images/m5-figure-11-1-react-pattern.png",
@@ -39,7 +39,8 @@
     "../assets/images/m5-figure-12-5-sql-tool-execution.png",
     "../assets/images/m5-figure-12-4-one-way-routing.png",
     "../assets/images/m5-figure-12-2-router-trace.png",
-    "../assets/images/m5-figure-12-6-supervisor-architecture.png"
+    "../assets/images/m5-figure-12-6-supervisor-architecture.png",
+    "../assets/images/m5-figure-13-1-mcp-architecture.png"
   ],
   "required_links": [
     "../index.html",
@@ -52,6 +53,11 @@
     "https://langchain-ai.github.io/langgraph/reference/prebuilt/#tools_condition",
     "https://smith.langchain.com/",
     "https://langchain-ai.github.io/langgraph/reference/prebuilt/#create_react_agent",
+    "https://modelcontextprotocol.io/",
+    "https://github.com/modelcontextprotocol/servers",
+    "https://mcp.so/",
+    "https://smithery.ai/",
+    "https://mcpservers.org/",
     "https://github.com/thimotyb/building-llm-applications/blob/main/ch11/main_01_01.py",
     "https://github.com/thimotyb/building-llm-applications/blob/main/ch11/main_02_02.py",
     "https://github.com/thimotyb/building-llm-applications/blob/main/ch11/main_03_01.py",
