@@ -588,6 +588,20 @@ agent = create_react_agent(
             </tr>
           </tbody>
         </table>
+
+        <h3>11.3 Building and Deploying MCP Servers</h3>
+        <p>Developing an MCP server involves exposing resources and tools through a standardized transport layer. While the protocol is technology-agnostic, it is essential to follow the foundational design principles to ensure broad interoperability across the ecosystem.</p>
+
+        <p><strong>Essential Development Resources</strong></p>
+        <ul>
+          <li><strong>Official Hub:</strong> The <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer">modelcontextprotocol.io</a> site is the starting point for architecture overviews, design principles, and tutorials.</li>
+          <li><strong>Protocol Specification:</strong> Detailed technical requirements, transport mechanisms, and security best practices can be found in the <a href="https://modelcontextprotocol.io/specification" target="_blank" rel="noopener noreferrer">MCP Protocol Specification</a>.</li>
+        </ul>
+
+        <h3>11.4 Simplifying with FastMCP</h3>
+        <p>Implementing MCP from scratch is not recommended due to the complexity of the underlying message handling. Instead, developers should use high-level frameworks like <strong>FastMCP</strong> to streamline server creation.</p>
+        
+        <p>FastMCP provides a Pythonic way to define tools and resources, handling the protocol's intricate details (like JSON-RPC serialization) automatically. Explore the <a href="https://gofastmcp.com/getting-started/welcome" target="_blank" rel="noopener noreferrer">FastMCP Getting Started Guide</a> to begin building interoperable context providers.</p>
       </section>
 
       <section class="panel">
