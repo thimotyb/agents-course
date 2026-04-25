@@ -7,3 +7,4 @@ resources/
 
 # Local Netlify folder
 .netlify
+site/assets/*.zip
