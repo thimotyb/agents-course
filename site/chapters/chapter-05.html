@@ -475,6 +475,16 @@ agent = create_react_agent(
           <figcaption><strong>Figure M5.7.</strong> Router-based architecture: a hybrid system where a deterministic router evaluates intent and delegates tasks to specialized, tool-using agents.</figcaption>
         </figure>
 
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-12-4-one-way-routing.png" alt="One-way routing decision.">
+          <figcaption><strong>Figure M5.8.</strong> One-way ticket in action: the router correctly identifies an accommodation request and dispatches it directly to the Booking Specialist, effectively bypassing the Travel Information Specialist.</figcaption>
+        </figure>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-12-2-router-trace.png" alt="LangSmith trace of a multi-agent router execution.">
+          <figcaption><strong>Figure M5.9.</strong> Multi-agent execution trace: visualizing how the router agent intercepts a query and correctly dispatches it to the appropriate specialist for execution.</figcaption>
+        </figure>
+
         <p>This approach offers several technical advantages:</p>
         <ul>
           <li><strong>Modularity:</strong> Each specialist agent is developed and tested independently with its own set of tools and prompts.</li>
@@ -484,7 +494,12 @@ agent = create_react_agent(
 
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m5-figure-12-3-booking-tools-action.png" alt="Booking specialist using diverse tools.">
-          <figcaption><strong>Figure M5.9.</strong> Specialist agent orchestration: the Accommodation Specialist evaluates a user request and sequentially invokes both the hotel database (SQLite) and the BnB service (REST) to find the best available options.</figcaption>
+          <figcaption><strong>Figure M5.10.</strong> Specialist agent orchestration: the Accommodation Specialist evaluates a user request and sequentially invokes both the hotel database (SQLite) and the BnB service (REST).</figcaption>
+        </figure>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-12-5-sql-tool-execution.png" alt="Booking agent executing a SQL query.">
+          <figcaption><strong>Figure M5.11.</strong> SQL tool execution: a detailed view of the Booking Specialist autonomously generating and executing a SQL query against the SQLite hotel database to retrieve precise availability records.</figcaption>
         </figure>
 
         <h3>9.2 Router Logic and Execution Trace</h3>
@@ -497,16 +512,6 @@ agent = create_react_agent(
           <li><em>"What are the main attractions in St Ives?"</em> &rarr; Routed to the <strong>Travel Information Specialist</strong>.</li>
           <li><em>"Are there any rooms available in Penzance this weekend?"</em> &rarr; Routed to the <strong>Accommodation Booking Specialist</strong>.</li>
         </ul>
-
-        <figure class="module-figure" data-zoomable>
-          <img src="../assets/images/m5-figure-12-4-one-way-routing.png" alt="One-way routing decision.">
-          <figcaption><strong>Figure M5.10.</strong> One-way ticket in action: the router correctly identifies an accommodation request and dispatches it directly to the Booking Specialist, effectively bypassing the Travel Information Specialist and ensuring a clean, focused execution path.</figcaption>
-        </figure>
-
-        <figure class="module-figure" data-zoomable>
-          <img src="../assets/images/m5-figure-12-2-router-trace.png" alt="LangSmith trace of a multi-agent router execution.">
-          <figcaption><strong>Figure M5.8.</strong> Multi-agent execution trace: visualizing how the router agent intercepts a query about room availability and correctly dispatches it to the booking specialist for execution.</figcaption>
-        </figure>
       </section>
 
       <section class="panel">
