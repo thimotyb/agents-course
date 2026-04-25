@@ -628,6 +628,20 @@ agent = create_react_agent(
         <div class="note">
           <p><strong>Significance:</strong> This negotiation ensures that the host understands exactly what tools are available, while the server knows which agentic behaviors the host permits, enabling truly composable AI workflows.</p>
         </div>
+
+        <h3>11.6 Practical Implementation: AccuWeather MCP Server</h3>
+        <p>To ground these concepts, consider the transition from a mocked weather tool to a production-grade <strong>AccuWeather MCP Server</strong>. This involves claiming an API key from the AccuWeather portal, implementing the server logic via FastMCP, and exposing it through a standardized endpoint.</p>
+
+        <p><strong>Testing with MCP Inspector</strong></p>
+        <p>The <a href="https://modelcontextprotocol.io/docs/tools/inspector" target="_blank" rel="noopener noreferrer">MCP Inspector</a> is an essential utility for interactive testing. It allows developers to connect to any MCP server, browse its tools, and run live queries without writing client-side code.</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-13-4-mcp-inspector.png" alt="MCP Inspector dashboard showing AccuWeather tools.">
+          <figcaption><strong>Figure M5.17.</strong> Verifying the AccuWeather MCP Server: the Inspector dashboard confirms that the <code>get_weather_conditions</code> tool is correctly exposed and ready for consumption.</figcaption>
+        </figure>
+
+        <p><strong>Programmatic Consumption</strong></p>
+        <p>Once verified, the server can be consumed by a test host (client). This confirms that the server is discoverable and responds correctly to tool calls, forming the final link in the interoperable agent chain.</p>
       </section>
 
       <section class="panel">
