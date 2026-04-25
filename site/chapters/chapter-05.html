@@ -490,6 +490,14 @@ agent = create_react_agent(
         <h3>9.2 Router Logic and Execution Trace</h3>
         <p>The router logic is typically implemented as a node that classifies the user question into predefined categories. Once a category is identified, the graph uses a conditional edge to hand off the <code>AgentState</code> to the target specialist.</p>
 
+        <p>A fundamental characteristic of this design is that each user query takes a <strong>one-way ticket</strong> through the workflow. The router performs a clean and unambiguous handoff, ensuring that the selected specialist agent handles the request and responds directly to the user before the process terminates.</p>
+
+        <p>For example, the system distinguishes between these distinct intents:</p>
+        <ul>
+          <li><em>"What are the main attractions in St Ives?"</em> &rarr; Routed to the <strong>Travel Information Specialist</strong>.</li>
+          <li><em>"Are there any rooms available in Penzance this weekend?"</em> &rarr; Routed to the <strong>Accommodation Booking Specialist</strong>.</li>
+        </ul>
+
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m5-figure-12-2-router-trace.png" alt="LangSmith trace of a multi-agent router execution.">
           <figcaption><strong>Figure M5.8.</strong> Multi-agent execution trace: visualizing how the router agent intercepts a query about room availability and correctly dispatches it to the booking specialist for execution.</figcaption>
