@@ -88,3 +88,11 @@ rm database_ollama.zip
 # Crea il database SQL necessario per gli esercizi sulla prenotazione hotel
 cd ch11
 ./env_ch11/bin/python setup_hotel_db.py
+
+## M11 - Download database vettoriale pre-calcolato (Gemini)
+# Scarica il DB già pronto per risparmiare tempo sugli embedding (Gemini)
+cd ch11
+mkdir -p vectorstore_db
+wget -O database_gemini.zip https://agents-course.netlify.app/assets/database_gemini.zip
+unzip database_gemini.zip -d vectorstore_db/
+rm database_gemini.zip
