@@ -482,6 +482,11 @@ agent = create_react_agent(
           <li><strong>Scalability:</strong> New capabilities (like flight booking or car rentals) can be added as new specialized nodes without redesigning the entire graph.</li>
         </ul>
 
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-12-3-booking-tools-action.png" alt="Booking specialist using diverse tools.">
+          <figcaption><strong>Figure M5.9.</strong> Specialist agent orchestration: the Accommodation Specialist evaluates a user request and sequentially invokes both the hotel database (SQLite) and the BnB service (REST) to find the best available options.</figcaption>
+        </figure>
+
         <h3>9.2 Router Logic and Execution Trace</h3>
         <p>The router logic is typically implemented as a node that classifies the user question into predefined categories. Once a category is identified, the graph uses a conditional edge to hand off the <code>AgentState</code> to the target specialist.</p>
 
