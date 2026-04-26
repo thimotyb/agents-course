@@ -113,4 +113,8 @@ rm database_gemini.zip
 ## M13 - Model Context Protocol (MCP) Utility
 # Avvia l'interfaccia interattiva per testare i server MCP
 npx @modelcontextprotocol/inspector
+Transport Type: Enter Streamable HTTP.
+URL: Enter http://127.0.0.1:8020/accu-mcp-server.
+Connection Type: Select Via Proxy.
+Authentication: Click the Authentication panel, and disable authentication by switching the toggle to the left.
 
