@@ -655,6 +655,80 @@ agent = create_react_agent(
           <img src="../assets/images/m5-figure-13-6-agent-mcp-invocation.png" alt="Agent invoking a weather tool via MCP.">
           <figcaption><strong>Figure M5.19.</strong> MCP in production: the agent successfully identifies the need for real-time weather data and invokes the remote MCP server tool to retrieve accurate, live conditions for the user's destination.</figcaption>
         </figure>
+
+        <h3>11.7 Integrating MCP Server Tools</h3>
+        <p>A significant advantage of the Model Context Protocol is the ability to integrate remote server tools directly into your agent's capability pool. Instead of manually wrapping each API, you can programmatically discover and register all tools exposed by an MCP server, combining them with your local functions.</p>
+        
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-13-6-mcp-integration.png" alt="Integrating remote MCP tools into the agent.">
+          <figcaption><strong>Figure M5.20.</strong> Seamless tool integration: the agent's internal toolkit is dynamically expanded by fetching and registering remote tools from an MCP server, allowing the model to choose between local and global capabilities.</figcaption>
+        </figure>
+
+        <p><strong>Combining Local and Remote Tools</strong></p>
+        <p>The following code snippet demonstrates how to extend an agent's toolkit by merging local tools with those retrieved from an AccuWeather MCP server:</p>
+        <pre><code># Retrieve tools from the remote MCP server
+accuweather_tools = await get_accuweather_tools()
+
+# Combine local tools with remote MCP tools
+tools = [search_travel_info, *accuweather_tools]
+
+# Bind the expanded toolkit to the model
+agent = create_react_agent(model=llm_model, tools=tools, ...)</code></pre>
+      </section>
+
+      <section class="panel">
+        <h2>12. Productionizing AI Agents: Memory and Persistence</h2>
+        <p>Building reliable AI agents for real-world environments requires more than just connecting models to tools. Production systems must maintain context across user interactions, handle edge cases gracefully, and remain resilient to interruptions. This stage of the development lifecycle focuses on <strong>memory</strong> and <strong>guardrails</strong>.</p>
+
+        <h3>12.1 Short-Term Memory and Checkpoints</h3>
+        <p>Without memory, every user interaction starts fresh, and the agent has no knowledge of past turns. This leads to inefficient and unnatural conversations. <strong>Short-term memory</strong> allows the system to retain context during a single session, enabling follow-up questions and multi-step reasoning.</p>
+        
+        <p><strong>Types of Agent Memory</strong></p>
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Memory Type</th>
+              <th>Scope</th>
+              <th>Persistence</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Short-term</td>
+              <td>Single user session</td>
+              <td>Until session ends</td>
+              <td>Remembering "that hotel" in a follow-up query.</td>
+            </tr>
+            <tr>
+              <td>Long-term (User)</td>
+              <td>Across multiple sessions</td>
+              <td>Indefinite (weeks/years)</td>
+              <td>Remembering a user's preferred travel destinations.</td>
+            </tr>
+            <tr>
+              <td>Long-term (App)</td>
+              <td>Global (all users)</td>
+              <td>Ongoing</td>
+              <td>Storing general travel updates or seasonal schedules.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>12.2 Implementing Checkpoints in LangGraph</h3>
+        <p>LangGraph manages memory through a powerful mechanism called <strong>checkpoints</strong>. A checkpoint is a snapshot of the graph's entire execution state taken after each node (super-step) is completed. This preserves conversation history, tool outputs, and intermediate variables.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-14-1-checkpoint-sequence.png" alt="Sequence diagram of checkpoints in LangGraph.">
+          <figcaption><strong>Figure M5.21.</strong> The checkpointing lifecycle: snapshots are saved after each node execution, allowing the system to restore the exact state across different conversation turns using a shared <code>thread_id</code>.</figcaption>
+        </figure>
+
+        <p>This approach provides three critical production advantages:</p>
+        <ul>
+          <li><strong>State Restoration:</strong> If an execution fails, the agent can resume from the last successful checkpoint without rerunning the entire process.</li>
+          <li><strong>Human-in-the-Loop:</strong> Workflows can be paused at a checkpoint for manual approval and then resumed using the stored state.</li>
+          <li><strong>Multi-Turn Context:</strong> Conversation history is automatically preserved across turns within a session (thread).</li>
+        </ul>
       </section>
 
       <section class="panel">

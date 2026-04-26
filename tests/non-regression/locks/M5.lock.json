@@ -17,6 +17,7 @@
     "9. Scaling to Router Architectures",
     "10. The Supervisor Pattern",
     "11. Connecting to the AI Ecosystem: Model Context Protocol (MCP)",
+    "12. Productionizing AI Agents: Memory and Persistence",
     "Guided lab",
     "Key takeaways",
     "1.1 Dynamic Decision-Making and Multi-Agent Systems",
@@ -24,8 +25,7 @@
     "1.3 Ensuring Production Readiness",
     "2.1 Defining Tools and the ReAct Pattern",
     "2.2 Tool Registration and LLM Binding",
-    "2.3 Technical Implementation: The @tool Decorator",
-    "3.1 Defining the AgentState"
+    "2.3 Technical Implementation: The @tool Decorator"
   ],
   "required_images": [
     "../assets/images/m5-figure-11-1-react-pattern.png",
@@ -46,7 +46,9 @@
     "../assets/images/m5-figure-13-5-fastmcp-accuweather.png",
     "../assets/images/m5-figure-13-2-capability-negotiation.png",
     "../assets/images/m5-figure-13-4-mcp-inspector.png",
-    "../assets/images/m5-figure-13-6-agent-mcp-invocation.png"
+    "../assets/images/m5-figure-13-6-agent-mcp-invocation.png",
+    "../assets/images/m5-figure-13-6-mcp-integration.png",
+    "../assets/images/m5-figure-14-1-checkpoint-sequence.png"
   ],
   "required_links": [
     "../index.html",
