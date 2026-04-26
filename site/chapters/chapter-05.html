@@ -796,6 +796,18 @@ agent = create_react_agent(model=llm_model, tools=tools, ...)</code></pre>
             </tr>
           </tbody>
         </table>
+
+        <h3>13.3 Multi-Level Guardrail Architecture</h3>
+        <p>In complex multi-agent systems, guardrails should be implemented at different levels of granularity to ensure comprehensive coverage.</p>
+        <ul>
+          <li><strong>Router-level:</strong> This guardrail acts as an early fail-fast filter before any agent logic or tool invocation. It screens the initial user intent and rejects obvious out-of-domain requests immediately.</li>
+          <li><strong>Agent-level:</strong> These guardrails provide a "belt-and-suspenders" safeguard. They catch out-of-scope requests if a specialized agent is ever called directly or reused in a different context, ensuring each component enforces its own boundary.</li>
+        </ul>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-14-4-guardrail-activation.png" alt="Multi-level guardrail activation.">
+          <figcaption><strong>Figure M5.25.</strong> Tiered defense in action: the system first rejects a non-travel query (router-level), and subsequently blocks a travel query for an unsupported location (agent-level), demonstrating robust boundary enforcement at every stage.</figcaption>
+        </figure>
       </section>
 
       <section class="panel">

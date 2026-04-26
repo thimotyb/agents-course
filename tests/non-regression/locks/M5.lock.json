@@ -51,7 +51,8 @@
     "../assets/images/m5-figure-14-2-memory-conversation.png",
     "../assets/images/m5-figure-14-1-checkpoint-sequence.png",
     "../assets/images/m5-figure-14-2-guardrail-workflow.png",
-    "../assets/images/m5-figure-14-3-guardrail-logic.png"
+    "../assets/images/m5-figure-14-3-guardrail-logic.png",
+    "../assets/images/m5-figure-14-4-guardrail-activation.png"
   ],
   "required_links": [
     "../index.html",
