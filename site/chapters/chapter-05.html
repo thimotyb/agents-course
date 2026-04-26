@@ -747,6 +747,49 @@ agent = create_react_agent(model=llm_model, tools=tools, ...)</code></pre>
           <img src="../assets/images/m5-figure-14-3-guardrail-logic.png" alt="Flowchart of router logic with guardrail check.">
           <figcaption><strong>Figure M5.23.</strong> Detailed guardrail logic: every query passes through a strict classifier. If <code>is_travel</code> is False, the router triggers a refusal response immediately.</figcaption>
         </figure>
+
+        <h3>13.2 Guardrail Taxonomies and Integration Points</h3>
+        <p>A robust safety architecture utilizes multiple types of guardrails layered across different stages of the agentic workflow.</p>
+
+        <p><strong>Primary Guardrail Types</strong></p>
+        <ul>
+          <li><strong>Rule-based:</strong> Explicit conditions, regular expressions, or keyword lists that catch prohibited patterns, sensitive topics, or formatting errors.</li>
+          <li><strong>Retrieval-based:</strong> Checks that validate queries or results against approved data sources to ensure that the agent remains grounded and in-scope.</li>
+          <li><strong>Model-based:</strong> Compact, specialized classification or moderation models that assess intent, sentiment, or adherence to safety policies.</li>
+        </ul>
+
+        <p><strong>Strategic Integration Points</strong></p>
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Workflow Stage</th>
+              <th>Guardrail Purpose</th>
+              <th>Technical Objective</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Pre-model</td>
+              <td>Query Filtering</td>
+              <td>Reject invalid or irrelevant queries before the LLM execution starts.</td>
+            </tr>
+            <tr>
+              <td>Routing-stage</td>
+              <td>Intent Validation</td>
+              <td>Decide if a specific query should trigger certain tools or restricted branches.</td>
+            </tr>
+            <tr>
+              <td>Tool-level</td>
+              <td>Action Authorization</td>
+              <td>Block unsafe, unauthorized, or structurally incorrect tool invocations.</td>
+            </tr>
+            <tr>
+              <td>Post-model</td>
+              <td>Response Verification</td>
+              <td>Verify generated answers against policy guidelines before delivery to the user.</td>
+            </tr>
+          </tbody>
+        </table>
       </section>
 
       <section class="panel">
