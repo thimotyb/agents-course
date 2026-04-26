@@ -740,8 +740,8 @@ agent = create_react_agent(model=llm_model, tools=tools, ...)</code></pre>
         
         <p>Introducing these early-exit guardrails delivers two key benefits:</p>
         <ul>
-          <li><strong>Improved Accuracy:</strong> Specialized agents are configured for specific domains (e.g., travel and weather). Attempting to answer unrelated questions increases the risk of hallucinations. Outright rejection keeps the conversation aligned with the agent’s actual capabilities.</li>
-          <li><strong>Cost Control:</strong> Pre-filtering prevents users from utilizing the specialized assistant as a general-purpose gateway to expensive LLMs, avoiding resource abuse and unnecessary processing costs.</li>
+          <li><strong>Improved Accuracy:</strong> Specialized agents are trained and configured only for specific domains (e.g., travel and weather). Attempting to answer unrelated questions increases the risk of inaccuracies or hallucinations. By rejecting irrelevant queries outright, the conversation remains strictly aligned with the agent’s actual capabilities.</li>
+          <li><strong>Cost Control:</strong> Without this filter, users might deliberately utilize the assistant as a free gateway to expensive LLMs, bypassing subscription costs for unrelated queries. Blocking non-domain topics early prevents this form of resource abuse and avoids unnecessary processing costs.</li>
         </ul>
 
         <figure class="module-figure" data-zoomable>
