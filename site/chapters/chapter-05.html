@@ -738,6 +738,12 @@ agent = create_react_agent(model=llm_model, tools=tools, ...)</code></pre>
         <h3>13.1 Pre-Model Guardrails and Early Exit</h3>
         <p>A domain relevance check screens queries before reasoning occurs. If a request is out-of-scope, the system intercepts it and politely refuses to answer, saving costs and preventing hallucinations.</p>
         
+        <p>Introducing these early-exit guardrails delivers two key benefits:</p>
+        <ul>
+          <li><strong>Improved Accuracy:</strong> Specialized agents are configured for specific domains (e.g., travel and weather). Attempting to answer unrelated questions increases the risk of hallucinations. Outright rejection keeps the conversation aligned with the agent’s actual capabilities.</li>
+          <li><strong>Cost Control:</strong> Pre-filtering prevents users from utilizing the specialized assistant as a general-purpose gateway to expensive LLMs, avoiding resource abuse and unnecessary processing costs.</li>
+        </ul>
+
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m5-figure-14-2-guardrail-workflow.png" alt="Updated travel assistant workflow with guardrail.">
           <figcaption><strong>Figure M5.22.</strong> Guardrail-enhanced workflow: the router introduces an early-exit path (refusal node) for out-of-scope queries, bypassing downstream specialists.</figcaption>
