@@ -682,6 +682,11 @@ agent = create_react_agent(model=llm_model, tools=tools, ...)</code></pre>
 
         <h3>12.1 Short-Term Memory and Checkpoints</h3>
         <p>Without memory, every user interaction starts fresh, and the agent has no knowledge of past turns. This leads to inefficient and unnatural conversations. <strong>Short-term memory</strong> allows the system to retain context during a single session, enabling follow-up questions and multi-step reasoning.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-14-2-memory-conversation.png" alt="Multi-turn conversation demonstrating context resolution.">
+          <figcaption><strong>Figure M5.22.</strong> Context resolution through memory: the agent maintains state across turns, correctly interpreting a follow-up query referencing the "same" location by accessing the prior interaction history stored in the checkpoint.</figcaption>
+        </figure>
         
         <p><strong>Types of Agent Memory</strong></p>
         <table class="modern-table">
