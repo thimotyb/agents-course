@@ -45,7 +45,8 @@
     "../assets/images/m5-figure-13-1-mcp-architecture.png",
     "../assets/images/m5-figure-13-5-fastmcp-accuweather.png",
     "../assets/images/m5-figure-13-2-capability-negotiation.png",
-    "../assets/images/m5-figure-13-4-mcp-inspector.png"
+    "../assets/images/m5-figure-13-4-mcp-inspector.png",
+    "../assets/images/m5-figure-13-6-agent-mcp-invocation.png"
   ],
   "required_links": [
     "../index.html",

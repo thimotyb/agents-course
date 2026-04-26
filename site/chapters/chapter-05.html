@@ -612,11 +612,11 @@ agent = create_react_agent(
         <p>FastMCP provides a Pythonic way to define tools and resources, handling the protocol's intricate details (like JSON-RPC serialization) automatically. Explore the <a href="https://gofastmcp.com/getting-started/welcome" target="_blank" rel="noopener noreferrer">FastMCP Getting Started Guide</a> and the <a href="https://github.com/PrefectHQ/fastmcp" target="_blank" rel="noopener noreferrer">FastMCP GitHub Repository</a> to begin building interoperable context providers.</p>
 
         <p><strong>Starting the MCP Server with FastMCP</strong></p>
-        <p>Once implemented, the server can be launched using the <code>fastmcp run</code> command. This command initializes the server and makes its tools and resources available via the specified transport layer (typically SSE or STDIO).</p>
+        <p>Once implemented, the server can be launched using the <code>fastmcp run</code> command. This command initializes the server and makes its tools and resources available via the specified transport layer.</p>
 
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m5-figure-13-5-fastmcp-accuweather.png" alt="FastMCP starting the AccuWeather MCP server locally.">
-          <figcaption><strong>Figure M5.18.</strong> FastMCP in action: launching the AccuWeather MCP server on the local machine, confirming successful tool registration and endpoint availability.</figcaption>
+          <figcaption><strong>Figure M5.16.</strong> FastMCP in action: launching the AccuWeather MCP server on the local machine, confirming successful tool registration and endpoint availability.</figcaption>
         </figure>
 
         <h3>11.5 Capability Negotiation and Initialization</h3>
@@ -624,7 +624,7 @@ agent = create_react_agent(
         
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m5-figure-13-2-capability-negotiation.png" alt="MCP capability negotiation process.">
-          <figcaption><strong>Figure M5.16.</strong> Capability negotiation: the handshake ensures that features like tools, resources, and sampling permissions are correctly identified before execution.</figcaption>
+          <figcaption><strong>Figure M5.17.</strong> Capability negotiation: the handshake ensures that features like tools, resources, and sampling permissions are correctly identified before execution.</figcaption>
         </figure>
 
         <p><strong>The Exchange of Capabilities</strong></p>
@@ -645,11 +645,16 @@ agent = create_react_agent(
         
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m5-figure-13-4-mcp-inspector.png" alt="MCP Inspector dashboard showing AccuWeather tools.">
-          <figcaption><strong>Figure M5.17.</strong> Verifying the AccuWeather MCP Server: the Inspector dashboard confirms that the <code>get_weather_conditions</code> tool is correctly exposed and ready for consumption.</figcaption>
+          <figcaption><strong>Figure M5.18.</strong> Verifying the AccuWeather MCP Server: the Inspector dashboard confirms that the <code>get_weather_conditions</code> tool is correctly exposed and ready for consumption.</figcaption>
         </figure>
 
         <p><strong>Programmatic Consumption</strong></p>
         <p>Once verified, the server can be consumed by a test host (client). This confirms that the server is discoverable and responds correctly to tool calls, forming the final link in the interoperable agent chain.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m5-figure-13-6-agent-mcp-invocation.png" alt="Agent invoking a weather tool via MCP.">
+          <figcaption><strong>Figure M5.19.</strong> MCP in production: the agent successfully identifies the need for real-time weather data and invokes the remote MCP server tool to retrieve accurate, live conditions for the user's destination.</figcaption>
+        </figure>
       </section>
 
       <section class="panel">
