@@ -678,14 +678,14 @@ agent = create_react_agent(model=llm_model, tools=tools, ...)</code></pre>
 
       <section class="panel">
         <h2>12. Productionizing AI Agents: Memory and Persistence</h2>
-        <p>Building reliable AI agents for real-world environments requires more than just connecting models to tools. Production systems must maintain context across user interactions, handle edge cases gracefully, and remain resilient to interruptions. This stage of the development lifecycle focuses on <strong>memory</strong> and <strong>guardrails</strong>.</p>
+        <p>Building reliable AI agents for real-world environments requires more than just connecting models to tools. Production systems must maintain context across user interactions, handle edge cases gracefully, and remain resilient to interruptions.</p>
 
         <h3>12.1 Short-Term Memory and Checkpoints</h3>
-        <p>Without memory, every user interaction starts fresh, and the agent has no knowledge of past turns. This leads to inefficient and unnatural conversations. <strong>Short-term memory</strong> allows the system to retain context during a single session, enabling follow-up questions and multi-step reasoning.</p>
+        <p>Without memory, every user interaction starts fresh. <strong>Short-term memory</strong> allows the system to retain context during a single session, enabling follow-up questions and multi-step reasoning.</p>
 
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m5-figure-14-2-memory-conversation.png" alt="Multi-turn conversation demonstrating context resolution.">
-          <figcaption><strong>Figure M5.22.</strong> Context resolution through memory: the agent maintains state across turns, correctly interpreting a follow-up query referencing the "same" location by accessing the prior interaction history stored in the checkpoint.</figcaption>
+          <figcaption><strong>Figure M5.20.</strong> Context resolution through memory: the agent maintains state across turns, correctly interpreting follow-up queries by accessing prior interaction history.</figcaption>
         </figure>
         
         <p><strong>Types of Agent Memory</strong></p>
@@ -721,44 +721,51 @@ agent = create_react_agent(model=llm_model, tools=tools, ...)</code></pre>
         </table>
 
         <h3>12.2 Implementing Checkpoints in LangGraph</h3>
-        <p>LangGraph manages memory through a powerful mechanism called <strong>checkpoints</strong>. A checkpoint is a snapshot of the graph's entire execution state taken after each node (super-step) is completed. This preserves conversation history, tool outputs, and intermediate variables.</p>
+        <p>LangGraph manages memory through <strong>checkpoints</strong>: snapshots of the graph's execution state taken after each node. This preserves conversation history, tool outputs, and intermediate variables.</p>
 
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m5-figure-14-1-checkpoint-sequence.png" alt="Sequence diagram of checkpoints in LangGraph.">
-          <figcaption><strong>Figure M5.21.</strong> The checkpointing lifecycle: snapshots are saved after each node execution, allowing the system to restore the exact state across different conversation turns using a shared <code>thread_id</code>.</figcaption>
+          <figcaption><strong>Figure M5.21.</strong> The checkpointing lifecycle: snapshots are saved after each node execution, allowing the system to restore exact state across turns using a shared <code>thread_id</code>.</figcaption>
         </figure>
 
-        <p>This approach provides three critical production advantages:</p>
-        <ul>
-          <li><strong>State Restoration:</strong> If an execution fails, the agent can resume from the last successful checkpoint without rerunning the entire process.</li>
-          <li><strong>Human-in-the-Loop:</strong> Workflows can be paused at a checkpoint for manual approval and then resumed using the stored state.</li>
-          <li><strong>Multi-Turn Context:</strong> Conversation history is automatically preserved across turns within a session (thread).</li>
-        </ul>
+        <p>This approach provides three critical advantages: <strong>State Restoration</strong> after failure, <strong>Human-in-the-Loop</strong> pauses, and automatic <strong>Multi-Turn Context</strong> preservation.</p>
       </section>
 
       <section class="panel">
         <h2>13. Enforcing Guardrails</h2>
-        <p>Guardrails are application-level controls that keep an AI agent operating within its defined policy framework. They inspect and validate inputs and outputs to ensure the system stays safe, relevant, and efficient. In practice, these controls are introduced at multiple stages: pre-model, post-model, and during tool-level checks.</p>
+        <p>Guardrails are application-level controls that keep an AI agent operating within its defined policy framework, ensuring the system stays safe, relevant, and efficient.</p>
 
         <h3>13.1 Pre-Model Guardrails and Early Exit</h3>
-        <p>The most effective guardrail is a domain relevance check that screens queries before any reasoning occurs. If a request falls outside the agent's remit (e.g., asking for stock market tips from a travel bot), the system intercepts it early and politely refuses to answer.</p>
+        <p>A domain relevance check screens queries before reasoning occurs. If a request is out-of-scope, the system intercepts it and politely refuses to answer, saving costs and preventing hallucinations.</p>
         
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m5-figure-14-2-guardrail-workflow.png" alt="Updated travel assistant workflow with guardrail.">
-          <figcaption><strong>Figure M5.23.</strong> Guardrail-enhanced workflow: the router introduces an early-exit path (refusal node) for out-of-scope queries, preventing them from reaching downstream specialists and reducing unnecessary API costs.</figcaption>
+          <figcaption><strong>Figure M5.22.</strong> Guardrail-enhanced workflow: the router introduces an early-exit path (refusal node) for out-of-scope queries, bypassing downstream specialists.</figcaption>
         </figure>
-
-        <p><strong>Implementing the Refusal Logic</strong></p>
-        <p>To enforce this, a <code>guardrail_refusal</code> node is added to the LangGraph. This node acts as a "no-op" that simply directs the flow to <code>END</code> after a refusal message has been generated by a lightweight classifier model.</p>
 
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m5-figure-14-3-guardrail-logic.png" alt="Flowchart of router logic with guardrail check.">
-          <figcaption><strong>Figure M5.24.</strong> Detailed guardrail logic: every query first passes through a strict Pydantic-based classifier. If <code>is_travel</code> is False, the router bypasses specialist agents and triggers the refusal response.</figcaption>
+          <figcaption><strong>Figure M5.23.</strong> Detailed guardrail logic: every query passes through a strict classifier. If <code>is_travel</code> is False, the router triggers a refusal response immediately.</figcaption>
         </figure>
+      </section>
 
-        <div class="note">
-          <p><strong>Implementation Tip:</strong> Use a smaller, faster model (e.g., <code>gpt-5-mini</code> or <code>gemini-1.5-flash</code>) for guardrail classification to ensure that the safety check does not introduce significant latency to the user experience.</p>
-        </div>
+      <section class="panel">
+        <h2>14. Advanced Production Strategies</h2>
+        <p>Beyond the basics of memory and safety, sophisticated agent systems implement additional layers of control and evaluation to ensure long-term reliability.</p>
+
+        <h3>14.1 Human-in-the-Loop (HITL)</h3>
+        <p>In HITL workflows, the agent pauses execution at critical decision points to request human approval. This is essential for high-value actions (e.g., final bookings) or when the model's confidence falls below a specific threshold.</p>
+
+        <h3>14.2 Post-Model Guardrails</h3>
+        <p>These checks inspect the LLM's generated response before it reaches the user. They serve as a final safety net to filter outdated details, redact sensitive data (PII), or enforce specific brand tone and style constraints.</p>
+
+        <h3>14.3 Systematic Agent Evaluation</h3>
+        <p>Ensuring an agent remains accurate over time requires consistent testing across several dimensions:</p>
+        <ul>
+          <li><strong>Functional Testing:</strong> Verifying complete and correct answers for a benchmark set of queries.</li>
+          <li><strong>Behavioral Testing:</strong> Confirming adherence to safety policies and persona constraints.</li>
+          <li><strong>Regression Testing:</strong> Using ground-truth datasets to ensure performance doesn't degrade when models or prompts are updated.</li>
+        </ul>
       </section>
 
       <section class="panel">
