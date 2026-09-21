@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>M8 - Agent Architectures: Foundational Patterns and Strategies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/site.css">
+  <script defer src="../assets/js/site.js"></script>
+</head>
+<body id="top" data-page-lang="en">
+  <div id="google_translate_element" class="translate-host" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="shell">
+      <section class="hero">
+        <p><a href="../index.html">Home</a></p>
+        <h1>M8 - Agent Architectures: Foundational Patterns and Strategies</h1>
+        <p class="hero-copy">A certification-informed foundation for designing, implementing, and evaluating reliable agentic systems.</p>
+      </section>
+    </div>
+  </header>
+
+  <main class="shell module-layout">
+    <aside class="panel outline-panel" aria-label="Module outline">
+      <h2 class="outline-title">Outline</h2>
+      <nav id="outline-nav"></nav>
+    </aside>
+
+    <article class="module-main">
+      <section class="panel">
+        <nav class="module-nav" aria-label="Module navigation">
+          <a href="chapter-07.html">M7 Previous</a>
+          <span>M8</span>
+          <span>Next</span>
+        </nav>
+      </section>
+
+      <section class="panel info-grid">
+        <div>
+          <h2>1. Learning outcomes</h2>
+          <h3>1.1 From agent features to architectural decisions</h3>
+          <p>This module distils the foundational patterns covered by the <a href="https://claudecertificationguide.com/learn/" target="_blank" rel="noopener noreferrer">Claude certification curriculum</a> and its public <a href="https://everpath-course-content.s3-accelerate.amazonaws.com/instructor%2F6nizmqk8tpzpfjvt6qmmav7rh%2Fpublic%2F1783542750%2FClaude+Certified+Architect+%E2%80%93+Foundations+Exam+Guide.pdf" target="_blank" rel="noopener noreferrer">Exam Guide</a>. The emphasis is on transferable reasoning, not on reproducing exam items or product-specific recipes.</p>
+          <h3>1.2 Target capabilities</h3>
+          <ul>
+            <li>Choose between loops, workflows, and multi-agent coordination for a given task.</li>
+            <li>Define bounded tools, explicit state transfer, and deterministic safety controls.</li>
+            <li>Design prompts and schemas that produce inspectable, recoverable outputs.</li>
+            <li>Evaluate context quality, provenance, escalation, and human review before deployment.</li>
+          </ul>
+        </div>
+        <div>
+          <h2>2. Topics</h2>
+          <h3>2.1 Certification blueprint at a glance</h3>
+          <table class="modern-table">
+            <thead><tr><th>Domain</th><th>Weight</th><th>Module focus</th></tr></thead>
+            <tbody>
+              <tr><td>Agentic Architecture and Orchestration</td><td>27%</td><td>Loops, coordinators, delegation, handoffs</td></tr>
+              <tr><td>Tool Design and MCP Integration</td><td>18%</td><td>Interfaces, errors, scope, resources</td></tr>
+              <tr><td>Claude Code Configuration and Workflows</td><td>20%</td><td>Rules, skills, plan mode, CI execution</td></tr>
+              <tr><td>Prompt Engineering and Structured Output</td><td>20%</td><td>Criteria, examples, schemas, validation</td></tr>
+              <tr><td>Context Management and Reliability</td><td>15%</td><td>Windows, provenance, escalation, review</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>3. Agentic execution patterns</h2>
+        <h3>3.1 The tool-use loop</h3>
+        <p>An agentic loop is a controlled execution cycle, not simply a longer chat exchange. The application sends the current messages and tool definitions to the model, inspects the response, executes any requested tool, and appends the tool result to the conversation before asking the model what to do next. The model therefore sees the evidence produced by its previous action and can decide whether another action is needed.</p>
+        <p>Loop control must rely on an explicit protocol signal such as <code>stop_reason</code>. A value such as <code>tool_use</code> means that the application must dispatch the requested tool and continue; <code>end_turn</code> means that the response can be returned to the user. Checking whether the first content block is text is unsafe because an assistant message can contain both explanatory text and a tool call. A maximum-iteration limit is still useful as a safety bound, but it should report an abnormal termination rather than replace the model's completion signal.</p>
+        <h3>3.2 Model-driven versus fixed control flow</h3>
+        <p>Model-driven control lets the agent choose the next tool from the current context. This is valuable when the route depends on information discovered during execution: a research agent may search, inspect a source, ask for a second search, and only then write a report. The architecture remains flexible because the developer specifies capabilities and constraints instead of enumerating every possible path.</p>
+        <p>Fixed control flow is preferable when the sequence itself is part of the requirement. A payment workflow, for example, may require identity verification, authorization, and a final commit in that order. The practical design question is not whether one approach is universally better, but which decisions should remain adaptive and which must be enforced by code.</p>
+        <h3>3.3 Session state, resumption, and forking</h3>
+        <p>Long-running work needs an explicit session strategy. Named resumption is useful when the previous conversation, tool results, and inspected files are still valid. The resumed agent should nevertheless be told about material changes made since the last run; otherwise it may trust observations that are no longer true.</p>
+        <p>Forking creates an independent branch from a shared baseline, which is useful for comparing two refactoring plans or testing alternative decomposition strategies. When the prior context is stale or too large, a fresh session with a compact, structured summary is safer than blindly resuming. This keeps state intentional and makes recovery reproducible.</p>
+      </section>
+
+      <section class="panel">
+        <h2>4. Multi-agent and workflow architecture</h2>
+        <h3>4.1 Coordinator and subagent patterns</h3>
+        <p>A coordinator-subagent architecture divides a complex task into roles while keeping responsibility for routing in one place. The coordinator receives the user request, chooses the appropriate specialists, supplies their inputs, aggregates their results, and decides whether the answer is complete. In a hub-and-spoke design, subagents return results to the coordinator rather than building hidden peer-to-peer channels.</p>
+        <p>This central point improves observability and error handling, but it does not create shared memory. A document analyst does not automatically see the search agent's findings, and a second invocation of the same subagent starts without the first invocation's context. The coordinator must pass the relevant findings explicitly, including source metadata, confidence, and any unresolved questions.</p>
+        <h3>4.2 Decomposition strategies</h3>
+        <p>Decomposition should match the shape of the problem. A predictable review can use a fixed sequence, such as analysing each file locally and then performing a cross-file integration pass. An open-ended investigation needs an adaptive plan: first map the problem, then create subtasks from what was discovered, and revise those subtasks when dependencies or missing evidence appear.</p>
+        <p>The coordinator must also check breadth, not only the quality of each individual result. If a research request about renewable energy is decomposed into solar and wind alone, downstream agents can work perfectly and still produce an incomplete report. A coverage assessment and targeted follow-up loop are therefore architectural responsibilities, not optional editorial steps.</p>
+        <h3>4.3 Enforcement, handoff, and escalation</h3>
+        <p>Prompt instructions are suitable for flexible guidance, but they cannot guarantee that a probabilistic model will always respect an ordering rule. When a missed step could cause a financial loss, a security breach, or a compliance violation, enforce the prerequisite in code. A refund handler, for example, should reject the call until the session contains a verified customer identity, even if the model tries to skip that step.</p>
+        <p>Escalation is another workflow boundary. A human reviewer may not have access to the agent transcript, so the handoff must be self-contained: identify the customer or case, summarize the request and attempted actions, state the suspected root cause and impact, and recommend the next action. For multi-concern requests, investigate the concerns in parallel where possible and produce one complete resolution or handoff rather than silently dropping the secondary issues.</p>
+      </section>
+
+      <section class="panel">
+        <h2>5. Tools, MCP, and controlled capabilities</h2>
+        <h3>5.1 Tool contracts and selection</h3>
+        <p>A tool description is part of the agent's decision surface. It should explain the tool's purpose, required inputs, output shape, boundary conditions, examples, and the situations in which a similar tool should be used instead. Vague names such as <code>analyze</code> or overlapping descriptions force the model to guess, which increases misrouting even when the underlying implementation is correct.</p>
+        <p>Tool access should be scoped by role. A synthesis agent may need a small <code>verify_fact</code> capability for common checks, but it should not receive every web-search and data-mutation tool in the system. Narrow interfaces reduce decision complexity, limit accidental side effects, and make it easier to reason about which agent is allowed to perform an action.</p>
+        <h3>5.2 Structured errors and recovery</h3>
+        <p>An error message such as “operation failed” gives the agent no basis for recovery. Tool responses should distinguish transient failures, invalid input, policy or business-rule violations, and permission failures. A structured response can include an error category, a human-readable explanation, an <code>isRetryable</code> flag, and any partial result that remains trustworthy.</p>
+        <p>Recovery should happen at the narrowest layer that has enough information. A subagent can retry a timeout with a modified query, while a coordinator should decide whether to switch specialists or continue with partial evidence. A valid empty search result is not the same as an access failure: treating both as errors either wastes retries or hides a real outage.</p>
+        <h3>5.3 MCP servers, tools, and resources</h3>
+        <p>Model Context Protocol separates discoverable content from executable actions. Use resources for read-oriented material such as catalogues or reference documents, and tools for operations that query, transform, or change external systems. This distinction gives the agent a clearer contract and helps reviewers reason about side effects.</p>
+        <p>MCP configuration also has an ownership dimension. Project-level configuration is appropriate for shared team tooling, while user-level configuration is better for personal or experimental servers. Environment-variable expansion keeps endpoints and credentials outside committed configuration. Multiple servers can be exposed at once, but their tools should still be named and scoped so that the agent can distinguish capabilities without relying on accidental keyword matches.</p>
+      </section>
+
+      <section class="panel">
+        <h2>6. Prompt, schema, and reliability strategies</h2>
+        <h3>6.1 Criteria, few-shot examples, and structured output</h3>
+        <p>Reliable prompting starts with observable acceptance criteria. Instead of asking an agent to “review the document carefully,” define what a complete result contains, which evidence is required, and how uncertainty must be represented. Few-shot examples are most useful for ambiguous cases and output formatting: they demonstrate the boundary between a valid finding, an unknown value, and a case that must be escalated.</p>
+        <p>Structured output turns those expectations into a contract. A JSON schema or tool definition should distinguish required fields from optional ones, constrain categorical values with enums, and allow nullable fields where the source may not contain an answer. This is safer than encouraging the model to fill every field, because the schema makes missing information visible instead of rewarding plausible invention.</p>
+        <h3>6.2 Validation, retries, and batch processing</h3>
+        <p>Validation has two layers. Syntax validation checks whether the response conforms to the schema; semantic validation checks whether values are sensible, internally consistent, and supported by the input. A retry should include the validation feedback and preserve the original task context, rather than simply repeating the same prompt and hoping for a different answer. Repeated failure should become an explicit escalation or review state.</p>
+        <p>Batch processing is an architectural trade-off, not an automatic cost optimisation. It fits overnight reports and other work that can tolerate delayed results, but it is unsuitable for a blocking merge check or an interactive decision. Each request needs a stable correlation identifier so that asynchronous results can be matched to the correct input, and the workflow must define what happens when a batch item fails or arrives incomplete.</p>
+        <h3>6.3 Context, provenance, and human review</h3>
+        <p>More context is not always better context. Large inputs can dilute attention, especially when many files or long tool traces are analysed in one pass. Focused local passes followed by an integration pass often produce more consistent results than asking one model call to hold every detail at once. Context extraction, compact summaries, and position-aware ordering help preserve the facts that actually drive the decision.</p>
+        <p>Reliability also depends on provenance. Each important claim should retain its source, retrieval time, and relationship to the evidence used to derive it. Conflicting or time-sensitive sources should be marked rather than silently merged. Finally, confidence should be calibrated against labelled validation data and reviewed with stratified samples, so human review focuses on document types, fields, or confidence bands where the system is genuinely weakest.</p>
+      </section>
+
+      <section class="panel">
+        <h2>7. Scenario-based architecture workshop</h2>
+        <h3>7.1 Customer support resolution agent</h3>
+        <p>Design verification gates, MCP tools, structured errors, and escalation for returns, billing disputes, and account issues.</p>
+        <h3>7.2 Multi-agent research system</h3>
+        <p>Build a coordinator that partitions research, passes source metadata, runs independent agents in parallel, and requests targeted follow-up when coverage is incomplete.</p>
+        <h3>7.3 Developer productivity and continuous integration</h3>
+        <p>Combine codebase exploration, scoped built-in tools, non-interactive execution, actionable review prompts, and machine-readable CI output.</p>
+        <h3>7.4 Structured data extraction</h3>
+        <p>Extract fields from unstructured documents, validate them, handle ambiguity explicitly, and route low-confidence cases to human review.</p>
+      </section>
+
+      <section class="panel">
+        <h2>8. Guided lab and assessment</h2>
+        <h3>8.1 Build a reliable research coordinator</h3>
+        <p>Implement a small coordinator with two scoped subagents, structured findings, parallel invocation, a coverage check, and a bounded refinement loop using a local runtime where possible.</p>
+        <h3>8.2 Architecture decision record</h3>
+        <p>Document why each pattern was selected, what is deterministic versus probabilistic, how failures propagate, and where a human must remain in the loop.</p>
+        <h3>8.3 Completion criteria</h3>
+        <ul>
+          <li>Every tool has an explicit contract and structured failure path.</li>
+          <li>Every handoff preserves the context and provenance needed downstream.</li>
+          <li>Tests cover premature termination, missing context, policy violations, and incomplete coverage.</li>
+          <li>The final report includes trade-offs, observability signals, and follow-up improvements.</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>9. Source map</h2>
+        <h3>9.1 Primary references</h3>
+        <ul>
+          <li><a href="https://claudecertificationguide.com/learn/1-agentic-architecture/1-1-agentic-loops" target="_blank" rel="noopener noreferrer">Agentic Loops and the Agentic Architecture curriculum</a></li>
+          <li><a href="https://claudecertificationguide.com/learn/2-tool-design-mcp" target="_blank" rel="noopener noreferrer">Tool Design and MCP Integration curriculum</a></li>
+          <li><a href="https://claudecertificationguide.com/learn/3-claude-code-config" target="_blank" rel="noopener noreferrer">Claude Code Configuration and Workflows curriculum</a></li>
+          <li><a href="https://claudecertificationguide.com/learn/4-prompt-engineering" target="_blank" rel="noopener noreferrer">Prompt Engineering and Structured Output curriculum</a></li>
+          <li><a href="https://claudecertificationguide.com/learn/5-context-management" target="_blank" rel="noopener noreferrer">Context Management and Reliability curriculum</a></li>
+          <li><a href="https://everpath-course-content.s3-accelerate.amazonaws.com/instructor%2F6nizmqk8tpzpfjvt6qmmav7rh%2Fpublic%2F1783542750%2FClaude+Certified+Architect+%E2%80%93+Foundations+Exam+Guide.pdf" target="_blank" rel="noopener noreferrer">Claude Certified Architect - Foundations Exam Guide (PDF)</a></li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>10. Key takeaways</h2>
+        <h3>10.1 Architecture heuristics</h3>
+        <ul>
+          <li>Make control flow, state transfer, and tool boundaries explicit.</li>
+          <li>Use deterministic gates for high-stakes rules and prompts for flexible guidance.</li>
+          <li>Design for recoverability: structured errors, provenance, observability, and human escalation.</li>
+        </ul>
+      </section>
+    </article>
+  </main>
+
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>

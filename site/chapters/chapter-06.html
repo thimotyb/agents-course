@@ -54,29 +54,166 @@
       </section>
 
       <section class="panel">
-        <h2>Guided lab</h2>
-        <h3>Execution steps</h3>
-        <p>Create an ADK project from scratch, add at least one external tool, and run an end-to-end agent workflow on a practical task.</p>
+        <h2>1. Framework comparison for model-portable agents</h2>
+        <h3>1.1 LangChain/LangGraph and ADK 2.0</h3>
+        <p>LangChain/LangGraph and Google Agent Development Kit 2.0 can both support tool-using and multi-agent systems, but they make different architectural choices. LangChain provides a broad model and integration abstraction, while LangGraph makes the execution graph, state transitions, checkpoints, and interrupts explicit. ADK 2.0 introduces a graph-based Workflow Runtime with agents, tools, and functions represented as workflow nodes; it is optimized for Gemini but can use non-Gemini models through its model adapters, including the LiteLLM integration.</p>
+        <p>The table is intended as a design aid rather than a winner-takes-all comparison. The portable part of an agent should be the task contract, tool schemas, state model, evaluation set, and orchestration intent. Provider-specific model construction, authentication, streaming details, and deployment hooks should stay behind an adapter.</p>
+
+        <div class="table-container">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Dimension</th>
+                <th>LangChain / LangGraph</th>
+                <th>ADK 2.0</th>
+                <th>Implication for model switching</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Primary abstraction</td>
+                <td>LangChain standardizes models, messages, tools, and runnable components; LangGraph composes them as a stateful graph.</td>
+                <td>ADK agents, tools, functions, and workflow nodes are composed through the ADK runtime and its graph-based workflow model.</td>
+                <td>Keep a framework-neutral agent contract and map it to the selected runtime.</td>
+              </tr>
+              <tr>
+                <td>Model providers</td>
+                <td>Large provider ecosystem with dedicated integrations, including Google, OpenAI-compatible endpoints, Anthropic, and Ollama.</td>
+                <td>Gemini is the first-class path; non-Gemini models can be reached through <code>LiteLlm</code> and supported provider adapters.</td>
+                <td>Use a <code>ModelProvider</code> factory and configure <code>MODEL_BACKEND</code> outside the agent logic.</td>
+              </tr>
+              <tr>
+                <td>Gemini → Ollama / DeepSeek</td>
+                <td>Usually a model constructor change, for example <code>ChatGoogleGenerativeAI</code> to <code>ChatOllama</code> or an OpenAI-compatible client.</td>
+                <td>Use the native Gemini model for Gemini and <code>LiteLlm(model="ollama_chat/...")</code> or the relevant provider prefix for other models.</td>
+                <td>Switch through configuration, but test tool calling, JSON schema support, context limits, and streaming for every target.</td>
+              </tr>
+              <tr>
+                <td>Orchestration</td>
+                <td>LangGraph gives explicit nodes, edges, state, conditional routing, persistence, interrupts, and human-in-the-loop control.</td>
+                <td>ADK 2.0 Workflow Runtime provides graph, dynamic, and collaborative workflows with runtime-managed execution state.</td>
+                <td>Represent routing as a framework-neutral workflow specification before implementing it in either graph runtime.</td>
+              </tr>
+              <tr>
+                <td>Tools and MCP</td>
+                <td>Tools are Python callables or structured tool objects; MCP integrations can expose remote tools and resources.</td>
+                <td>Tools are agent capabilities; ADK also integrates MCP tools and resources and provides Google-oriented tools.</td>
+                <td>Define tools with stable JSON schemas and avoid provider-specific response formats in business logic.</td>
+              </tr>
+              <tr>
+                <td>Ingestion, RAG, and knowledge sources</td>
+                <td>Rich ecosystem of document loaders, Wikipedia/web loaders, text splitters, embedding integrations, vector stores, and retrievers.</td>
+                <td>The core is an agent runtime, not an equivalent catalog of chunking and embedding utilities. ADK provides tools, Google Search, MCP, and integration points; ingestion, indexing, and retrieval are normally supplied by application code or external services.</td>
+                <td>Keep the knowledge pipeline as a separate data layer and expose retrieval through a stable tool or MCP interface. The same RAG backend can then serve LangGraph or ADK.</td>
+              </tr>
+              <tr>
+                <td>State and memory</td>
+                <td>Graph state, checkpoints, stores, and memory integrations are explicit parts of the LangGraph design.</td>
+                <td>Sessions, context, events, and workflow state are managed through ADK runtime concepts.</td>
+                <td>Separate durable domain state from transient conversation state so migration does not require a data rewrite.</td>
+              </tr>
+              <tr>
+                <td>Structured output</td>
+                <td>Uses provider integrations, tool calling, output parsers, and schema-aware runnables.</td>
+                <td>Uses ADK agent configuration, model responses, tools, and adapter capabilities; support can vary by provider.</td>
+                <td>Validate at the application boundary with Pydantic/JSON Schema and implement a repair or escalation path.</td>
+              </tr>
+              <tr>
+                <td>Observability and evaluation</td>
+                <td>LangSmith and OpenTelemetry integrations are commonly used for traces, datasets, and evaluations.</td>
+                <td>ADK provides runtime events and Google Cloud-oriented deployment and observability paths, with third-party integrations available.</td>
+                <td>Keep evaluation datasets and trace assertions independent of the vendor dashboard.</td>
+              </tr>
+              <tr>
+                <td>Deployment orientation</td>
+                <td>Flexible: self-hosted services, containers, LangGraph deployments, or custom infrastructure.</td>
+                <td>Strong path to Google Cloud and Agent Runtime, while local execution and other integrations remain possible.</td>
+                <td>Keep the runtime boundary thin so a cloud deployment choice does not determine the model choice.</td>
+              </tr>
+              <tr>
+                <td>Main portability risk</td>
+                <td>Provider differences are hidden by abstractions but can surface in tool-calling, streaming, token limits, and error metadata.</td>
+                <td>Non-Gemini models may require LiteLLM and can expose a smaller common capability set than native Gemini.</td>
+                <td>Declare required capabilities and run a conformance test suite before promoting a new model.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>1.2 Recommended portable architecture</h3>
+        <p>Place the model selector at the outer edge of the application. A configuration value such as <code>MODEL_BACKEND=gemini</code>, <code>MODEL_BACKEND=ollama</code>, or <code>MODEL_BACKEND=deepseek</code> should select a provider adapter; it should not change the coordinator's prompts, tool schemas, domain state, or evaluation cases. In practice, the factory returns the framework-specific model object while the rest of the agent receives only the common chat/tool interface.</p>
+        <p>Portability is not achieved by changing a model string alone. The replacement model must pass capability checks for structured tool calls, parallel tool calls if required, JSON output, maximum context, streaming, retries, and refusal/error handling. A small conformance suite should run the same scenarios against Gemini, an Ollama-served local model, and DeepSeek before switching production traffic. If a capability is missing, the adapter should fail explicitly or select a degraded workflow rather than silently producing an invalid result.</p>
+        <p><strong>Important distinction:</strong> ADK can use a Wikipedia loader, a chunker, an embedding model, or a vector database, but these are not automatically ADK utilities in the same sense as LangChain's integrations. A practical ADK design wraps the retrieval operation in a typed function tool, connects to an MCP server, or calls a managed search service. The agent sees a contract such as <code>search_knowledge_base(query)</code>; the implementation behind that contract can use LangChain, a native vector database client, or a custom Python pipeline without changing the orchestration graph.</p>
+        <p><strong>Practical rule:</strong> use LangChain/LangGraph when provider breadth and explicit graph control are the priority; use ADK 2.0 when its workflow runtime, Google tooling, and deployment ecosystem are the priority. In both cases, keep the agent contract, tools, state, tests, and safety gates independent from the selected model provider.</p>
+        <p class="source-note"><strong>Reference points:</strong> <a href="https://github.com/google/adk-docs/blob/main/docs/2.0/index.md" target="_blank" rel="noopener noreferrer">ADK 2.0 workflow documentation</a>, <a href="https://github.com/google/adk-python/blob/main/src/google/adk/models/lite_llm.py" target="_blank" rel="noopener noreferrer">ADK LiteLLM adapter</a>, and <a href="https://docs.langchain.com/oss/python/integrations/providers/ollama/" target="_blank" rel="noopener noreferrer">LangChain Ollama integration</a>.</p>
       </section>
 
       <section class="panel">
-        <h2>Exercises</h2>
-        <h3>Practice tasks</h3>
+        <h2>2. Guided lab: Google Skills ADK Labs</h2>
+        <h3>2.1 Recommended Learning Sequence</h3>
+        <p>This compact sequence uses two Google Skills challenge labs that can be launched with a standard Google Skills account, without enrollment in the GEAR program. Each lab provides a managed Google Cloud environment and temporary lab credentials, so a personal Gemini API key is not required.</p>
+
+        <div class="table-container">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Lab</th>
+                <th>Level</th>
+                <th>Duration</th>
+                <th>Credits</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td><a href="https://www.skills.google/focuses/145032" target="_blank" rel="noopener noreferrer">Engineer AI Agents with Agent Development Kit (ADK): Challenge Lab</a></td>
+                <td>Intermediate challenge</td>
+                <td>1 hr 30 min</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><a href="https://www.skills.google/focuses/164314" target="_blank" rel="noopener noreferrer">Use Agent Skills with Multi-Agent Systems: Challenge Lab</a></td>
+                <td>Advanced challenge</td>
+                <td>1 hr 30 min</td>
+                <td>1</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>Credit plan:</strong> the complete sequence costs 2 credits. Sign in to <a href="https://www.skills.google/" target="_blank" rel="noopener noreferrer">Google Skills</a> and open each lab before classroom delivery to confirm current availability and credit requirements.</p>
+      </section>
+
+      <section class="panel">
+        <h2>3. Exercises</h2>
+        <h3>3.1 Practice tasks</h3>
         <p>Implement structured logging and error handling, then compare agent behavior before and after reliability improvements.</p>
       </section>
 
       <section class="panel">
-        <h2>Deliverable</h2>
-        <h3>Submission output</h3>
+        <h2>4. Deliverable</h2>
+        <h3>4.1 Submission output</h3>
         <p>An ADK-based agent repository with setup instructions, runnable examples, and a short operational runbook.</p>
       </section>
 
       <section class="panel">
-        <h2>Key takeaways</h2>
+        <h2>5. Key takeaways</h2>
         <ul>
           <li>ADK provides a practical framework to structure reliable agent implementations.</li>
           <li>Tool wiring, observability, and failure handling are central to usable agents.</li>
           <li>The same workflow can be extended from local prototype to deployable service.</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>6. Sitography</h2>
+        <h3>6.1 Model portability and provider adapters</h3>
+        <ul>
+          <li><a href="https://github.com/BerriAI/litellm" target="_blank" rel="noopener noreferrer">LiteLLM - unified interface for LLM providers</a>: open-source Python library used to route a common model interface to providers such as Ollama, DeepSeek, OpenAI, and other compatible endpoints.</li>
+          <li><a href="https://github.com/google/adk-python/blob/main/src/google/adk/models/lite_llm.py" target="_blank" rel="noopener noreferrer">ADK LiteLLM adapter</a>: ADK integration layer for non-Gemini model backends.</li>
+          <li><a href="https://github.com/google/adk-docs/blob/main/docs/2.0/index.md" target="_blank" rel="noopener noreferrer">ADK 2.0 workflow documentation</a>: graph-based, dynamic, and collaborative workflow runtime.</li>
         </ul>
       </section>
     </article>
