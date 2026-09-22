@@ -25,8 +25,15 @@
 | --- | --- | --- | --- |
 | `https://learning.oreilly.com/library/view/ai-agents-and/9781633436541/Text/contents.html` | book table of contents | `M1, M2, M3, M4, M5` | Canonical source for module progression |
 | `https://adk.dev/get-started/` | official documentation | `M6` | Primary ADK onboarding reference |
+| `https://adk.dev/get-started/python/` | official ADK Python quickstart | `M6` | Installation, project creation, credentials, CLI execution, and local web development UI |
+| `https://adk.dev/agents/llm-agents/` | official ADK simple agents documentation | `M6` | LlmAgent identity, instructions, tools, model configuration, context, schemas, planners, and code execution |
+| `https://adk.dev/graphs/` | official ADK graph workflow documentation | `M6` | Graph-based workflows, node and edge composition, routing, typed data flow, and workflow limitations |
+| `https://adk.dev/graphs/dynamic/` | official ADK dynamic workflow documentation | `M6` | Programmatic orchestration, runtime branching, checkpointing, resume behavior, and dynamic data flow |
+| `https://adk.dev/workflows/collaboration/` | official ADK collaborative workflows documentation | `M6` | Coordinator and subagent teams, collaboration modes, control transfer, context isolation, and limitations |
+| `https://adk.dev/workflows/patterns/` | official ADK workflow patterns documentation | `M6` | Coordinator, sequential, parallel, hierarchical, generate-review, iterative refinement, and human-in-the-loop patterns |
 | `https://codelabs.developers.google.com/onramp/instructions?hl=it#0` | official Google Codelab | `M6` | Base source for the final ADK course module and its guided practical path |
 | `https://www.skills.google/catalog?format%5B%5D=labs&keywords=Agent+Development+Kit` | official Google Skills catalog | `M6` | Source for the compact two-lab ADK sequence, durations, levels, stable links, and credit planning |
+| `https://www.skills.google/focuses/104687` | official Google Skills lab | `M6` | Additional ADK lab supplied for the M6 guided learning sequence; confirm title, duration, and credits in the catalog |
 | `https://github.com/BerriAI/litellm` | open-source model gateway/library | `M6` | Reference for routing a common model interface to Ollama, DeepSeek, and other providers through the ADK LiteLLM adapter |
 | `https://github.com/thimotyb/building-llm-applications.git` | source repository | `M7` | Canonical source for labs and exercises |
 | `https://claudecertificationguide.com/learn/` | public certification curriculum | `M8` | Task statements and learning examples across Agentic Architecture, Tool Design and MCP, Claude Code, Prompt Engineering, and Context Management |
