@@ -15,7 +15,7 @@
 | M3 | RAG Systems | `site/chapters/chapter-03.html` | O'Reilly book contents (Ch 06) | Foundational RAG pipeline |
 | M4 | Advanced RAG | `site/chapters/chapter-04.html` | O'Reilly book contents + advanced retrieval/evaluation chapters | Query strategies, reranking, eval |
 | M5 | AI Agents Architectures with LangGraph | `site/chapters/chapter-05.html` | O'Reilly book contents + agent architecture chapters | Multi-step, tools, memory, control flow |
-| M6 | Google Agent Development Kit | `site/chapters/chapter-06.html` | Official ADK documentation + Google Codelab: AI Agents On-Ramp | ADK-based agent implementation and operations |
+| M6 | Google Agent Development Kit | `site/chapters/chapter-06.html` | Official ADK documentation + Google Codelab: AI Agents On-Ramp + `building-llm-applications/ch12/adk` | ADK implementation, LiteLLM model switching, and operations |
 | M7 | Labs and Exercises from Building LLM Applications | `site/chapters/chapter-07.html` | `building-llm-applications` repository | Practical implementation module with guided labs and exercises |
 | M8 | Agent Architectures: Foundational Patterns and Strategies | `site/chapters/chapter-08.html` | Claude Certified Architect - Foundations study guide and Exam Guide | Certification-informed foundations for agent loops, orchestration, tools, workflows, prompts, and reliability |
 
@@ -37,6 +37,9 @@
 | `https://www.skills.google/focuses/137365` | official Google Skills lab | `M6` | Required public lab, available without GEAR enrollment. Build Multi-Agent Systems with ADK (GENAI106) provides ADK 2 examples for hierarchical multi-agent teams, session state, and sequential, loop, and parallel workflow agents; advanced, 90 minutes, and listed at 7 credits when verified |
 | `https://www.skills.google/focuses/132178` | official Google Skills lab | `M6` | Use Model Context Protocol (MCP) Tools with ADK Agents (GENAI124): advanced 90-minute lab using Google Maps MCP tools and a custom MCP server; listed at 7 credits when verified, but currently access-restricted or unavailable for some accounts |
 | `https://github.com/BerriAI/litellm` | open-source model gateway/library | `M6` | Reference for routing a common model interface to Ollama, DeepSeek, and other providers through the ADK LiteLLM adapter |
+| `https://adk.dev/agents/models/litellm/` | official ADK model documentation | `M6` | LiteLLM connector and <code>LiteLlm</code> wrapper for non-Gemini models |
+| `https://adk.dev/agents/models/ollama/` | official ADK model documentation | `M6` | Local Ollama model connection via LiteLLM |
+| `https://github.com/thimotyb/building-llm-applications/tree/feat/deepseek-4-support/ch12/adk` | runnable ADK exercise | `M6` | Budget day-trip advisor with DeepSeek/Ollama switch, DuckDuckGo search, Open-Meteo forecast, and ADK Web instructions |
 | `https://github.com/thimotyb/building-llm-applications.git` | source repository | `M7` | Canonical source for labs and exercises |
 | `https://claudecertificationguide.com/learn/` | public certification curriculum | `M8` | Task statements and learning examples across Agentic Architecture, Tool Design and MCP, Claude Code, Prompt Engineering, and Context Management |
 | `https://everpath-course-content.s3-accelerate.amazonaws.com/instructor%2F6nizmqk8tpzpfjvt6qmmav7rh%2Fpublic%2F1783542750%2FClaude+Certified+Architect+%E2%80%93+Foundations+Exam+Guide.pdf` | certification exam guide (PDF) | `M8` | Blueprint, domain weights, scenario patterns, in-scope concepts, and implementation trade-offs |

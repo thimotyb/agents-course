@@ -166,6 +166,7 @@
         <p><strong>Important distinction:</strong> ADK can use a Wikipedia loader, a chunker, an embedding model, or a vector database, but these are not automatically ADK utilities in the same sense as LangChain's integrations. A practical ADK design wraps the retrieval operation in a typed function tool, connects to an MCP server, or calls a managed search service. The agent sees a contract such as <code>search_knowledge_base(query)</code>; the implementation behind that contract can use LangChain, a native vector database client, or a custom Python pipeline without changing the orchestration graph.</p>
         <p><strong>Practical rule:</strong> use LangChain/LangGraph when provider breadth and explicit graph control are the priority; use ADK 2.0 when its workflow runtime, Google tooling, and deployment ecosystem are the priority. In both cases, keep the agent contract, tools, state, tests, and safety gates independent from the selected model provider.</p>
         <p class="source-note"><strong>Reference points:</strong> <a href="https://github.com/google/adk-docs/blob/main/docs/2.0/index.md" target="_blank" rel="noopener noreferrer">ADK 2.0 workflow documentation</a>, <a href="https://github.com/google/adk-python/blob/main/src/google/adk/models/lite_llm.py" target="_blank" rel="noopener noreferrer">ADK LiteLLM adapter</a>, and <a href="https://docs.langchain.com/oss/python/integrations/providers/ollama/" target="_blank" rel="noopener noreferrer">LangChain Ollama integration</a>.</p>
+
       </section>
 
       <section class="panel">
@@ -293,6 +294,17 @@
         <p class="source-note"><strong>Required course lab:</strong> <em>Build Multi-Agent Systems with ADK</em> is publicly available with a standard Google Skills account and does not require GEAR enrollment. It provides hands-on ADK 2 multi-agent examples covering parent and sub-agent relationships, session state, and sequential, loop, and parallel workflow agents.</p>
 
         <p><strong>Credit plan:</strong> <em>Engineer AI Agents with Agent Development Kit (ADK): Challenge Lab</em> currently lists 5 credits, <em>Use Agent Skills with Multi-Agent Systems: Challenge Lab</em> lists 1 credit, and both <em>Build Multi-Agent Systems with ADK</em> and <em>Use Model Context Protocol (MCP) Tools with ADK Agents</em> list 7 credits each. The third lab's duration and credit cost must be confirmed on its Google Skills page before classroom delivery. GENAI124 may return an access-denied or unavailable-resource message depending on the account. Sign in to <a href="https://www.skills.google/" target="_blank" rel="noopener noreferrer">Google Skills</a> and open each lab to confirm current availability and requirements.</p>
+
+        <h3>8.2 LiteLLM in ADK: a budget day-trip advisor</h3>
+        <p>LiteLLM is a Python translation layer that exposes a common interface to models from different providers. In ADK, <code>LiteLlm</code> wraps a non-Gemini model and is passed to an <code>Agent</code> as its <code>model</code>. This example uses the library directly, without a LiteLLM Proxy: a project-root <code>.env</code> selects either DeepSeek V4 through <code>deepseek/...</code> or a local Ollama model through <code>ollama_chat/...</code>. The agent and its tools stay the same when the model changes; tool-calling quality still needs to be tested for each model.</p>
+        <p>The <a href="https://github.com/thimotyb/building-llm-applications/tree/feat/deepseek-4-support/ch12/adk" target="_blank" rel="noopener noreferrer">ADK budget day-trip advisor exercise in <code>ch12/adk</code></a> plans an inexpensive one-day trip from the user's starting city. Its DuckDuckGo function tool searches for transport, prices, opening hours, and attractions; its Open-Meteo function tool checks the destination forecast for the travel date. The agent then proposes a timed itinerary, an itemized per-person budget, source links, and an indoor alternative if the weather is poor. The repository README explains setup, the <code>LLM_PROVIDER</code> switch, and how to run the agent with <code>adk run</code> or <code>adk web</code>.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/adk-ch12-Screenshot 2026-09-23 235807.png" alt="ADK Web showing the budget day-trip advisor conversation, DuckDuckGo and weather tool events, and a DeepSeek model trace.">
+          <figcaption><strong>Figure M6.2.</strong> The <code>ch12/adk</code> advisor in ADK Web: the event timeline shows travel-search and weather-forecast tool calls, while the trace identifies the DeepSeek model used for this run.</figcaption>
+        </figure>
+
+        <p class="source-note"><strong>Further reading:</strong> <a href="https://adk.dev/agents/models/litellm/" target="_blank" rel="noopener noreferrer">ADK LiteLLM model connector</a> and <a href="https://adk.dev/agents/models/ollama/" target="_blank" rel="noopener noreferrer">ADK Ollama model setup</a>.</p>
       </section>
 
       <section class="panel">
@@ -329,9 +341,12 @@
         </ul>
         <h3>12.2 Model portability and provider adapters</h3>
         <ul>
+          <li><a href="https://adk.dev/agents/models/litellm/" target="_blank" rel="noopener noreferrer">ADK LiteLLM model connector</a>: the <code>LiteLlm</code> wrapper for remote or locally hosted non-Gemini models.</li>
+          <li><a href="https://adk.dev/agents/models/ollama/" target="_blank" rel="noopener noreferrer">ADK Ollama model setup</a>: local Ollama connection through LiteLLM.</li>
           <li><a href="https://github.com/BerriAI/litellm" target="_blank" rel="noopener noreferrer">LiteLLM - unified interface for LLM providers</a>: open-source Python library used to route a common model interface to providers such as Ollama, DeepSeek, OpenAI, and other compatible endpoints.</li>
           <li><a href="https://github.com/google/adk-python/blob/main/src/google/adk/models/lite_llm.py" target="_blank" rel="noopener noreferrer">ADK LiteLLM adapter</a>: ADK integration layer for non-Gemini model backends.</li>
           <li><a href="https://github.com/google/adk-docs/blob/main/docs/2.0/index.md" target="_blank" rel="noopener noreferrer">ADK 2.0 workflow documentation</a>: graph-based, dynamic, and collaborative workflow runtime.</li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/feat/deepseek-4-support/ch12/adk" target="_blank" rel="noopener noreferrer">ADK budget day-trip advisor exercise</a>: source code and README for the DeepSeek/Ollama model switch, DuckDuckGo search, and Open-Meteo forecast tools.</li>
         </ul>
       </section>
     </article>
