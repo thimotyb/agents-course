@@ -181,6 +181,16 @@
           <figcaption><strong>Figure M6.1.</strong> ADK graph workflow combining deterministic functions, human approval, a tool call, an LLM analysis node, and conditional outcomes. Adapted from the <a href="https://adk.dev/graphs/" target="_blank" rel="noopener noreferrer">official ADK graph workflow documentation</a>.</figcaption>
         </figure>
 
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/adk-graph-Screenshot 2026-09-29 182047.png" alt="ADK Web 2.10 showing the flight-upgrade workflow graph and a 4,000-mile request routed from check_miles to deny_upgrade.">
+          <figcaption><strong>Figure M6.2.</strong> The runnable <code>ch12/adk_graph_upgrade</code> workflow in ADK Web 2.10. A 4,000-mile request makes <code>check_miles</code> persist the upgrade request, emit the <code>DENY</code> route, and terminate at <code>deny_upgrade</code>.</figcaption>
+        </figure>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/adk-graph2-Screenshot 2026-09-29 182759.png" alt="ADK Web 2.10 showing the human-in-the-loop flight-upgrade path for 12,000 miles, followed by flight-history retrieval and an LLM approval decision.">
+          <figcaption><strong>Figure M6.3.</strong> Human-in-the-loop and LLM-supported decision path for a 12,000-mile request. The workflow emits <code>GET_CONSENT</code>, pauses at <code>adk_request_input</code>, resumes on <code>FETCH_HISTORY</code>, and gives the retrieved flight metrics to <code>analyze_history</code>, which returns a structured <code>approved: true</code> decision with its supporting reason.</figcaption>
+        </figure>
+
         <h3>4.2 Sequential data flow and typed contracts</h3>
         <p>In a sequential graph, the output of one node becomes the input of the next node. A function can therefore transform a model response into a structured object, and a subsequent agent can consume that object through an input schema instead of parsing free-form text. This makes intermediate data inspectable and reduces the amount of session-state plumbing needed for a simple pipeline.</p>
         <p>A useful design practice is to give every important boundary a contract: the classifier returns an allowed route, the retrieval node returns evidence with metadata, and the approval node returns an explicit decision. The graph then becomes a set of testable interfaces rather than a collection of implicit prompt assumptions.</p>
@@ -322,7 +332,7 @@
 
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/adk-ch12-Screenshot 2026-09-23 235807.png" alt="ADK Web showing the budget day-trip advisor conversation, DuckDuckGo and weather tool events, and a DeepSeek model trace.">
-          <figcaption><strong>Figure M6.2.</strong> The <code>ch12/adk</code> advisor in ADK Web: the event timeline shows travel-search and weather-forecast tool calls, while the trace identifies the DeepSeek model used for this run.</figcaption>
+          <figcaption><strong>Figure M6.4.</strong> The <code>ch12/adk</code> advisor in ADK Web: the event timeline shows travel-search and weather-forecast tool calls, while the trace identifies the DeepSeek model used for this run.</figcaption>
         </figure>
 
         <p class="source-note"><strong>Further reading:</strong> <a href="https://adk.dev/agents/models/litellm/" target="_blank" rel="noopener noreferrer">ADK LiteLLM model connector</a> and <a href="https://adk.dev/agents/models/ollama/" target="_blank" rel="noopener noreferrer">ADK Ollama model setup</a>.</p>
