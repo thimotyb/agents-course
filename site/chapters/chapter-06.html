@@ -44,12 +44,13 @@
           <ul>
             <li>Understand ADK building blocks and project structure.</li>
             <li>Implement a runnable ADK agent with tools and configuration.</li>
+            <li>Design graph data flow with event outputs, schemas, routing, and scoped state.</li>
             <li>Evaluate execution behavior, observability, and deployment readiness.</li>
           </ul>
         </div>
         <div>
           <h2>Topics</h2>
-          <p>ADK architecture, environment setup, tool integration, runtime patterns, debugging flow, and deployment considerations.</p>
+          <p>ADK architecture, environment setup, tool integration, graph data handling, runtime patterns, debugging flow, and deployment considerations.</p>
         </div>
       </section>
 
@@ -188,56 +189,76 @@
         <p>Conditional routing maps a value emitted by a router node to one or more downstream branches. This supports deterministic handling for categories such as bug, customer support, or logistics, while dynamic workflows remain available when loops, recursion, or runtime-generated plans are too complex for a static graph. Prebuilt sequential, parallel, and loop workflow agents cover common patterns without requiring every edge to be assembled manually.</p>
         <p>Graph workflows are not a universal replacement for all ADK features. The official documentation notes that some third-party integrations may not yet be compatible with graph-based workflows. For portability, isolate integrations behind tool nodes and test the complete graph with the selected model and runtime before deployment.</p>
 
-        <h2>5. Dynamic workflows</h2>
-        <h3>5.1 Programmatic orchestration</h3>
+      </section>
+
+      <section class="panel">
+        <h2>5. Data handling for agent workflows</h2>
+        <h3>5.1 Event fields and workflow data flow</h3>
+        <p>ADK workflow nodes exchange data through events. A node's <code>output</code> becomes the input of its successor, while <code>message</code> carries a user-facing response and <code>route</code> selects one or more conditional branches. These fields have distinct responsibilities: workflow data should travel as output, presentation text should travel as a message, and control decisions should travel as routes.</p>
+        <p>For a simple sequence, pass values directly from node to node instead of writing every intermediate result to session state. A router can emit both an output and a route when the selected branch also needs the original or normalized payload. Design each node execution to produce one authoritative output so that downstream behavior remains predictable.</p>
+
+        <h3>5.2 Structured contracts and schemas</h3>
+        <p>Node outputs can be serializable structured values rather than free-form text. Typed models and explicit input and output schemas document the contract at each boundary and allow the runtime to validate data before the next node consumes it. This is especially useful for classifications, evidence records, approval decisions, and other values that must not depend on brittle text parsing.</p>
+        <p>An LLM agent can also consume structured workflow data through its input schema and return a structured result through its output schema. Validation does not eliminate model uncertainty, but it turns malformed data into an explicit error that can be retried, repaired, or escalated instead of silently propagating through the graph.</p>
+
+        <h3>5.3 Session state and data scopes</h3>
+        <p>Session state is appropriate when data must outlive a single edge or be shared by non-adjacent nodes. ADK distinguishes unprefixed session-lifetime values from <code>temp:</code> values for the current invocation, <code>user:</code> values shared across one user's sessions, and <code>app:</code> values shared across the application. Select the narrowest scope that matches the required lifetime and audience.</p>
+        <p>Keep transient node payloads in event output and persist only information that later executions genuinely need. This separation limits accidental coupling, reduces stale state, and makes it easier to test a node with a complete input contract.</p>
+        <p class="source-note"><strong>Reference:</strong> <a href="https://adk.dev/graphs/data-handling/" target="_blank" rel="noopener noreferrer">ADK Data Handling for Agent Workflows</a>.</p>
+      </section>
+
+      <section class="panel">
+
+        <h2>6. Dynamic workflows</h2>
+        <h3>6.1 Programmatic orchestration</h3>
         <p>Dynamic workflows are the ADK option for execution paths that are too variable or too complex for a static graph. Instead of declaring every possible edge in advance, an orchestrator node uses normal program logic such as <code>if</code>, <code>while</code>, recursion, and <code>async/await</code> to decide which child nodes to run and in which order. This is useful for iterative investigation, runtime-generated plans, and workflows whose next step depends on intermediate results.</p>
         <p>In Python, the workflow is typically expressed with a <code>@node</code> decorator and <code>ctx.run_node()</code>. The orchestrator invokes an agent, function, or tool as a child node, receives its output, and passes that value to the next child. The application can therefore keep complex routing logic in ordinary Python while preserving ADK's execution, event, and checkpointing model.</p>
 
-        <h3>5.2 Checkpointing and resume behavior</h3>
+        <h3>6.2 Checkpointing and resume behavior</h3>
         <p>Dynamic workflows are designed to be resumable. ADK tracks child-node executions and can skip successful child nodes when an interrupted workflow resumes. An orchestrator that calls <code>ctx.run_node()</code> should be marked with <code>rerun_on_resume=True</code>; the orchestrator body is re-entered, while completed children are recovered from their checkpoints instead of being executed again unnecessarily.</p>
         <p>This distinction matters when a workflow pauses for human input or encounters a transient failure. The node configuration must make the intended behavior explicit: re-enter the orchestrator to continue coordinating children, or hand the resume payload directly to the next node. Without that decision, a resumed workflow may duplicate side effects or lose the context needed to continue safely.</p>
 
-        <h3>5.3 Dynamic data flow and selection criteria</h3>
+        <h3>6.3 Dynamic data flow and selection criteria</h3>
         <p><code>ctx.run_node()</code> returns the child result directly, so a dynamic workflow can pass typed values from one node to another without manually writing intermediate values into session state. A draft agent can return text, a formatting function can transform it, and a validation agent can inspect the transformed result. Pydantic models or equivalent schemas can make these boundaries explicit when the data is more structured.</p>
         <p>Choose a dynamic workflow when the path depends on runtime information, the number of iterations is not known in advance, or the orchestration logic benefits from regular programming constructs. Choose a static graph when the process has a stable topology that should be visible, auditable, and validated as a fixed set of edges. Both styles can be combined: a static graph can invoke a dynamic sub-workflow for one complex stage.</p>
         <p class="source-note"><strong>Reference:</strong> <a href="https://adk.dev/graphs/dynamic/" target="_blank" rel="noopener noreferrer">ADK Dynamic Workflows</a>.</p>
       </section>
 
       <section class="panel">
-        <h2>6. Collaborative agent teams</h2>
-        <h3>6.1 Coordinator and specialized subagents</h3>
+        <h2>7. Collaborative agent teams</h2>
+        <h3>7.1 Coordinator and specialized subagents</h3>
         <p>Collaborative workflows are designed for complex tasks that benefit from several agents with distinct responsibilities and relatively open-ended coordination. A coordinator agent delegates work to specialized subagents, collects their results, and decides what to do next. This differs from a fixed sequential workflow: the coordinator can choose which specialist to invoke based on the request and can return to a specialist when clarification or additional work is needed.</p>
         <p>In ADK, subagents can be assigned an operating mode that constrains how they interact. <code>chat</code> allows full interaction and manual transfer, <code>task</code> allows clarification questions and returns automatically when the task is finished, and <code>single_turn</code> performs one bounded turn with no user interaction. The coordinator declares the subagents, and ADK creates delegation tools that allow it to route work to them.</p>
 
-        <h3>6.2 Collaboration modes and control transfer</h3>
+        <h3>7.2 Collaboration modes and control transfer</h3>
         <p>Mode selection is an architectural decision. Use <code>single_turn</code> for independent operations that can run in parallel, such as gathering weather and availability data. Use <code>task</code> when a specialist may need to ask the user a focused clarification question before completing its work. Use the default <code>chat</code> mode when the specialist should retain conversational control until an explicit handoff occurs.</p>
         <p>Control transfer depends on how the subagent was invoked. A task agent used as a workflow node advances to the next graph node when it completes; the same task agent delegated by an LLM coordinator returns control to the originating coordinator after <code>finish_task</code>. Making this distinction explicit prevents a team from mixing graph transitions and agent delegation as if they had identical semantics.</p>
 
-        <h3>6.3 Isolation, parallelism, and limitations</h3>
+        <h3>7.3 Isolation, parallelism, and limitations</h3>
         <p>Task and single-turn agents operate in isolated session branches. Parallel specialists cannot see each other's intermediate events, so the coordinator must aggregate their outputs and pass any necessary context to a later synthesis step. This isolation improves separation of concerns and makes parallel work safer, but it also means that shared state must be designed rather than assumed.</p>
         <p>Collaboration modes are intended for subagents, not for the root agent. Task-mode agents must be leaf agents and cannot themselves contain subagents. ADK Python 2.0 also documents that task mode is currently disabled inside graph-based workflows; use a coordinator with delegation or a dynamic workflow when that restriction applies.</p>
         <p class="source-note"><strong>Reference:</strong> <a href="https://adk.dev/workflows/collaboration/" target="_blank" rel="noopener noreferrer">ADK Collaborative Workflows</a>.</p>
       </section>
 
       <section class="panel">
-        <h2>7. Workflow patterns</h2>
-        <h3>7.1 Coordinator, sequential, and parallel patterns</h3>
+        <h2>8. Workflow patterns</h2>
+        <h3>8.1 Coordinator, sequential, and parallel patterns</h3>
         <p>ADK's workflow patterns are reusable architectural templates rather than rigid product features. A coordinator and dispatcher routes each request to a specialist; a sequential pipeline runs a known series of steps; and a parallel fan-out runs independent tasks concurrently before a gather or synthesis step combines their results. The correct pattern depends on whether the task needs adaptive routing, a fixed order, or lower latency through concurrency.</p>
         <p>Sequential and parallel patterns make data ownership explicit. In a sequential pipeline, an earlier agent can publish a validated result under an output key for later agents to consume. In a fan-out and gather design, each branch should write to a distinct result location, and the gather agent should know which results are complete, missing, or conflicting before it synthesizes them.</p>
 
-        <h3>7.2 Hierarchical, generate-and-review, and refinement patterns</h3>
+        <h3>8.2 Hierarchical, generate-and-review, and refinement patterns</h3>
         <p>Hierarchical task decomposition adds more than one coordination level: a high-level agent breaks the goal into areas, intermediate agents delegate specialized subtasks, and leaf agents perform bounded work. This structure is useful for large research or codebase tasks, but it requires clear role boundaries and explicit context transfer to prevent duplicated or incomplete coverage.</p>
         <p>The generate-and-review pattern separates production from quality control. One agent creates a draft or candidate result, while another checks it against explicit criteria and either approves it or reports corrections. Iterative refinement repeats this cycle until a quality threshold is met or a safety bound is reached. The reviewer should return structured findings so that the next generation step addresses concrete defects rather than receiving an ambiguous request to “try again”.</p>
 
-        <h3>7.3 Human-in-the-loop and pattern selection</h3>
+        <h3>8.3 Human-in-the-loop and pattern selection</h3>
         <p>Human-in-the-loop workflows insert an approval or clarification step where the model should not make an irreversible decision alone. The human interaction can be combined with sequential processing, conditional routing, or a review loop. For policy-sensitive actions, the approval boundary should be enforced by the workflow or tool layer instead of relying only on an instruction in the prompt.</p>
         <p>A practical selection process starts with four questions: Is the route fixed or adaptive? Can subtasks run independently? Does the result need an explicit review pass? Is human approval required before a side effect? The answers lead to a sequential pipeline, parallel fan-out, coordinator, generate-and-review loop, or human-gated workflow. Patterns can be nested, but each nested boundary should expose a clear input, output, failure path, and completion condition.</p>
         <p class="source-note"><strong>Reference:</strong> <a href="https://adk.dev/workflows/patterns/" target="_blank" rel="noopener noreferrer">ADK Workflow Patterns</a>.</p>
       </section>
 
       <section class="panel">
-        <h2>8. Guided lab: Google Skills ADK Labs</h2>
-        <h3>8.1 Recommended Learning Sequence</h3>
+        <h2>9. Guided lab: Google Skills ADK Labs</h2>
+        <h3>9.1 Recommended Learning Sequence</h3>
         <p>This compact sequence lists five Google Skills labs. Availability and access requirements vary by lab; the required <em>Build Multi-Agent Systems with ADK</em> lab is publicly available with a standard Google Skills account and does not require GEAR enrollment. When a lab can be launched, it provides a managed Google Cloud environment and temporary credentials, so a personal Gemini API key is not required.</p>
 
         <div class="table-container">
@@ -295,7 +316,7 @@
 
         <p><strong>Credit plan:</strong> <em>Engineer AI Agents with Agent Development Kit (ADK): Challenge Lab</em> currently lists 5 credits, <em>Use Agent Skills with Multi-Agent Systems: Challenge Lab</em> lists 1 credit, and both <em>Build Multi-Agent Systems with ADK</em> and <em>Use Model Context Protocol (MCP) Tools with ADK Agents</em> list 7 credits each. The third lab's duration and credit cost must be confirmed on its Google Skills page before classroom delivery. GENAI124 may return an access-denied or unavailable-resource message depending on the account. Sign in to <a href="https://www.skills.google/" target="_blank" rel="noopener noreferrer">Google Skills</a> and open each lab to confirm current availability and requirements.</p>
 
-        <h3>8.2 LiteLLM in ADK: a budget day-trip advisor</h3>
+        <h3>9.2 LiteLLM in ADK: a budget day-trip advisor</h3>
         <p>LiteLLM is a Python translation layer that exposes a common interface to models from different providers. In ADK, <code>LiteLlm</code> wraps a non-Gemini model and is passed to an <code>Agent</code> as its <code>model</code>. This example uses the library directly, without a LiteLLM Proxy: a project-root <code>.env</code> selects either DeepSeek V4 through <code>deepseek/...</code> or a local Ollama model through <code>ollama_chat/...</code>. The agent and its tools stay the same when the model changes; tool-calling quality still needs to be tested for each model.</p>
         <p>The <a href="https://github.com/thimotyb/building-llm-applications/tree/feat/deepseek-4-support/ch12/adk" target="_blank" rel="noopener noreferrer">ADK budget day-trip advisor exercise in <code>ch12/adk</code></a> plans an inexpensive one-day trip from the user's starting city. Its DuckDuckGo function tool searches for transport, prices, opening hours, and attractions; its Open-Meteo function tool checks the destination forecast for the travel date. The agent then proposes a timed itinerary, an itemized per-person budget, source links, and an indoor alternative if the weather is poor. The repository README explains setup, the <code>LLM_PROVIDER</code> switch, and how to run the agent with <code>adk run</code> or <code>adk web</code>.</p>
 
@@ -308,19 +329,19 @@
       </section>
 
       <section class="panel">
-        <h2>9. Exercises</h2>
-        <h3>9.1 Practice tasks</h3>
+        <h2>10. Exercises</h2>
+        <h3>10.1 Practice tasks</h3>
         <p>Implement structured logging and error handling, then compare agent behavior before and after reliability improvements.</p>
       </section>
 
       <section class="panel">
-        <h2>10. Deliverable</h2>
-        <h3>10.1 Submission output</h3>
+        <h2>11. Deliverable</h2>
+        <h3>11.1 Submission output</h3>
         <p>An ADK-based agent repository with setup instructions, runnable examples, and a short operational runbook.</p>
       </section>
 
       <section class="panel">
-        <h2>11. Key takeaways</h2>
+        <h2>12. Key takeaways</h2>
         <ul>
           <li>ADK provides a practical framework to structure reliable agent implementations.</li>
           <li>Tool wiring, observability, and failure handling are central to usable agents.</li>
@@ -329,17 +350,18 @@
       </section>
 
       <section class="panel">
-        <h2>12. Sitography</h2>
-        <h3>12.1 ADK foundations and workflow documentation</h3>
+        <h2>13. Sitography</h2>
+        <h3>13.1 ADK foundations and workflow documentation</h3>
         <ul>
           <li><a href="https://adk.dev/get-started/python/" target="_blank" rel="noopener noreferrer">ADK Python Quickstart</a>: installation, project creation, credentials, CLI execution, and local web development UI.</li>
           <li><a href="https://adk.dev/agents/llm-agents/" target="_blank" rel="noopener noreferrer">ADK Simple Agents (LlmAgent)</a>: agent identity, instructions, tools, model configuration, context, schemas, planners, and code execution.</li>
           <li><a href="https://adk.dev/graphs/" target="_blank" rel="noopener noreferrer">ADK Graph Workflows</a>: explicit nodes, edges, routing, and typed workflow data flow.</li>
+          <li><a href="https://adk.dev/graphs/data-handling/" target="_blank" rel="noopener noreferrer">ADK Data Handling for Agent Workflows</a>: event output, user-facing messages, routes, state scopes, and schema-constrained structured contracts.</li>
           <li><a href="https://adk.dev/graphs/dynamic/" target="_blank" rel="noopener noreferrer">ADK Dynamic Workflows</a>: programmatic orchestration, runtime branching, checkpointing, and resume behavior.</li>
           <li><a href="https://adk.dev/workflows/collaboration/" target="_blank" rel="noopener noreferrer">ADK Collaborative Workflows</a>: coordinator and subagent teams, collaboration modes, and control transfer.</li>
           <li><a href="https://adk.dev/workflows/patterns/" target="_blank" rel="noopener noreferrer">ADK Workflow Patterns</a>: sequential, parallel, hierarchical, generate-review, refinement, and human-in-the-loop patterns.</li>
         </ul>
-        <h3>12.2 Model portability and provider adapters</h3>
+        <h3>13.2 Model portability and provider adapters</h3>
         <ul>
           <li><a href="https://adk.dev/agents/models/litellm/" target="_blank" rel="noopener noreferrer">ADK LiteLLM model connector</a>: the <code>LiteLlm</code> wrapper for remote or locally hosted non-Gemini models.</li>
           <li><a href="https://adk.dev/agents/models/ollama/" target="_blank" rel="noopener noreferrer">ADK Ollama model setup</a>: local Ollama connection through LiteLLM.</li>
@@ -347,6 +369,7 @@
           <li><a href="https://github.com/google/adk-python/blob/main/src/google/adk/models/lite_llm.py" target="_blank" rel="noopener noreferrer">ADK LiteLLM adapter</a>: ADK integration layer for non-Gemini model backends.</li>
           <li><a href="https://github.com/google/adk-docs/blob/main/docs/2.0/index.md" target="_blank" rel="noopener noreferrer">ADK 2.0 workflow documentation</a>: graph-based, dynamic, and collaborative workflow runtime.</li>
           <li><a href="https://github.com/thimotyb/building-llm-applications/tree/feat/deepseek-4-support/ch12/adk" target="_blank" rel="noopener noreferrer">ADK budget day-trip advisor exercise</a>: source code and README for the DeepSeek/Ollama model switch, DuckDuckGo search, and Open-Meteo forecast tools.</li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/feat/deepseek-4-support/ch12/adk_graph_upgrade" target="_blank" rel="noopener noreferrer">ADK 2 flight-upgrade graph exercise</a>: runnable implementation of the mile thresholds, human consent, flight-history tool, local-Ollama analysis, conditional routes, and upgrade decision shown in Figure M6.1.</li>
         </ul>
       </section>
     </article>
