@@ -57,7 +57,7 @@
 | `https://docs.cloud.google.com/gemini-enterprise-agent-platform/build/runtime?hl=it` | official Google Cloud documentation | `M9` | Managed Agent Runtime lifecycle, supported deployment inputs, security, scaling, querying, and operations |
 | `https://colab.research.google.com/github/GoogleCloudPlatform/generative-ai/blob/main/gemini/agent-engine/intro_agent_engine.ipynb?hl=it` | official Google Cloud Colab notebook | `M9` | Guided Agent Runtime setup, deployment, remote invocation, management, and cleanup |
 | `https://docs.mulesoft.com/agent-network/latest/af-agent-networks` | official MuleSoft documentation | `M9` | Agent Fabric networks, guided determinism, A2A agents, MCP servers, Exchange, CloudHub 2.0, Omni Gateway, and observability |
-| `building-llm-applications/ch13` | runnable ADK A2A exercise | `M9` | Local-Ollama ADK server exposed with `to_a2a()` and ADK client consuming it through `RemoteA2aAgent` |
+| `https://github.com/thimotyb/building-llm-applications/tree/main/ch13` | runnable ADK A2A and Docker exercise | `M9` | Local-Ollama ADK server exposed with `to_a2a()`, ADK client consuming it through `RemoteA2aAgent`, and Docker/Compose containerization of the A2A server |
 | `resources/` | local supporting assets | `M1, M2, M3, M4, M5, M6, M7, M8, M9` | Labs, slides, notebooks, diagrams to be added incrementally |
 
 ## Mapping Rules

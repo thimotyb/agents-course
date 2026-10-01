@@ -115,7 +115,7 @@ shipping_specialist = RemoteA2aAgent(
         <p>The remote agent can be placed in the <code>sub_agents</code> collection of a local ADK coordinator. The coordinator decides when to delegate; ADK translates its native events into A2A requests and translates remote messages, task states, and artifacts back into ADK events. The boundary should preserve identifiers and errors so a trace can follow one user request across both processes.</p>
         <p>A production client should not trust discovery metadata blindly. It must validate the card source, require HTTPS, apply authentication, set connection and task timeouts, constrain retries, and decide how to handle input-required, authentication-required, failed, or canceled remote tasks.</p>
         <h3>5.3 Chapter 13 implementation</h3>
-        <p>The <a href="https://github.com/thimotyb/building-llm-applications" target="_blank" rel="noopener noreferrer"><code>building-llm-applications/ch13</code> exercise</a> implements both roles. A shipping specialist owns a deterministic estimation tool and is exposed with <code>to_a2a()</code>; a separate client discovers it from the generated card and delegates requests with <code>RemoteA2aAgent</code>. Both processes use local Ollama with <code>gemma4:e4b</code> by default.</p>
+        <p>The <a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch13" target="_blank" rel="noopener noreferrer"><code>building-llm-applications/ch13</code> exercise</a> implements both roles. A shipping specialist owns a deterministic estimation tool and is exposed with <code>to_a2a()</code>; a separate client discovers it from the generated card and delegates requests with <code>RemoteA2aAgent</code>. Both processes use local Ollama with <code>gemma4:e4b</code> by default.</p>
         <p class="source-note"><strong>Reference:</strong> <a href="https://adk.dev/a2a/quickstart-consuming/" target="_blank" rel="noopener noreferrer">ADK A2A Quickstart: Consuming an agent with Python</a>.</p>
       </section>
 
@@ -130,11 +130,22 @@ shipping_specialist = RemoteA2aAgent(
         <p>The official <a href="https://colab.research.google.com/github/GoogleCloudPlatform/generative-ai/blob/main/gemini/agent-engine/intro_agent_engine.ipynb?hl=it" target="_blank" rel="noopener noreferrer">Building and Deploying an Agent with Agent Runtime notebook</a> provides a guided environment for project initialization, staging dependencies, deployment, remote queries, inspection, and cleanup. Treat the notebook as an operational lab: resource names, regions, IAM permissions, staging buckets, deployed identifiers, and deletion steps are part of the result.</p>
         <h3>6.4 Container and cluster deployment</h3>
         <p>The <code>to_a2a()</code> output is a Starlette ASGI application and can be packaged in a container. Cloud Run is suitable for a stateless HTTPS service with managed scaling; GKE offers more control over networking, sidecars, scheduling, and platform integration; another Kubernetes or VM environment can host the same contract when the team owns the operational stack. In every case, the public URL in the Agent Card must match the deployed route and authentication boundary.</p>
+        <h3>6.5 Chapter 13 Docker example</h3>
+        <p>The <a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch13" target="_blank" rel="noopener noreferrer">Chapter 13 deployment example</a> packages the ADK shipping specialist and its A2A endpoint as a non-root Docker container. The <a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch13/Dockerfile" target="_blank" rel="noopener noreferrer"><code>Dockerfile</code></a> installs the pinned Python dependencies, exposes port <code>8001</code>, starts the Starlette application with Uvicorn, and checks the generated Agent Card as its container health probe.</p>
+        <p>The <a href="https://github.com/thimotyb/building-llm-applications/blob/main/ch13/compose.yaml" target="_blank" rel="noopener noreferrer"><code>compose.yaml</code></a> builds the image, publishes the A2A port, and connects the container to Ollama running on the host through <code>host.docker.internal</code>. The model tag remains configurable, so the course baseline can be selected before startup:</p>
+        <pre><code>export OLLAMA_MODEL=gemma4:e4b
+docker compose -f ch13/compose.yaml up --build -d
+docker compose -f ch13/compose.yaml ps
+
+curl --fail --silent \
+  http://127.0.0.1:8001/.well-known/agent-card.json \
+  | python3 -m json.tool</code></pre>
+        <p>The container holds the A2A server, while Ollama and the model remain on the host. Ollama must accept traffic from the Docker network; exposing its API on an untrusted network must be avoided. Stop and remove the exercise container with <code>docker compose -f ch13/compose.yaml down</code>.</p>
         <p class="source-note"><strong>References:</strong> <a href="https://docs.cloud.google.com/gemini-enterprise-agent-platform/build/runtime?hl=it" target="_blank" rel="noopener noreferrer">Google Agent Runtime</a>, <a href="https://adk.dev/deploy/cloud-run/" target="_blank" rel="noopener noreferrer">ADK deployment to Cloud Run</a>, and <a href="https://adk.dev/deploy/gke/" target="_blank" rel="noopener noreferrer">ADK deployment to GKE</a>.</p>
       </section>
 
       <section class="panel">
-        <h2>7. Enterprise aside: MuleSoft Agent Fabric</h2>
+        <h2>7. MuleSoft Agent Fabric</h2>
         <h3>7.1 Agent networks and guided determinism</h3>
         <p>MuleSoft Agent Fabric models an agent network as a coordinated set of brokers, A2A-compliant agents, LLMs, and MCP servers. The network is described through human-readable YAML and Agent Script. Its guided-determinism pattern separates probabilistic LLM decisions from deterministic graph nodes, so open-ended classification or reasoning can feed controlled routing and execution paths.</p>
         <h3>7.2 Components and protocol roles</h3>
@@ -182,6 +193,7 @@ shipping_specialist = RemoteA2aAgent(
           <li><a href="https://docs.cloud.google.com/gemini-enterprise-agent-platform/build/runtime?hl=it" target="_blank" rel="noopener noreferrer">Google Agent Runtime documentation</a></li>
           <li><a href="https://colab.research.google.com/github/GoogleCloudPlatform/generative-ai/blob/main/gemini/agent-engine/intro_agent_engine.ipynb?hl=it" target="_blank" rel="noopener noreferrer">Google Agent Runtime Colab notebook</a></li>
           <li><a href="https://docs.mulesoft.com/agent-network/latest/af-agent-networks" target="_blank" rel="noopener noreferrer">MuleSoft Agent Fabric agent networks</a></li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch13" target="_blank" rel="noopener noreferrer">Chapter 13 ADK A2A and Docker exercise</a></li>
         </ul>
       </section>
 
