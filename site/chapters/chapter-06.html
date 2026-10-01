@@ -71,6 +71,7 @@
         <p>The instruction is the agent contract: it states the goal, persona, constraints, expected output, and rules for using tools. Tools can be Python functions, ADK <code>BaseTool</code> implementations, or other agents exposed through <code>AgentTool</code>. Clear names, descriptions, and schemas help the model choose and call each tool correctly.</p>
         <h3>2.3 Configuration and evaluation</h3>
         <p>Simple agents can be refined with generation settings such as temperature, token limits, and safety controls, as well as structured input and output schemas, context variables, planners, and code execution. Because model-driven behavior is non-deterministic, evaluate representative tasks and tool calls rather than relying on a single successful response.</p>
+        <p><strong>ADK 1 exercise notebooks:</strong> open <a href="https://colab.research.google.com/drive/16YGY_eTLag6DbebAMj2QmXFwY0AU6Yg0" target="_blank" rel="noopener noreferrer">ADK 1 exercise notebook 1 in Google Colab</a> and <a href="https://colab.research.google.com/drive/1bIp_432a-FxabwdXG9T02sfcVmFjNO8o" target="_blank" rel="noopener noreferrer">ADK 1 exercise notebook 2 in Google Colab</a>. Access requires a Google account authorized for the supplied notebooks.</p>
         <p class="source-note"><strong>Reference:</strong> <a href="https://adk.dev/agents/llm-agents/" target="_blank" rel="noopener noreferrer">ADK Simple Agents (LlmAgent)</a>.</p>
       </section>
 
@@ -269,7 +270,7 @@
       <section class="panel">
         <h2>9. Guided lab: Google Skills ADK Labs</h2>
         <h3>9.1 Recommended Learning Sequence</h3>
-        <p>This compact sequence lists five Google Skills labs. Availability and access requirements vary by lab; the required <em>Build Multi-Agent Systems with ADK</em> lab is publicly available with a standard Google Skills account and does not require GEAR enrollment. When a lab can be launched, it provides a managed Google Cloud environment and temporary credentials, so a personal Gemini API key is not required.</p>
+        <p>This compact sequence lists seven Google Skills labs. Availability and access requirements vary by lab; the required <em>Build Multi-Agent Systems with ADK</em> lab is publicly available with a standard Google Skills account and does not require GEAR enrollment. When a lab can be launched, it provides a managed Google Cloud environment and temporary credentials, so a personal Gemini API key is not required.</p>
 
         <div class="table-container">
           <table class="modern-table">
@@ -313,10 +314,24 @@
               </tr>
               <tr>
                 <td>5</td>
+                <td><a href="https://www.skills.google/focuses/132170" target="_blank" rel="noopener noreferrer">Connect to Remote Agents with ADK and the Agent2Agent (A2A) SDK</a></td>
+                <td>Advanced</td>
+                <td>1 hr 30 min</td>
+                <td>7</td>
+              </tr>
+              <tr>
+                <td>6</td>
                 <td><a href="https://www.skills.google/focuses/132178" target="_blank" rel="noopener noreferrer">Use Model Context Protocol (MCP) Tools with ADK Agents</a></td>
                 <td>Advanced</td>
                 <td>1 hr 30 min</td>
                 <td>7</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td><a href="https://www.skills.google/focuses/125062" target="_blank" rel="noopener noreferrer">Deploy ADK agents to Agent Runtime</a></td>
+                <td>Advanced</td>
+                <td>1 hr 30 min</td>
+                <td>5</td>
               </tr>
             </tbody>
           </table>
@@ -324,7 +339,7 @@
 
         <p class="source-note"><strong>Required course lab:</strong> <em>Build Multi-Agent Systems with ADK</em> is publicly available with a standard Google Skills account and does not require GEAR enrollment. It provides hands-on ADK 2 multi-agent examples covering parent and sub-agent relationships, session state, and sequential, loop, and parallel workflow agents.</p>
 
-        <p><strong>Credit plan:</strong> <em>Engineer AI Agents with Agent Development Kit (ADK): Challenge Lab</em> currently lists 5 credits, <em>Use Agent Skills with Multi-Agent Systems: Challenge Lab</em> lists 1 credit, and both <em>Build Multi-Agent Systems with ADK</em> and <em>Use Model Context Protocol (MCP) Tools with ADK Agents</em> list 7 credits each. The third lab's duration and credit cost must be confirmed on its Google Skills page before classroom delivery. GENAI124 may return an access-denied or unavailable-resource message depending on the account. Sign in to <a href="https://www.skills.google/" target="_blank" rel="noopener noreferrer">Google Skills</a> and open each lab to confirm current availability and requirements.</p>
+        <p><strong>Credit plan:</strong> <em>Engineer AI Agents with Agent Development Kit (ADK): Challenge Lab</em> currently lists 5 credits, <em>Use Agent Skills with Multi-Agent Systems: Challenge Lab</em> lists 1 credit, <em>Build Multi-Agent Systems with ADK</em>, <em>Connect to Remote Agents with ADK and the Agent2Agent (A2A) SDK</em>, and <em>Use Model Context Protocol (MCP) Tools with ADK Agents</em> list 7 credits each, while <em>Deploy ADK agents to Agent Runtime</em> lists 5 credits. The third lab's duration and credit cost must be confirmed on its Google Skills page before classroom delivery. GENAI124 may return an access-denied or unavailable-resource message depending on the account. Sign in to <a href="https://www.skills.google/" target="_blank" rel="noopener noreferrer">Google Skills</a> and open each lab to confirm current availability and requirements.</p>
 
         <h3>9.2 LiteLLM in ADK: a budget day-trip advisor</h3>
         <p>LiteLLM is a Python translation layer that exposes a common interface to models from different providers. In ADK, <code>LiteLlm</code> wraps a non-Gemini model and is passed to an <code>Agent</code> as its <code>model</code>. This example uses the library directly, without a LiteLLM Proxy: a project-root <code>.env</code> selects either DeepSeek V4 through <code>deepseek/...</code> or a local Ollama model through <code>ollama_chat/...</code>. The agent and its tools stay the same when the model changes; tool-calling quality still needs to be tested for each model.</p>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>M9 - Agent2Agent Protocol and Agent Deployment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/site.css">
+  <script defer src="../assets/js/site.js"></script>
+</head>
+<body id="top" data-page-lang="en">
+  <div id="google_translate_element" class="translate-host" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="shell">
+      <section class="hero">
+        <p><a href="../index.html">Home</a></p>
+        <h1>M9 - Agent2Agent Protocol and Agent Deployment</h1>
+        <p class="hero-copy">Connect independently deployed agents through A2A, implement ADK server and client roles, and select a production deployment model.</p>
+      </section>
+    </div>
+  </header>
+
+  <main class="shell module-layout">
+    <aside class="panel outline-panel" aria-label="Module outline">
+      <h2 class="outline-title">Outline</h2>
+      <nav id="outline-nav"></nav>
+    </aside>
+
+    <article class="module-main">
+      <section class="panel">
+        <nav class="module-nav" aria-label="Module navigation">
+          <a href="chapter-08.html">M8 Previous</a>
+          <span>M9</span>
+          <span>Next</span>
+        </nav>
+      </section>
+
+      <section class="panel info-grid">
+        <div>
+          <h2>1. Learning outcomes</h2>
+          <h3>1.1 Interoperability and deployment decisions</h3>
+          <ul>
+            <li>Explain the role and boundaries of the Agent2Agent protocol.</li>
+            <li>Distinguish Agent Cards, messages, tasks, parts, and artifacts.</li>
+            <li>Expose and consume an A2A-compatible agent with ADK Python.</li>
+            <li>Compare local ASGI hosting, container platforms, Google Agent Runtime, and an enterprise agent network.</li>
+          </ul>
+        </div>
+        <div>
+          <h2>2. Topics</h2>
+          <h3>2.1 Contract, implementation, operations</h3>
+          <p>The module moves from the protocol contract to an executable ADK server/client pair, then separates application behavior from hosting, security, scaling, governance, and observability concerns.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>3. Agent2Agent protocol foundations</h2>
+        <h3>3.1 Why A2A exists</h3>
+        <p>Agent2Agent (A2A) is an open standard for communication and collaboration between agentic applications. It allows an agent built with one framework or operated by one organization to delegate work to another agent without learning that agent's private prompt, memory, tools, or implementation. The remote agent remains an opaque service with a declared public contract.</p>
+        <p>A2A is a communication layer rather than an agent framework. ADK, LangGraph, CrewAI, Semantic Kernel, or custom code can implement the reasoning system behind an A2A endpoint. The protocol standardizes the boundary between those systems.</p>
+        <h3>3.2 A2A and MCP solve different problems</h3>
+        <p>MCP connects an agent to tools, APIs, and data resources. A2A connects one autonomous agentic application to another. A remote A2A agent may internally use MCP servers, but the calling agent delegates a goal and receives an agent result rather than invoking the remote tools directly. The two protocols are therefore complementary.</p>
+        <h3>3.3 Actors and discoverable contracts</h3>
+        <p>An A2A interaction has a user, an A2A client acting for that user, and an A2A server exposing the remote agent. Discovery begins with an <strong>Agent Card</strong>: a JSON document that declares identity, endpoint, protocol capabilities, input and output modes, skills, and authentication requirements. A client can use a well-known URL, a curated registry, or direct private configuration to locate a card.</p>
+        <h3>3.4 Messages, tasks, parts, and artifacts</h3>
+        <p>A <strong>Message</strong> represents one communication turn and contains one or more <strong>Parts</strong>. A part can carry text, structured data, inline bytes, or a referenced file. An <strong>Artifact</strong> is a concrete task output such as a report, image, or structured dataset. A quick stateless interaction can return a message; trackable or long-running work is represented as a <strong>Task</strong> with its own identifier and lifecycle.</p>
+        <p>Tasks can move through working, input-required, authentication-required, completed, canceled, rejected, or failed states. A <code>contextId</code> groups related messages and tasks. Once a task reaches a terminal state it is immutable; a refinement creates a new task in the same context and can reference the earlier task or artifact.</p>
+        <h3>3.5 Interaction and security modes</h3>
+        <p>A2A uses HTTP(S) and supports request/response, Server-Sent Events for streaming updates, and push notifications for long-running work. Authentication schemes are advertised in the Agent Card, while credentials travel through standard HTTP mechanisms rather than inside prompts or task content. Production design must still define authorization, tenant isolation, secret handling, rate limits, input validation, and audit correlation.</p>
+        <p class="source-note"><strong>Reference:</strong> <a href="https://a2a-protocol.org/latest/" target="_blank" rel="noopener noreferrer">A2A Protocol documentation</a>.</p>
+      </section>
+
+      <section class="panel">
+        <h2>4. Exposing an A2A server with ADK Python</h2>
+        <h3>4.1 Wrap an existing ADK agent</h3>
+        <p>ADK can expose an existing <code>root_agent</code> with <code>to_a2a()</code>. The helper creates an A2A executor that bridges protocol requests to the ADK runner, request handling and in-memory task services, a Starlette application, and an Agent Card. Uvicorn serves the resulting ASGI application.</p>
+        <p>The A2A protocol and SDK are not experimental, but the current ADK Python integration for <code>to_a2a()</code>, <code>A2aAgentExecutor</code>, and <code>RemoteA2aAgent</code> is explicitly marked experimental. Pin the tested ADK version and review release notes before production upgrades.</p>
+        <p>Protocol compatibility must be checked independently from package installation. The validated ADK 1.39.1 environment with <code>a2a-sdk</code> 0.3.26 generated a card advertising A2A protocol version 0.3.0. Client, server, SDK, and specification versions must be aligned deliberately when either endpoint is upgraded.</p>
+        <pre><code>from google.adk.a2a.utils.agent_to_a2a import to_a2a
+
+a2a_app = to_a2a(
+    root_agent,
+    host="127.0.0.1",
+    port=8001,
+    protocol="http",
+)</code></pre>
+        <p>The host, protocol, and port are used in the URL advertised by the generated card; they must describe the address clients can actually reach. <code>to_a2a()</code> does not bind the network port by itself, so its configuration must match the Uvicorn command.</p>
+        <h3>4.2 Agent Card and server responsibilities</h3>
+        <p>ADK can generate the card from the agent metadata or accept an explicit <code>AgentCard</code> object or JSON file. Automatic generation is convenient for the first integration; an explicit card gives stronger control over stable skills, authentication declarations, supported modes, versioning, and public service URLs.</p>
+        <p>The default helper uses in-memory session, task, artifact, credential, and push-notification services. These are appropriate for a local exercise but not automatically durable across restarts or replicas. Production hosting must supply persistent services where task recovery and horizontal scaling require them.</p>
+        <h3>4.3 Local server command</h3>
+        <pre><code>uvicorn ch13.a2a_server.agent:a2a_app \
+  --host 127.0.0.1 --port 8001
+
+curl http://127.0.0.1:8001/.well-known/agent-card.json</code></pre>
+        <p class="source-note"><strong>Reference:</strong> <a href="https://adk.dev/a2a/quickstart-exposing/" target="_blank" rel="noopener noreferrer">ADK A2A Quickstart: Exposing an agent with Python</a>.</p>
+      </section>
+
+      <section class="panel">
+        <h2>5. Consuming an A2A agent with ADK Python</h2>
+        <h3>5.1 Discover the remote agent</h3>
+        <p><code>RemoteA2aAgent</code> represents the remote A2A service inside an ADK application. It receives a local name and an Agent Card supplied as an object, local file, or URL. The client uses the card to understand where and how to call the server while the remote implementation remains hidden.</p>
+        <pre><code>from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
+
+shipping_specialist = RemoteA2aAgent(
+    name="shipping_specialist",
+    description="Remote parcel-estimation specialist.",
+    agent_card="http://127.0.0.1:8001/.well-known/agent-card.json",
+    use_legacy=False,
+)</code></pre>
+        <h3>5.2 Delegate through a client agent</h3>
+        <p>The remote agent can be placed in the <code>sub_agents</code> collection of a local ADK coordinator. The coordinator decides when to delegate; ADK translates its native events into A2A requests and translates remote messages, task states, and artifacts back into ADK events. The boundary should preserve identifiers and errors so a trace can follow one user request across both processes.</p>
+        <p>A production client should not trust discovery metadata blindly. It must validate the card source, require HTTPS, apply authentication, set connection and task timeouts, constrain retries, and decide how to handle input-required, authentication-required, failed, or canceled remote tasks.</p>
+        <h3>5.3 Chapter 13 implementation</h3>
+        <p>The <a href="https://github.com/thimotyb/building-llm-applications" target="_blank" rel="noopener noreferrer"><code>building-llm-applications/ch13</code> exercise</a> implements both roles. A shipping specialist owns a deterministic estimation tool and is exposed with <code>to_a2a()</code>; a separate client discovers it from the generated card and delegates requests with <code>RemoteA2aAgent</code>. Both processes use local Ollama with <code>gemma4:e4b</code> by default.</p>
+        <p class="source-note"><strong>Reference:</strong> <a href="https://adk.dev/a2a/quickstart-consuming/" target="_blank" rel="noopener noreferrer">ADK A2A Quickstart: Consuming an agent with Python</a>.</p>
+      </section>
+
+      <section class="panel">
+        <h2>6. Deployment modes</h2>
+        <h3>6.1 Deploy the protocol endpoint, not only the model</h3>
+        <p>An A2A deployment includes an externally reachable HTTPS endpoint, a correct Agent Card, application dependencies, model and tool connectivity, state services, authentication, authorization, logs, metrics, traces, and a lifecycle for versions and rollback. Moving the same ADK object to a remote process is only one part of production readiness.</p>
+        <h3>6.2 Google Agent Runtime: managed deployment</h3>
+        <p>Gemini Enterprise Agent Runtime is a managed environment for deploying, operating, and scaling agentic applications. It abstracts the underlying infrastructure, integrates ADK deployment, and provides operational capabilities around security, sessions, monitoring, and lifecycle management. The API retains the resource name <code>ReasoningEngine</code> for backward compatibility.</p>
+        <p>The standard lifecycle is: configure a Google Cloud project and SDK, develop and test the agent, stage and deploy it, invoke the remote resource, observe and manage it, and delete it when no longer required. Agent Runtime accepts higher-level framework integrations and can also deploy container images or source with a Dockerfile when the runtime contract is satisfied.</p>
+        <h3>6.3 Agent Runtime notebook workflow</h3>
+        <p>The official <a href="https://colab.research.google.com/github/GoogleCloudPlatform/generative-ai/blob/main/gemini/agent-engine/intro_agent_engine.ipynb?hl=it" target="_blank" rel="noopener noreferrer">Building and Deploying an Agent with Agent Runtime notebook</a> provides a guided environment for project initialization, staging dependencies, deployment, remote queries, inspection, and cleanup. Treat the notebook as an operational lab: resource names, regions, IAM permissions, staging buckets, deployed identifiers, and deletion steps are part of the result.</p>
+        <h3>6.4 Container and cluster deployment</h3>
+        <p>The <code>to_a2a()</code> output is a Starlette ASGI application and can be packaged in a container. Cloud Run is suitable for a stateless HTTPS service with managed scaling; GKE offers more control over networking, sidecars, scheduling, and platform integration; another Kubernetes or VM environment can host the same contract when the team owns the operational stack. In every case, the public URL in the Agent Card must match the deployed route and authentication boundary.</p>
+        <p class="source-note"><strong>References:</strong> <a href="https://docs.cloud.google.com/gemini-enterprise-agent-platform/build/runtime?hl=it" target="_blank" rel="noopener noreferrer">Google Agent Runtime</a>, <a href="https://adk.dev/deploy/cloud-run/" target="_blank" rel="noopener noreferrer">ADK deployment to Cloud Run</a>, and <a href="https://adk.dev/deploy/gke/" target="_blank" rel="noopener noreferrer">ADK deployment to GKE</a>.</p>
+      </section>
+
+      <section class="panel">
+        <h2>7. Enterprise aside: MuleSoft Agent Fabric</h2>
+        <h3>7.1 Agent networks and guided determinism</h3>
+        <p>MuleSoft Agent Fabric models an agent network as a coordinated set of brokers, A2A-compliant agents, LLMs, and MCP servers. The network is described through human-readable YAML and Agent Script. Its guided-determinism pattern separates probabilistic LLM decisions from deterministic graph nodes, so open-ended classification or reasoning can feed controlled routing and execution paths.</p>
+        <h3>7.2 Components and protocol roles</h3>
+        <p>A broker routes work across a graph of triggers, nodes, and edges. Every graph starts with an A2A trigger; agent assets communicate through A2A, while MCP servers expose tools and data. A registry defines reusable assets, connections, and policies. This places protocol interoperability inside an enterprise catalogue and governance model rather than treating every endpoint as an isolated integration.</p>
+        <h3>7.3 Publication, deployment, and governance</h3>
+        <p>Agent network assets are published to Anypoint Exchange for discovery and reuse, then deployed to CloudHub 2.0. Omni Gateway can enforce ingress and egress policies and emit telemetry; Anypoint Monitoring collects logs, metrics, and traces. The model adds centralized discovery, orchestration, governance, and observability around agents that may still be built and hosted in different ecosystems.</p>
+        <p class="source-note"><strong>Reference:</strong> <a href="https://docs.mulesoft.com/agent-network/latest/af-agent-networks" target="_blank" rel="noopener noreferrer">Building Agent Networks for MuleSoft Agent Fabric</a>.</p>
+      </section>
+
+      <section class="panel">
+        <h2>8. Guided lab</h2>
+        <h3>8.1 Run the local A2A pair</h3>
+        <ol>
+          <li>Create the isolated <code>ch13/.venv</code> environment and install <code>google-adk[a2a]</code>.</li>
+          <li>Start Ollama and make <code>gemma4:e4b</code> available.</li>
+          <li>Start the shipping specialist on port <code>8001</code> and inspect its generated Agent Card.</li>
+          <li>Run the client agent and ask for a delivery estimate.</li>
+          <li>Trace the delegation boundary and identify local ADK events versus remote A2A messages and tasks.</li>
+        </ol>
+        <h3>8.2 Production-readiness exercise</h3>
+        <p>Replace the local assumptions with a deployment plan. Define the external card URL, authentication scheme, secret ownership, persistent state requirements, timeouts, retry policy, telemetry correlation, rollout strategy, and cleanup procedure. Compare Agent Runtime, Cloud Run, GKE, and enterprise network onboarding against the application's control and governance requirements.</p>
+        <h3>8.3 Completion criteria</h3>
+        <ul>
+          <li>The Agent Card is reachable and describes the expected shipping skill.</li>
+          <li>The client delegates instead of reimplementing the server tool.</li>
+          <li>Invalid zones and weights produce explicit errors.</li>
+          <li>The deployment record separates application, protocol, infrastructure, and governance responsibilities.</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>9. Source map</h2>
+        <h3>9.1 Primary references</h3>
+        <ul>
+          <li><a href="https://a2a-protocol.org/latest/" target="_blank" rel="noopener noreferrer">A2A Protocol documentation</a></li>
+          <li><a href="https://adk.dev/a2a/" target="_blank" rel="noopener noreferrer">ADK with Agent2Agent Protocol</a></li>
+          <li><a href="https://adk.dev/a2a/quickstart-exposing/" target="_blank" rel="noopener noreferrer">ADK Python A2A exposing guide</a></li>
+          <li><a href="https://adk.dev/a2a/quickstart-consuming/" target="_blank" rel="noopener noreferrer">ADK Python A2A consuming guide</a></li>
+          <li><a href="https://docs.cloud.google.com/gemini-enterprise-agent-platform/build/runtime?hl=it" target="_blank" rel="noopener noreferrer">Google Agent Runtime documentation</a></li>
+          <li><a href="https://colab.research.google.com/github/GoogleCloudPlatform/generative-ai/blob/main/gemini/agent-engine/intro_agent_engine.ipynb?hl=it" target="_blank" rel="noopener noreferrer">Google Agent Runtime Colab notebook</a></li>
+          <li><a href="https://docs.mulesoft.com/agent-network/latest/af-agent-networks" target="_blank" rel="noopener noreferrer">MuleSoft Agent Fabric agent networks</a></li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>10. Key takeaways</h2>
+        <h3>10.1 Design rules</h3>
+        <ul>
+          <li>Use A2A for agent-to-agent delegation and MCP for agent-to-tool connectivity.</li>
+          <li>Treat the Agent Card as a versioned, secured service contract.</li>
+          <li>Keep application logic independent from the selected hosting platform.</li>
+          <li>Choose deployment by durability, scaling, network, security, governance, and observability requirements.</li>
+        </ul>
+      </section>
+    </article>
+  </main>
+
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>
