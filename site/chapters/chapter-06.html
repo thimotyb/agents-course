@@ -182,16 +182,6 @@
           <figcaption><strong>Figure M6.1.</strong> ADK graph workflow combining deterministic functions, human approval, a tool call, an LLM analysis node, and conditional outcomes. Adapted from the <a href="https://adk.dev/graphs/" target="_blank" rel="noopener noreferrer">official ADK graph workflow documentation</a>.</figcaption>
         </figure>
 
-        <figure class="module-figure" data-zoomable>
-          <img src="../assets/images/adk-graph-Screenshot 2026-09-29 182047.png" alt="ADK Web 2.10 showing the flight-upgrade workflow graph and a 4,000-mile request routed from check_miles to deny_upgrade.">
-          <figcaption><strong>Figure M6.2.</strong> The runnable <code>ch12/adk_graph_upgrade</code> workflow in ADK Web 2.10. A 4,000-mile request makes <code>check_miles</code> persist the upgrade request, emit the <code>DENY</code> route, and terminate at <code>deny_upgrade</code>.</figcaption>
-        </figure>
-
-        <figure class="module-figure" data-zoomable>
-          <img src="../assets/images/adk-graph2-Screenshot 2026-09-29 182759.png" alt="ADK Web 2.10 showing the human-in-the-loop flight-upgrade path for 12,000 miles, followed by flight-history retrieval and an LLM approval decision.">
-          <figcaption><strong>Figure M6.3.</strong> Human-in-the-loop and LLM-supported decision path for a 12,000-mile request. The workflow emits <code>GET_CONSENT</code>, pauses at <code>adk_request_input</code>, resumes on <code>FETCH_HISTORY</code>, and gives the retrieved flight metrics to <code>analyze_history</code>, which returns a structured <code>approved: true</code> decision with its supporting reason.</figcaption>
-        </figure>
-
         <h3>4.2 Sequential data flow and typed contracts</h3>
         <p>In a sequential graph, the output of one node becomes the input of the next node. A function can therefore transform a model response into a structured object, and a subsequent agent can consume that object through an input schema instead of parsing free-form text. This makes intermediate data inspectable and reduces the amount of session-state plumbing needed for a simple pipeline.</p>
         <p>A useful design practice is to give every important boundary a contract: the classifier returns an allowed route, the retrieval node returns evidence with metadata, and the approval node returns an explicit decision. The graph then becomes a set of testable interfaces rather than a collection of implicit prompt assumptions.</p>
@@ -351,6 +341,59 @@
         </figure>
 
         <p class="source-note"><strong>Further reading:</strong> <a href="https://adk.dev/agents/models/litellm/" target="_blank" rel="noopener noreferrer">ADK LiteLLM model connector</a> and <a href="https://adk.dev/agents/models/ollama/" target="_blank" rel="noopener noreferrer">ADK Ollama model setup</a>.</p>
+
+        <h3>9.3 ADK 2 graph workflow: flight-upgrade routing</h3>
+        <p>The <a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch12/adk_graph_upgrade" target="_blank" rel="noopener noreferrer">runnable <code>ch12/adk_graph_upgrade</code> exercise</a> implements a flight-upgrade workflow as an explicit ADK 2 graph. It combines deterministic functions, a human-input pause, a flight-history tool, and an LLM decision node while keeping routing rules visible and testable.</p>
+
+        <div class="table-container">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Input</th>
+                <th>Route</th>
+                <th>What to observe</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>4000</code></td>
+                <td>Deny</td>
+                <td>A request below 5,000 miles follows the deterministic <code>DENY</code> edge.</td>
+              </tr>
+              <tr>
+                <td><code>12000</code></td>
+                <td>Human consent and LLM analysis</td>
+                <td>A request from 5,000 through 20,000 miles pauses for consent, fetches flight history, and asks the model for a structured decision.</td>
+              </tr>
+              <tr>
+                <td><code>25000</code></td>
+                <td>Direct processing</td>
+                <td>A request above 20,000 miles bypasses review and follows the direct upgrade route.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Create the exercise-specific environment from the repository root, install its dependencies, ensure that the default <code>gemma4:e4b</code> model is available in the local Ollama runtime, and open the graph in ADK Web:</p>
+        <pre><code>python3 -m venv ch12/env_ch12_adk2
+ch12/env_ch12_adk2/bin/python -m pip install -r ch12/adk_graph_upgrade/requirements.txt
+ollama pull gemma4:e4b
+ch12/env_ch12_adk2/bin/adk web --no_use_local_storage ch12/adk_graph_upgrade</code></pre>
+
+        <p>Submit <code>4000</code>, <code>12000</code>, and <code>25000</code> in ADK Web and compare the active nodes and conditional edges. For the middle route, answer the human-input request with <code>yes</code> so that the workflow resumes, retrieves the flight history, and reaches the model-supported decision.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/adk-graph-Screenshot 2026-09-29 182047.png" alt="ADK Web 2.10 showing the flight-upgrade workflow graph and a 4,000-mile request routed from check_miles to deny_upgrade.">
+          <figcaption><strong>Figure M6.2.</strong> The runnable <code>ch12/adk_graph_upgrade</code> workflow in ADK Web 2.10. A 4,000-mile request makes <code>check_miles</code> persist the upgrade request, emit the <code>DENY</code> route, and terminate at <code>deny_upgrade</code>.</figcaption>
+        </figure>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/adk-graph2-Screenshot 2026-09-29 182759.png" alt="ADK Web 2.10 showing the human-in-the-loop flight-upgrade path for 12,000 miles, followed by flight-history retrieval and an LLM approval decision.">
+          <figcaption><strong>Figure M6.3.</strong> Human-in-the-loop and LLM-supported decision path for a 12,000-mile request. The workflow emits <code>GET_CONSENT</code>, pauses at <code>adk_request_input</code>, resumes on <code>FETCH_HISTORY</code>, and gives the retrieved flight metrics to <code>analyze_history</code>, which returns a structured <code>approved: true</code> decision with its supporting reason.</figcaption>
+        </figure>
+
+        <p>Validate the deterministic paths without invoking the model or external services:</p>
+        <pre><code>ch12/env_ch12_adk2/bin/python -m unittest ch12.adk_graph_upgrade.test_agent</code></pre>
       </section>
 
       <section class="panel">
@@ -394,7 +437,7 @@
           <li><a href="https://github.com/google/adk-python/blob/main/src/google/adk/models/lite_llm.py" target="_blank" rel="noopener noreferrer">ADK LiteLLM adapter</a>: ADK integration layer for non-Gemini model backends.</li>
           <li><a href="https://github.com/google/adk-docs/blob/main/docs/2.0/index.md" target="_blank" rel="noopener noreferrer">ADK 2.0 workflow documentation</a>: graph-based, dynamic, and collaborative workflow runtime.</li>
           <li><a href="https://github.com/thimotyb/building-llm-applications/tree/feat/deepseek-4-support/ch12/adk" target="_blank" rel="noopener noreferrer">ADK budget day-trip advisor exercise</a>: source code and README for the DeepSeek/Ollama model switch, DuckDuckGo search, and Open-Meteo forecast tools.</li>
-          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/feat/deepseek-4-support/ch12/adk_graph_upgrade" target="_blank" rel="noopener noreferrer">ADK 2 flight-upgrade graph exercise</a>: runnable implementation of the mile thresholds, human consent, flight-history tool, local-Ollama analysis, conditional routes, and upgrade decision shown in Figure M6.1.</li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch12/adk_graph_upgrade" target="_blank" rel="noopener noreferrer">ADK 2 flight-upgrade graph exercise</a>: runnable implementation of the mile thresholds, human consent, flight-history tool, local-Ollama analysis, conditional routes, and upgrade decision shown in Figure M6.1.</li>
         </ul>
       </section>
     </article>
