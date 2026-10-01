@@ -27,7 +27,9 @@
     "5.1 Discover the remote agent",
     "5.2 Delegate through a client agent"
   ],
-  "required_images": [],
+  "required_images": [
+    "../assets/images/m9-mulesoft-agent-fabric-architecture.png"
+  ],
   "required_links": [
     "../index.html",
     "chapter-08.html",

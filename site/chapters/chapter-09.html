@@ -141,6 +141,12 @@ shipping_specialist = RemoteA2aAgent(
         <p>A broker routes work across a graph of triggers, nodes, and edges. Every graph starts with an A2A trigger; agent assets communicate through A2A, while MCP servers expose tools and data. A registry defines reusable assets, connections, and policies. This places protocol interoperability inside an enterprise catalogue and governance model rather than treating every endpoint as an isolated integration.</p>
         <h3>7.3 Publication, deployment, and governance</h3>
         <p>Agent network assets are published to Anypoint Exchange for discovery and reuse, then deployed to CloudHub 2.0. Omni Gateway can enforce ingress and egress policies and emit telemetry; Anypoint Monitoring collects logs, metrics, and traces. The model adds centralized discovery, orchestration, governance, and observability around agents that may still be built and hosted in different ecosystems.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m9-mulesoft-agent-fabric-architecture.png" alt="MuleSoft Agent Fabric shared-space architecture with Anypoint Exchange, CloudHub 2.0, Omni Gateway, Anypoint Monitoring, agent brokers, MCP servers, LLMs, Agentforce agents, and Gemini agents.">
+          <figcaption><strong>Figure M9.1.</strong> MuleSoft Agent Fabric shared-space architecture. Agent-network assets and dependencies are published through Anypoint Exchange, deployed behind CloudHub 2.0 and Omni Gateway, connected to external models, MCP servers, and agents, and traced through Anypoint Monitoring. Source: <a href="https://docs.mulesoft.com/agent-network/latest/af-agent-networks" target="_blank" rel="noopener noreferrer">MuleSoft Agent Fabric documentation</a>.</figcaption>
+        </figure>
+
         <p class="source-note"><strong>Reference:</strong> <a href="https://docs.mulesoft.com/agent-network/latest/af-agent-networks" target="_blank" rel="noopener noreferrer">Building Agent Networks for MuleSoft Agent Fabric</a>.</p>
       </section>
 
