@@ -21,11 +21,11 @@
     "3.3 Actors and discoverable contracts",
     "3.4 Messages, tasks, parts, and artifacts",
     "3.5 Interaction and security modes",
+    "3.6 Protocol evolution: A2A 0.3 and A2A 1.0",
     "4.1 Wrap an existing ADK agent",
     "4.2 Agent Card and server responsibilities",
     "4.3 Local server command",
-    "5.1 Discover the remote agent",
-    "5.2 Delegate through a client agent"
+    "5.1 Discover the remote agent"
   ],
   "required_images": [
     "../assets/images/m9-mulesoft-agent-fabric-architecture.png"
@@ -33,6 +33,9 @@
   "required_links": [
     "../index.html",
     "chapter-08.html",
+    "https://github.com/a2aproject/A2A/releases/tag/v0.3.0",
+    "https://github.com/a2aproject/A2A/releases/tag/v1.0.0",
+    "https://github.com/a2aproject/A2A/releases/tag/v1.0.1",
     "https://a2a-protocol.org/latest/",
     "https://adk.dev/a2a/quickstart-exposing/",
     "https://github.com/thimotyb/building-llm-applications/tree/main/ch13",

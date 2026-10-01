@@ -70,6 +70,66 @@
         <p>Tasks can move through working, input-required, authentication-required, completed, canceled, rejected, or failed states. A <code>contextId</code> groups related messages and tasks. Once a task reaches a terminal state it is immutable; a refinement creates a new task in the same context and can reference the earlier task or artifact.</p>
         <h3>3.5 Interaction and security modes</h3>
         <p>A2A uses HTTP(S) and supports request/response, Server-Sent Events for streaming updates, and push notifications for long-running work. Authentication schemes are advertised in the Agent Card, while credentials travel through standard HTTP mechanisms rather than inside prompts or task content. Production design must still define authorization, tenant isolation, secret handling, rate limits, input validation, and audit correlation.</p>
+
+        <h3>3.6 Protocol evolution: A2A 0.3 and A2A 1.0</h3>
+        <p>A2A 0.3.0 was published on 30 July 2025. It established the updated well-known Agent Card path, card signatures, extended cards, mTLS security schemes, and skill-level security declarations. A2A 1.0.0 was published on 12 March 2026 as the first stable major-version baseline. The 1.0 line retains the core concepts of agents, messages, tasks, artifacts, streaming, and push notifications while introducing breaking changes that make the protocol model more consistent and easier to evolve.</p>
+
+        <div class="table-container">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>A2A 0.3</th>
+                <th>A2A 1.0</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Specification structure</td>
+                <td>Application operations and transport mappings are described more closely together.</td>
+                <td>The application protocol is formally separated from the JSON-RPC, gRPC, and HTTP+JSON/REST bindings.</td>
+              </tr>
+              <tr>
+                <td>Versioning</td>
+                <td>Version compatibility is less explicit at the service boundary.</td>
+                <td>Clients declare the protocol version through a service parameter; unsupported versions produce a defined <code>VersionNotSupportedError</code>.</td>
+              </tr>
+              <tr>
+                <td>Task management</td>
+                <td>Focuses primarily on operations addressing individual tasks.</td>
+                <td>Adds a standardized task-list operation with filtering and pagination.</td>
+              </tr>
+              <tr>
+                <td>Push notifications</td>
+                <td>Uses separate task and push-notification configuration structures.</td>
+                <td>Unifies the configuration model and normalizes create, get, list, and delete operations.</td>
+              </tr>
+              <tr>
+                <td>Agent Card</td>
+                <td>Introduces signatures, extended-card retrieval, and the <code>agent-card.json</code> discovery path.</td>
+                <td>Moves extended-card support into agent capabilities and standardizes the related field names.</td>
+              </tr>
+              <tr>
+                <td>OAuth security</td>
+                <td>Retains the earlier OAuth flow model alongside mTLS support.</td>
+                <td>Removes implicit and password flows and adds PKCE and device-code support.</td>
+              </tr>
+              <tr>
+                <td>Data and streaming model</td>
+                <td>Contains structures and fields later marked as redundant or deprecated.</td>
+                <td>Removes deprecated fields, simplifies parts and identifiers, aligns enums with ProtoJSON, and removes the redundant streaming <code>final</code> field.</td>
+              </tr>
+              <tr>
+                <td>Interoperability</td>
+                <td>Provides the pre-1.0 interoperability contract.</td>
+                <td>Adds clearer compatibility responsibilities, SDK backward-compatibility guidance, and native multi-tenant context for gRPC.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Version 1.0 is the current stable protocol generation, but 1.0.0 is not the latest maintenance release. A2A 1.0.1 was published on 28 May 2026 with corrections to the preferred HTTP media type, transcoding-related errors, and task-status values. These patch-level corrections do not introduce another protocol generation.</p>
+        <p class="source-note"><strong>Version references:</strong> <a href="https://github.com/a2aproject/A2A/releases/tag/v0.3.0" target="_blank" rel="noopener noreferrer">A2A 0.3.0 release</a>, <a href="https://github.com/a2aproject/A2A/releases/tag/v1.0.0" target="_blank" rel="noopener noreferrer">A2A 1.0.0 release</a>, and <a href="https://github.com/a2aproject/A2A/releases/tag/v1.0.1" target="_blank" rel="noopener noreferrer">A2A 1.0.1 release</a>.</p>
         <p class="source-note"><strong>Reference:</strong> <a href="https://a2a-protocol.org/latest/" target="_blank" rel="noopener noreferrer">A2A Protocol documentation</a>.</p>
       </section>
 
@@ -187,6 +247,9 @@ curl --fail --silent \
         <h3>9.1 Primary references</h3>
         <ul>
           <li><a href="https://a2a-protocol.org/latest/" target="_blank" rel="noopener noreferrer">A2A Protocol documentation</a></li>
+          <li><a href="https://github.com/a2aproject/A2A/releases/tag/v0.3.0" target="_blank" rel="noopener noreferrer">A2A 0.3.0 release notes</a></li>
+          <li><a href="https://github.com/a2aproject/A2A/releases/tag/v1.0.0" target="_blank" rel="noopener noreferrer">A2A 1.0.0 release notes</a></li>
+          <li><a href="https://github.com/a2aproject/A2A/releases/tag/v1.0.1" target="_blank" rel="noopener noreferrer">A2A 1.0.1 maintenance release notes</a></li>
           <li><a href="https://adk.dev/a2a/" target="_blank" rel="noopener noreferrer">ADK with Agent2Agent Protocol</a></li>
           <li><a href="https://adk.dev/a2a/quickstart-exposing/" target="_blank" rel="noopener noreferrer">ADK Python A2A exposing guide</a></li>
           <li><a href="https://adk.dev/a2a/quickstart-consuming/" target="_blank" rel="noopener noreferrer">ADK Python A2A consuming guide</a></li>

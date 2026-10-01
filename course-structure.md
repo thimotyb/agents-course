@@ -51,6 +51,9 @@
 | `https://claudecertificationguide.com/learn/` | public certification curriculum | `M8` | Task statements and learning examples across Agentic Architecture, Tool Design and MCP, Claude Code, Prompt Engineering, and Context Management |
 | `https://everpath-course-content.s3-accelerate.amazonaws.com/instructor%2F6nizmqk8tpzpfjvt6qmmav7rh%2Fpublic%2F1783542750%2FClaude+Certified+Architect+%E2%80%93+Foundations+Exam+Guide.pdf` | certification exam guide (PDF) | `M8` | Blueprint, domain weights, scenario patterns, in-scope concepts, and implementation trade-offs |
 | `https://a2a-protocol.org/latest/` | official A2A Protocol documentation | `M9` | Protocol purpose, interoperability, relationship with MCP, core actors, Agent Cards, messages, tasks, artifacts, and interaction modes |
+| `https://github.com/a2aproject/A2A/releases/tag/v0.3.0` | official A2A 0.3.0 release notes | `M9` | A2A 0.3 publication date, Agent Card discovery changes, signatures, extended cards, mTLS, and skill-level security |
+| `https://github.com/a2aproject/A2A/releases/tag/v1.0.0` | official A2A 1.0.0 release notes | `M9` | Stable major-version baseline, breaking changes, task listing, versioning, OAuth modernization, binding separation, and compatibility updates |
+| `https://github.com/a2aproject/A2A/releases/tag/v1.0.1` | official A2A 1.0.1 release notes | `M9` | Maintenance fixes for HTTP media type preference, transcoding errors, and task-status values |
 | `https://adk.dev/a2a/` | official ADK A2A documentation | `M9` | ADK support for exposing and consuming A2A-compatible agents |
 | `https://adk.dev/a2a/quickstart-exposing/` | official ADK Python guide | `M9` | Exposing an ADK agent with `to_a2a()`, generated Agent Cards, A2A request handling, and Uvicorn |
 | `https://adk.dev/a2a/quickstart-consuming/` | official ADK Python guide | `M9` | Discovering and consuming an A2A service with `RemoteA2aAgent` |
