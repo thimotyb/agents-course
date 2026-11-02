@@ -55,6 +55,31 @@ Metrics from the probability of the predicted class: ECE = expected calibration 
 - XGBoost fails on negations ("no rush") on the full set (urgent acc 0.87).
 - **gemma-12b (local) is over-confident**: on `team` conf 0.92 but acc 0.77 (ECE 0.233), and it is never uncertain (cov@c 1.00), so a threshold-based router would never escalate its mistakes. It is also ~16 s/ticket vs 0.19 s for Jev and 2.2 s for DeepSeek. Do not use a general local LLM as a self-judge without calibration.
 
+## Routing replay (cascade Jev -> DeepSeek -> human), computed from the stored results, no new model calls
+Source: `ch14/bench/routing_replay.py`, full 120-ticket set. auto-acc = accuracy on questions resolved without a human; eff-acc assumes the human is always right (upper bound).
+
+#### Cascade: jev-1.14.0 -> deepseek-v4-flash -> human  (n=120 tickets x 3 questions)
+
+| setup | threshold | auto-acc | human% | eff-acc | escal% | $/1k tickets | ms/ticket |
+|---|---|---|---|---|---|---|---|
+| jev-1.14.0 -> deepseek-v4-flash | 0.5 | 0.961 | 0.0 | 0.961 | 1 | 0.02 | 207 |
+| jev-1.14.0 -> deepseek-v4-flash | 0.6 | 0.961 | 0.3 | 0.961 | 11 | 0.05 | 577 |
+| jev-1.14.0 -> deepseek-v4-flash | 0.7 | 0.983 | 3.1 | 0.983 | 19 | 0.06 | 763 |
+| jev-1.14.0 -> deepseek-v4-flash | 0.8 | 0.991 | 5.8 | 0.992 | 31 | 0.08 | 1013 |
+| jev-1.14.0 -> deepseek-v4-flash | 0.9 | 0.997 | 11.7 | 0.997 | 59 | 0.13 | 1544 |
+| jev-1.14.0 alone | 0.5 | 0.964 | 0.3 | 0.964 | 0 | 0.02 | 187 |
+| jev-1.14.0 alone | 0.6 | 0.977 | 3.6 | 0.978 | 0 | 0.02 | 187 |
+| jev-1.14.0 alone | 0.7 | 0.991 | 6.7 | 0.992 | 0 | 0.02 | 187 |
+| jev-1.14.0 alone | 0.8 | 0.994 | 11.1 | 0.994 | 0 | 0.02 | 187 |
+| jev-1.14.0 alone | 0.9 | 0.996 | 24.7 | 0.997 | 0 | 0.02 | 187 |
+| deepseek-v4-flash alone | 0.5 | 0.950 | 0.0 | 0.950 | 0 | 0.17 | 2057 |
+| deepseek-v4-flash alone | 0.6 | 0.963 | 1.4 | 0.964 | 0 | 0.17 | 2057 |
+| deepseek-v4-flash alone | 0.7 | 0.980 | 4.7 | 0.981 | 0 | 0.17 | 2057 |
+| deepseek-v4-flash alone | 0.8 | 0.991 | 8.9 | 0.992 | 0 | 0.17 | 2057 |
+| deepseek-v4-flash alone | 0.9 | 1.000 | 17.8 | 1.000 | 0 | 0.17 | 2057 |
+
+Reading (threshold 0.7): the cascade resolves 96.9% of questions automatically at 0.983 accuracy for $0.06 per 1000 tickets and ~760 ms/ticket; DeepSeek alone resolves 95.3% at 0.980 for $0.17 and ~2060 ms; Jev alone resolves 93.3% at 0.991 for $0.02 and ~190 ms. The cascade trades a little precision for fewer human reviews. Caveats: synthetic data, 120 tickets, thresholds not tuned on a separate set, cost model charges a whole ticket to every tier it reaches (the live `CascadeJudge` re-asks only unsure questions, so it is slightly cheaper).
+
 ## Pending
 - Remaining 71 tickets for gemma-12b (not run; no extrapolation is made) and OpenDecider-small/nano (backend written, never run against the real package).
 - Refresh this file with: `bench/report.py --md bench/RESULTS.md --notes ../../agents-course/notes/benchmark-judge-results.md` (from `building-llm-applications/ch14`, with `agents-course` next to it).
