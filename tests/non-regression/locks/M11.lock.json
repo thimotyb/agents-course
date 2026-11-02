@@ -27,10 +27,13 @@
     "5.1 Metrics",
     "5.2 Benchmark design"
   ],
-  "required_images": [],
+  "required_images": [
+    "../assets/images/m11-figure-1-judge-cascade.svg"
+  ],
   "required_links": [
     "../index.html",
     "chapter-10.html",
+    "chapter-12.html",
     "https://typesafe.ai/blog/introducing-system-one-models-and-jev",
     "https://docs.typesafe.ai/",
     "https://docs.typesafe.ai/models.md",

@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 575" width="1200" height="575" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#27465f"/></marker>
+  </defs>
+  <rect width="1200" height="575" fill="#ffffff"/>
+  <text x="600" y="34" text-anchor="middle" font-size="22" font-weight="700" fill="#132338">Cascade of judges: cheap first, stronger only when unsure</text>
+
+  <g stroke="#27465f" stroke-width="2.5">
+    <rect x="30" y="200" width="170" height="100" rx="12" fill="#f2f5f9"/>
+    <rect x="250" y="195" width="180" height="110" rx="12" fill="#e7f0d9"/>
+    <polygon points="535,195 605,250 535,305 465,250" fill="#fff0c9"/>
+    <rect x="650" y="195" width="180" height="110" rx="12" fill="#dff1f7"/>
+    <polygon points="935,195 1005,250 935,305 865,250" fill="#fff0c9"/>
+    <rect x="1030" y="205" width="150" height="90" rx="12" fill="#fde2d0" stroke="#b5541f"/>
+    <rect x="445" y="70" width="180" height="60" rx="12" fill="#cfeedd"/>
+    <rect x="845" y="70" width="180" height="60" rx="12" fill="#cfeedd"/>
+  </g>
+  <g text-anchor="middle" fill="#132338">
+    <text x="115" y="238" font-size="16" font-weight="700">Ticket +</text>
+    <text x="115" y="259" font-size="16" font-weight="700">typed questions</text>
+    <text x="115" y="282" font-size="12">team · urgent · refund</text>
+    <text x="340" y="232" font-size="17" font-weight="700">Tier 1</text>
+    <text x="340" y="254" font-size="14">fast decision model</text>
+    <text x="340" y="274" font-size="12">all questions, one call</text>
+    <text x="535" y="246" font-size="14" font-weight="700">confident?</text>
+    <text x="535" y="265" font-size="12">p ≥ threshold</text>
+    <text x="740" y="232" font-size="17" font-weight="700">Tier 2</text>
+    <text x="740" y="254" font-size="14">general language model</text>
+    <text x="740" y="274" font-size="12">only the unsure questions</text>
+    <text x="935" y="246" font-size="14" font-weight="700">confident?</text>
+    <text x="935" y="265" font-size="12">p ≥ threshold</text>
+    <text x="1105" y="240" font-size="17" font-weight="700">Person</text>
+    <text x="1105" y="261" font-size="12">approve · correct ·</text>
+    <text x="1105" y="277" font-size="12">give feedback</text>
+    <text x="535" y="96" font-size="15" font-weight="700">Answered by tier 1</text>
+    <text x="535" y="116" font-size="12">route recorded per question</text>
+    <text x="935" y="96" font-size="15" font-weight="700">Answered by tier 2</text>
+    <text x="935" y="116" font-size="12">route recorded per question</text>
+  </g>
+
+  <g stroke="#27465f" stroke-width="2.5" fill="none" marker-end="url(#a)">
+    <line x1="200" y1="250" x2="248" y2="250"/>
+    <line x1="430" y1="250" x2="463" y2="250"/>
+    <line x1="605" y1="250" x2="648" y2="250"/>
+    <line x1="830" y1="250" x2="863" y2="250"/>
+    <line x1="1005" y1="250" x2="1028" y2="250"/>
+    <line x1="535" y1="195" x2="535" y2="132"/>
+    <line x1="935" y1="195" x2="935" y2="132"/>
+  </g>
+  <g font-size="13" fill="#27465f" text-anchor="middle">
+    <text x="556" y="168" text-anchor="start">yes</text>
+    <text x="956" y="168" text-anchor="start">yes</text>
+    <text x="627" y="240">no</text>
+    <text x="1017" y="240">no</text>
+    <text x="627" y="322" font-size="11">re-ask only the</text>
+    <text x="627" y="336" font-size="11">unsure questions</text>
+  </g>
+
+  <!-- metrics -->
+  <g text-anchor="middle" fill="#132338" font-size="13">
+    <text x="340" y="360" font-weight="700">about 190 ms per ticket</text>
+    <text x="340" y="380">USD 0.002 for 120 tickets</text>
+    <text x="740" y="360" font-weight="700">about 2.1 s per ticket</text>
+    <text x="740" y="380">USD 0.020 for 120 tickets</text>
+    <text x="1105" y="360" font-weight="700">last tier</text>
+    <text x="1105" y="380">decision written to the trace</text>
+  </g>
+  <text x="600" y="412" text-anchor="middle" font-size="12" fill="#4b5d73">Measured latency and cost of each judge alone on 120 synthetic tickets with three questions each.</text>
+
+  <rect x="30" y="435" width="1150" height="115" rx="12" fill="#f2f5f9" stroke="#27465f" stroke-width="2"/>
+  <g fill="#132338" font-size="14">
+    <text x="55" y="465" font-weight="700">Rules</text>
+    <text x="55" y="489">· Each question is routed on its own; confidence is the probability of the returned answer.</text>
+    <text x="55" y="510">· Thresholds are code and are tuned per task on labelled data, never taken from the model.</text>
+    <text x="55" y="531">· Questions still unsure after the last tier are returned as needs-human.</text>
+  </g>
+</svg>

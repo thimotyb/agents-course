@@ -83,6 +83,10 @@
           <li><strong>Decide:</strong> stop, repeat with feedback, or hand over to a person.</li>
         </ol>
         <p>The defining property is that the verification result changes what happens next. A pipeline that always runs the same steps is a workflow; a loop reads its own outcome and decides.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m10-figure-1-agentic-loop.svg" alt="Agentic loop: a goal and specification enter Generate, then Harness and Judge; Decide accepts, sends feedback back to Generate, or escalates to a person; a typed state is checkpointed after every node.">
+          <figcaption><strong>Figure M10.1.</strong> The agentic loop. Generate produces the artifact, the harness runs tests and static rules, and the judge answers typed questions with probabilities. Decide applies thresholds held in code: accept, return to Generate with the failure or the judge findings as feedback, or ask a person when the judge is uncertain or the budget is exhausted. The typed state is checkpointed after every node.</figcaption>
+        </figure>
         <h3>3.3 When a loop is the wrong tool</h3>
         <p>A loop adds latency, cost, and variance. It is justified when two conditions hold: the first attempt is often wrong, and correctness can be checked cheaply and reliably. When the task is a known sequence, a workflow is simpler and cheaper. When correctness cannot be checked, repetition only produces more confident errors, so the loop needs a person as the verifier.</p>
       </section>

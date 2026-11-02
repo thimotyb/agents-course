@@ -248,6 +248,11 @@ def decide(answer, accept=0.7, reject=0.3):
           </tbody>
         </table>
         <p>At 0.7 the cascade halves the number of questions that reach a person compared with the decision model alone, in exchange for a small loss of precision and about three times the cost; it still costs about one third of the general model alone. Raising the threshold buys accuracy with more human review. These figures come from a synthetic set and must be recomputed on real traffic before choosing a threshold.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m11-figure-1-judge-cascade.svg" alt="Cascade of judges: a ticket with typed questions goes to a fast decision model; confident answers stop there, unsure questions are re-asked to a general language model, and questions still unsure go to a person.">
+          <figcaption><strong>Figure M11.1.</strong> Cascade of judges. Each question is answered by the first tier whose confidence reaches the threshold; only the unsure questions go to the next tier, and what remains unsure after the last tier goes to a person. The latency and cost shown are those measured for each judge alone on 120 synthetic tickets with three questions each.</figcaption>
+        </figure>
+
         <h3>7.3 Human review that works</h3>
         <p>The strongest use of a person in an agent is as the last tier of a cascade, called only in specific conditions.</p>
         <ul>

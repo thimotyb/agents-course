@@ -27,10 +27,13 @@
     "5.1 Planner-executor",
     "5.2 Router"
   ],
-  "required_images": [],
+  "required_images": [
+    "../assets/images/m10-figure-1-agentic-loop.svg"
+  ],
   "required_links": [
     "../index.html",
     "chapter-09.html",
+    "chapter-11.html",
     "https://www.anthropic.com/engineering/building-effective-agents",
     "https://langchain-ai.github.io/langgraph/",
     "https://adk.dev/agents/workflow-agents/loop-agents/",
