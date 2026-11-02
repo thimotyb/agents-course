@@ -18,6 +18,14 @@ Runtime baseline for examples:
 - default model: `gemma4:e4b`
 - avoid dependence on OpenAI API keys for classroom examples
 
+## Companion Repository (Code)
+
+All runnable course code lives in the companion repo **`building-llm-applications`**:
+- local path: `/home/thimoty/git/building-llm-applications` (GitHub: `thimotyb/building-llm-applications`)
+- code for labs, exercises, demos and workshops goes there (chapters `ch01`...`ch13`, ADK in `ch12`, A2A/Docker in `ch13`); this repo holds only the site, notes, and course materials
+- API keys and provider selection live in its git-ignored `.env` (`LLM_PROVIDER`, `OLLAMA_MODEL`, `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, `TYPESAFE_API_KEY`, ...); never copy keys into this repo
+- the Workshop 2 plan is in `notes/TODO-seminar.md`
+
 ## Canonical Project Structure
 
 Use this structure as the baseline:
