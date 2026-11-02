@@ -188,6 +188,12 @@ shipping_specialist = RemoteA2aAgent(
         <p>The standard lifecycle is: configure a Google Cloud project and SDK, develop and test the agent, stage and deploy it, invoke the remote resource, observe and manage it, and delete it when no longer required. Agent Runtime accepts higher-level framework integrations and can also deploy container images or source with a Dockerfile when the runtime contract is satisfied.</p>
         <h3>6.3 Agent Runtime notebook workflow</h3>
         <p>The official <a href="https://colab.research.google.com/github/GoogleCloudPlatform/generative-ai/blob/main/gemini/agent-engine/intro_agent_engine.ipynb?hl=it" target="_blank" rel="noopener noreferrer">Building and Deploying an Agent with Agent Runtime notebook</a> provides a guided environment for project initialization, staging dependencies, deployment, remote queries, inspection, and cleanup. Treat the notebook as an operational lab: resource names, regions, IAM permissions, staging buckets, deployed identifiers, and deletion steps are part of the result.</p>
+
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/agentruntime-Screenshot 2026-10-01 225411.png" alt="Google Cloud Shell Editor showing a completed ADK deployment of a transcript-summarization agent, including the created Agent Engine resource and its Google Cloud playground link.">
+          <figcaption><strong>Figure M9.1.</strong> Completed deployment of an ADK transcript-summarization agent to Google Agent Runtime from Cloud Shell. After staging the source, resolving dependencies, and initializing Vertex AI, the CLI reports the created Agent Engine resource and provides its Google Cloud playground link. The output also warns that the explicit staging-bucket option is deprecated.</figcaption>
+        </figure>
+
         <h3>6.4 Container and cluster deployment</h3>
         <p>The <code>to_a2a()</code> output is a Starlette ASGI application and can be packaged in a container. Cloud Run is suitable for a stateless HTTPS service with managed scaling; GKE offers more control over networking, sidecars, scheduling, and platform integration; another Kubernetes or VM environment can host the same contract when the team owns the operational stack. In every case, the public URL in the Agent Card must match the deployed route and authentication boundary.</p>
         <h3>6.5 Chapter 13 Docker example</h3>
@@ -215,7 +221,7 @@ curl --fail --silent \
 
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m9-mulesoft-agent-fabric-architecture.png" alt="MuleSoft Agent Fabric shared-space architecture with Anypoint Exchange, CloudHub 2.0, Omni Gateway, Anypoint Monitoring, agent brokers, MCP servers, LLMs, Agentforce agents, and Gemini agents.">
-          <figcaption><strong>Figure M9.1.</strong> MuleSoft Agent Fabric shared-space architecture. Agent-network assets and dependencies are published through Anypoint Exchange, deployed behind CloudHub 2.0 and Omni Gateway, connected to external models, MCP servers, and agents, and traced through Anypoint Monitoring. Source: <a href="https://docs.mulesoft.com/agent-network/latest/af-agent-networks" target="_blank" rel="noopener noreferrer">MuleSoft Agent Fabric documentation</a>.</figcaption>
+          <figcaption><strong>Figure M9.2.</strong> MuleSoft Agent Fabric shared-space architecture. Agent-network assets and dependencies are published through Anypoint Exchange, deployed behind CloudHub 2.0 and Omni Gateway, connected to external models, MCP servers, and agents, and traced through Anypoint Monitoring. Source: <a href="https://docs.mulesoft.com/agent-network/latest/af-agent-networks" target="_blank" rel="noopener noreferrer">MuleSoft Agent Fabric documentation</a>.</figcaption>
         </figure>
 
         <p class="source-note"><strong>Reference:</strong> <a href="https://docs.mulesoft.com/agent-network/latest/af-agent-networks" target="_blank" rel="noopener noreferrer">Building Agent Networks for MuleSoft Agent Fabric</a>.</p>

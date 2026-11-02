@@ -28,6 +28,7 @@
     "5.1 Discover the remote agent"
   ],
   "required_images": [
+    "../assets/images/agentruntime-Screenshot 2026-10-01 225411.png",
     "../assets/images/m9-mulesoft-agent-fabric-architecture.png"
   ],
   "required_links": [

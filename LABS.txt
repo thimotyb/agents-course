@@ -1,9 +1,9 @@
 LABS:
 
-
+Get Started with Agent Development Kit (ADK) (Gear)
 Empower ADK agents with tools (non GEAR?)
-Engineer AI Agents with Agent Development Kit (ADK): Challenge Lab (non GEAR?)
+Engineer AI Agents with Agent Development Kit (ADK): Challenge Lab (non GEAR?) ****
 Build Multi-Agent Systems with ADK
-Deploy an Agent with Agent Development Kit (ADK): Challenge Lab
-Deploy ADK agents to Agent Runtime
+Deploy an Agent with Agent Development Kit (ADK): Challenge Lab (non GEAR?)
+Deploy ADK agents to Agent Runtime (non GEAR?) https://www.skills.google/focuses/125062?parent=catalog
 Connect to Remote Agents with ADK and the Agent2Agent (A2A) SDK
