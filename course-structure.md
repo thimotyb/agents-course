@@ -20,6 +20,7 @@
 | M8 | Agent Architectures: Foundational Patterns and Strategies | `site/chapters/chapter-08.html` | Claude Certified Architect - Foundations study guide and Exam Guide | Certification-informed foundations for agent loops, orchestration, tools, workflows, prompts, and reliability |
 | M9 | Agent2Agent Protocol and Agent Deployment | `site/chapters/chapter-09.html` | A2A Protocol, ADK A2A guides, Google Agent Runtime, and MuleSoft Agent Fabric documentation | Interoperable agents, ADK server/client implementation, deployment choices, and enterprise agent networks |
 | M10 | The Agentic Loop | `site/chapters/chapter-10.html` | Anthropic engineering article on building effective agents, LangGraph and ADK documentation, and `building-llm-applications/ch14` | Loop definition, state and stop criteria, orchestration patterns, bounded LangGraph implementation, and a verified repair loop |
+| M11 | Decision Models, Judges, Cost, and Observability | `site/chapters/chapter-11.html` | TypeSafe Jev documentation, OpenDecider, LLM-as-a-judge literature, and `building-llm-applications/ch14` benchmark and routing code | Typed decision models, judge placement, calibration measurements on labelled tickets, cascades, human review, cost model, and traces |
 
 ## Source Inventory
 
@@ -66,7 +67,12 @@
 | `https://www.anthropic.com/engineering/building-effective-agents` | engineering article | `M10` | Workflow and agent patterns: routing, orchestrator-workers, evaluator-optimizer |
 | `https://langchain-ai.github.io/langgraph/` | official LangGraph documentation | `M10` | State graphs, conditional edges, checkpointers, interrupts |
 | `https://adk.dev/agents/workflow-agents/loop-agents/` | official ADK documentation | `M10` | Loop agent with maximum iterations and exit signal |
-| `resources/` | local supporting assets | `M1, M2, M3, M4, M5, M6, M7, M8, M9, M10` | Labs, slides, notebooks, diagrams to be added incrementally |
+| `https://typesafe.ai/blog/introducing-system-one-models-and-jev` | vendor announcement | `M11` | System One model concept and Jev release; vendor claims, to be verified by measurement |
+| `https://docs.typesafe.ai/` | vendor documentation | `M11` | Question types, response format, models, pricing (input tokens only), context limits |
+| `https://github.com/manjunathshiva/opendecider` | open-weight decision models | `M11` | Local decision models with the same typed-question interface; self-reported benchmarks |
+| `https://arxiv.org/abs/2306.05685` | research paper | `M11` | Position, verbosity, and self-enhancement bias of language models used as judges |
+| `notes/benchmark-judge-results.md` | measured results | `M11` | Calibration, cost, latency, and routing replay on 120 synthetic tickets; gemma-12b on 49 tickets |
+| `resources/` | local supporting assets | `M1, M2, M3, M4, M5, M6, M7, M8, M9, M10, M11` | Labs, slides, notebooks, diagrams to be added incrementally |
 
 ## Mapping Rules
 

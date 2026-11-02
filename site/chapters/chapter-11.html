@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>M11 - Decision Models, Judges, Cost, and Observability</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/site.css">
+  <script defer src="../assets/js/site.js"></script>
+</head>
+<body id="top" data-page-lang="en">
+  <div id="google_translate_element" class="translate-host" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="shell">
+      <section class="hero">
+        <p><a href="../index.html">Home</a></p>
+        <h1>M11 - Decision Models, Judges, Cost, and Observability</h1>
+        <p class="hero-copy">Use typed decision models as judges, routers, and gates inside an agent; measure their calibration; combine them with people and larger models; and account for cost and traces.</p>
+      </section>
+    </div>
+  </header>
+
+  <main class="shell module-layout">
+    <aside class="panel outline-panel" aria-label="Module outline">
+      <h2 class="outline-title">Outline</h2>
+      <nav id="outline-nav"></nav>
+    </aside>
+
+    <article class="module-main">
+      <section class="panel">
+        <nav class="module-nav" aria-label="Module navigation">
+          <a href="chapter-10.html">M10 Previous</a>
+          <span>M11</span>
+          <span>Next</span>
+        </nav>
+      </section>
+
+      <section class="panel info-grid">
+        <div>
+          <h2>1. Learning outcomes</h2>
+          <h3>1.1 Judging, routing, and accounting</h3>
+          <ul>
+            <li>Explain the difference between a generative model and a decision model that returns typed answers with probabilities.</li>
+            <li>Place a judge in an agent as evaluator, router, guardrail, or gate, and choose between one model and a separate judge.</li>
+            <li>Measure a judge with accuracy, calibration error, and the accuracy of its confident answers.</li>
+            <li>Design confidence thresholds, cascades, and human review that act on those probabilities.</li>
+            <li>Estimate the cost of an agent run and define the traces and metrics needed to operate it.</li>
+          </ul>
+        </div>
+        <div>
+          <h2>2. Topics</h2>
+          <h3>2.1 From a probability to a decision</h3>
+          <p>The module separates producing text from deciding, shows how a decision model fits into an evaluator-optimizer loop, reports a measured comparison of four judges on labelled tickets, and uses the measurements to set thresholds, build a cascade, and budget cost.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>3. Decision models</h2>
+        <h3>3.1 Generation versus decision</h3>
+        <p>Most agent steps that are called reasoning are in fact decisions with a small answer space: which team handles this request, is this output acceptable, is this action allowed. A generative model answers them by writing text that code must then parse, and the text carries no calibrated measure of how sure the model is.</p>
+        <p>A <strong>decision model</strong> reverses the interface. It receives a state and a list of typed questions and returns typed answers with probabilities, in a single forward pass, without producing free text. The vendor that popularized this class of model calls it a System One model, by analogy with fast, intuitive judgment, and describes it as a replacement for the smart if-statement inside application code. The agent keeps the slower, deliberate generation for work that needs it.</p>
+        <h3>3.2 Typed questions and probabilities</h3>
+        <table>
+          <thead>
+            <tr><th>Question type</th><th>Asks</th><th>Returns</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Yes/no</td><td>Is a statement about the state true?</td><td>One probability of yes</td></tr>
+            <tr><td>Choice</td><td>Which one option from a described set?</td><td>The top option and a probability for each option</td></tr>
+            <tr><td>Score</td><td>Where does the state fall on ordered, described levels?</td><td>An expected level and a probability for each level</td></tr>
+          </tbody>
+        </table>
+        <p>Several questions about the same state can be sent in one call. The calling code receives numbers, so thresholds, comparisons, and routing remain ordinary code that can be tested.</p>
+        <h3>3.3 Available implementations</h3>
+        <p>Three families can serve this interface, with different trade-offs.</p>
+        <ul>
+          <li><strong>Hosted decision model.</strong> Jev, from TypeSafe AI, was released in September 2026 as a closed-weight model available only through an API. Its documentation lists text input, questions of yes/no, choice, score, and image-location types, a context limit of 64k tokens per request, and billing on input tokens only, at USD 0.042 per million tokens at the time of writing. The vendor reports that the model is trained with a method called Reinforcement Learning for Calibrated Decisions and claims latency in hundreds of milliseconds. These are vendor statements and should be checked against measurements on the target data.</li>
+          <li><strong>Open decision models.</strong> Small open-weight models trained for the same interface exist, including a 400M-parameter encoder and a 4B model, distributed with a Python package that exposes the same question schema. They run locally and cost nothing per call, but they are young and their published benchmarks are self-reported.</li>
+          <li><strong>General language model as judge.</strong> Any chat model can be prompted to return structured answers with probabilities. This needs no new infrastructure and works with a local runtime, but the probabilities are the model's own statements and must be calibrated.</li>
+        </ul>
+        <p>Because the three expose the same contract, an agent can select the implementation by configuration and compare them on the same questions.</p>
+      </section>
+
+      <section class="panel">
+        <h2>4. Judges in the architecture</h2>
+        <h3>4.1 Four placements</h3>
+        <table>
+          <thead>
+            <tr><th>Placement</th><th>Question it answers</th><th>Effect of the answer</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Evaluator</td><td>Does the artifact meet the specification? Does it add anything outside it?</td><td>Accept, revise, or ask a person</td></tr>
+            <tr><td>Router</td><td>Which path, model, or agent should handle this request?</td><td>Selects the next node</td></tr>
+            <tr><td>Guardrail</td><td>Is this input or output permitted?</td><td>Blocks or rewrites</td></tr>
+            <tr><td>Gate</td><td>May this irreversible action proceed?</td><td>Requires approval below a confidence level</td></tr>
+          </tbody>
+        </table>
+        <p>In an evaluator-optimizer loop the judge sits between generation and the decision to repeat. Deterministic checks, such as tests, remain the hard stop criterion; the judge covers what tests cannot express, such as fit to a written specification or behavior outside its scope.</p>
+        <h3>4.2 One model or a separate judge</h3>
+        <p>Using the same model to generate and to judge is the cheapest design and the weakest. Evaluations of language models as judges report systematic tendencies: a preference for output produced by the same model, a preference for longer answers, and sensitivity to the order of candidates. A separate judge reduces shared blind spots, particularly when it differs in provider or training.</p>
+        <ul>
+          <li><strong>One model:</strong> acceptable for low-stakes drafts, with deterministic checks doing the real verification.</li>
+          <li><strong>Separate model of the same size:</strong> removes self-preference at the price of a second call.</li>
+          <li><strong>Dedicated decision model:</strong> adds speed and a probability designed to be read, and keeps the generating model out of the verdict.</li>
+          <li><strong>Several judges:</strong> reserve for decisions whose cost of error is high, because cost grows with each added judge.</li>
+        </ul>
+        <h3>4.3 Writing the questions</h3>
+        <p>The quality of the questions bounds the quality of the judge. A small set of rules applies to every implementation.</p>
+        <ul>
+          <li>Ask one condition per question. Combine answers in code instead of asking compound questions.</li>
+          <li>Phrase every yes/no question so that a high value means the condition holds.</li>
+          <li>Describe each option and level in terms of observable evidence.</li>
+          <li>Keep question wording, thresholds, and options in one module, so they can be versioned and reviewed.</li>
+          <li>Send the full state the judge needs, with named fields, and remove everything irrelevant.</li>
+        </ul>
+        <h3>4.4 A backend-independent contract</h3>
+        <p>The agent depends on a small interface, not on a provider. The judge receives a state and typed questions and returns answers that carry a value and a probability distribution; the thresholds that turn a probability into a decision are separate code.</p>
+        <pre><code>class Judge(Protocol):
+    def judge(self, state: str, questions: Sequence[Question]) -&gt; Verdict: ...
+
+questions = [
+    Choice(id="team", prompt="Which team should handle this ticket?",
+           options=["billing", "engineering", "sales"]),
+    Noul(id="urgent", prompt="Does the customer need a resolution within 24 hours?"),
+]
+verdict = make_judge().judge(ticket_text, questions)     # backend chosen by configuration
+verdict["urgent"].probabilities["true"]                  # for example 0.90
+
+def decide(answer, accept=0.7, reject=0.3):
+    p = answer.probabilities["true"]
+    return "yes" if p &gt;= accept else "no" if p &lt;= reject else "unsure"</code></pre>
+        <p>A backend failure must raise an error. Converting a timeout or an authorization failure into a negative answer silently approves or rejects work for the wrong reason.</p>
+      </section>
+
+      <section class="panel">
+        <h2>5. Measuring a judge</h2>
+        <h3>5.1 Metrics</h3>
+        <table>
+          <thead>
+            <tr><th>Metric</th><th>Meaning</th><th>Why it matters</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Accuracy</td><td>Share of correct top answers</td><td>Basic quality</td></tr>
+            <tr><td>Expected calibration error (ECE)</td><td>Average gap between stated confidence and actual accuracy, over confidence bins</td><td>Whether a probability of 0.9 means correct nine times in ten</td></tr>
+            <tr><td>Brier score</td><td>Mean squared error of the probability vector</td><td>Combines accuracy and calibration; lower is better</td></tr>
+            <tr><td>Accuracy at confidence 0.7 or more</td><td>Accuracy on the answers the judge is sure about</td><td>What a threshold-based router can trust</td></tr>
+            <tr><td>Coverage at confidence 0.7 or more</td><td>Share of answers the judge is sure about</td><td>How much work remains for a larger model or a person</td></tr>
+          </tbody>
+        </table>
+        <p>Accuracy alone hides the failure that matters most in a routed system: a judge that is wrong and certain never triggers escalation.</p>
+        <h3>5.2 Benchmark design</h3>
+        <p>The measurements below use 120 synthetic support tickets without personal data: 100 built from templates with labels correct by construction, and 20 written by hand to include negations, implicit refunds, and urgency without keywords. Each ticket carries three questions sent in one call: which team (three options), whether resolution is needed within 24 hours, and whether a refund or credit is explicitly requested. Four systems answered the same questions: a hosted decision model, a hosted general language model, a local general language model, and a gradient-boosted classifier on word features trained with five-fold cross-validation.</p>
+        <h3>5.3 Results on the full ticket set</h3>
+        <table>
+          <thead>
+            <tr><th>Task</th><th>System</th><th>Accuracy</th><th>ECE</th><th>Brier</th><th>Mean confidence</th><th>Accuracy when confident</th><th>Coverage when confident</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Team</td><td>Hosted general model</td><td>0.87</td><td>0.063</td><td>0.153</td><td>0.87</td><td>0.93</td><td>0.88</td></tr>
+            <tr><td>Team</td><td>Hosted decision model</td><td>0.91</td><td>0.032</td><td>0.114</td><td>0.93</td><td>0.97</td><td>0.88</td></tr>
+            <tr><td>Team</td><td>Gradient boosting</td><td>0.86</td><td>0.076</td><td>0.196</td><td>0.89</td><td>0.91</td><td>0.90</td></tr>
+            <tr><td>Urgent</td><td>Hosted general model</td><td>0.98</td><td>0.063</td><td>0.023</td><td>0.94</td><td>1.00</td><td>0.98</td></tr>
+            <tr><td>Urgent</td><td>Hosted decision model</td><td>0.99</td><td>0.128</td><td>0.055</td><td>0.86</td><td>1.00</td><td>0.93</td></tr>
+            <tr><td>Urgent</td><td>Gradient boosting</td><td>0.87</td><td>0.055</td><td>0.196</td><td>0.89</td><td>0.92</td><td>0.88</td></tr>
+            <tr><td>Refund</td><td>Hosted general model</td><td>1.00</td><td>0.033</td><td>0.007</td><td>0.97</td><td>1.00</td><td>1.00</td></tr>
+            <tr><td>Refund</td><td>Hosted decision model</td><td>0.99</td><td>0.047</td><td>0.012</td><td>0.96</td><td>1.00</td><td>0.99</td></tr>
+            <tr><td>Refund</td><td>Gradient boosting</td><td>0.97</td><td>0.033</td><td>0.063</td><td>0.95</td><td>0.97</td><td>0.99</td></tr>
+          </tbody>
+        </table>
+        <table>
+          <thead>
+            <tr><th>System</th><th>Mean latency per ticket</th><th>Cost for 120 tickets</th><th>Preparation</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Hosted general model</td><td>2,057 ms</td><td>USD 0.0202</td><td>Prompt only</td></tr>
+            <tr><td>Hosted decision model</td><td>187 ms</td><td>USD 0.0020</td><td>Question wording only</td></tr>
+            <tr><td>Gradient boosting</td><td>Negligible</td><td>None</td><td>Labelled data for every task, retraining on change</td></tr>
+          </tbody>
+        </table>
+        <h3>5.4 A local model on the first 49 tickets</h3>
+        <p>A 12B-parameter local language model run on a GPU was interrupted after the first 49 tickets, all template-built. The comparison below uses the same 49 tickets for every system.</p>
+        <table>
+          <thead>
+            <tr><th>Task</th><th>System</th><th>Accuracy</th><th>ECE</th><th>Mean confidence</th><th>Coverage when confident</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Team</td><td>Local 12B model</td><td>0.77</td><td>0.233</td><td>0.92</td><td>1.00</td></tr>
+            <tr><td>Team</td><td>Hosted decision model</td><td>0.90</td><td>0.077</td><td>0.91</td><td>0.82</td></tr>
+            <tr><td>Urgent</td><td>Local 12B model</td><td>0.85</td><td>0.096</td><td>0.90</td><td>1.00</td></tr>
+            <tr><td>Urgent</td><td>Hosted decision model</td><td>0.98</td><td>0.132</td><td>0.87</td><td>0.94</td></tr>
+            <tr><td>Refund</td><td>Local 12B model</td><td>0.94</td><td>0.048</td><td>0.98</td><td>1.00</td></tr>
+            <tr><td>Refund</td><td>Hosted decision model</td><td>1.00</td><td>0.043</td><td>0.96</td><td>1.00</td></tr>
+          </tbody>
+        </table>
+        <p>The local model needed about 16 seconds per ticket. On two tickets it never answered the refund question, which both contained the phrase "I do not want a refund"; those two tickets are counted as failures, not as correct answers.</p>
+        <h3>5.5 Reading the results</h3>
+        <ul>
+          <li>On the full set the hosted decision model had the best team accuracy and calibration, about one tenth of the cost, and about eleven times lower latency than the hosted general model.</li>
+          <li>The decision model was under-confident on urgency: mean confidence 0.86 against accuracy 0.99. A threshold chosen for one task should not be reused for another.</li>
+          <li>The local general model was over-confident and never uncertain: on the team task its mean confidence was 0.92 with accuracy 0.77, and every answer exceeded the 0.7 threshold. A router built on it would never escalate its errors.</li>
+          <li>Gradient boosting was competitive where wording is simple and fell to 0.87 on urgency, where negations such as "no rush" matter.</li>
+        </ul>
+        <p>The data are limited. The set is synthetic and template-heavy, which favors the classifier; it has only 120 tickets, so differences of a few points are not significant; and some team errors may stem from ambiguous labels, which were not audited. Thresholds must be tuned on the target data before deployment.</p>
+      </section>
+
+      <section class="panel">
+        <h2>6. Decision model versus a classical classifier</h2>
+        <h3>6.1 What is the same</h3>
+        <p>Both take an input and return a class with a probability, run in milliseconds, and produce no free text. For a fixed problem with plentiful labels they can reach similar accuracy.</p>
+        <h3>6.2 What differs</h3>
+        <table>
+          <thead>
+            <tr><th>Aspect</th><th>Gradient-boosted classifier</th><th>Decision model</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Input</td><td>Engineered features, or text turned into word statistics</td><td>Free text or structured data as written</td></tr>
+            <tr><td>Training</td><td>A labelled dataset per task, retrained when the task changes</td><td>Already trained; asked new questions at run time</td></tr>
+            <tr><td>The question</td><td>Fixed inside the model</td><td>A parameter of each call</td></tr>
+            <tr><td>Calibration</td><td>Usually a separate step</td><td>Claimed as a training objective; verify per task</td></tr>
+            <tr><td>Explanation</td><td>Feature attribution is available</td><td>Probabilities only</td></tr>
+            <tr><td>Control of failure</td><td>Fully local and inspectable</td><td>Depends on the provider and on the wording of the question</td></tr>
+          </tbody>
+        </table>
+        <h3>6.3 Choosing</h3>
+        <p>A trained classifier remains the better choice for a stable problem with labelled data, strict cost or latency limits, and a need for explanations. A decision model fits when there are many questions, when they change often, when labels do not exist yet, or when the input is unstructured text. In practice the decision model can also produce labels for training the classifier later.</p>
+      </section>
+
+      <section class="panel">
+        <h2>7. Thresholds, cascades, and people</h2>
+        <h3>7.1 Three-way decisions</h3>
+        <p>A probability supports three outcomes instead of two: act, reject, or defer. The thresholds that separate them express the cost of each error. Raising the acceptance threshold fits actions where a false yes is expensive, such as a refund or an alert to a person on call; lowering it fits situations where a missed detection is expensive, such as a safety issue. The band between the thresholds is the share of work that goes to a person or to a stronger model, and it is the quantity to measure.</p>
+        <h3>7.2 Cascades</h3>
+        <p>A cascade orders judges from cheap and fast to slow and strong. Each question is answered by the first judge whose confidence reaches the threshold; only the unsure questions go to the next judge, and what is still unsure after the last judge goes to a person.</p>
+        <p>The table replays a cascade from stored answers on all 120 tickets, with three questions per ticket. "Resolved automatically" is the share of questions answered without a person; "accuracy" is measured on those questions. The replay charges a whole ticket to every judge it reaches, which slightly overstates the cost of a live cascade that re-asks only the unsure questions.</p>
+        <table>
+          <thead>
+            <tr><th>Setup</th><th>Threshold</th><th>Resolved automatically</th><th>Accuracy</th><th>Cost per 1,000 tickets</th><th>Latency per ticket</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Decision model, then general model, then person</td><td>0.7</td><td>96.9%</td><td>0.983</td><td>USD 0.06</td><td>about 760 ms</td></tr>
+            <tr><td>Decision model alone, then person</td><td>0.7</td><td>93.3%</td><td>0.991</td><td>USD 0.02</td><td>about 190 ms</td></tr>
+            <tr><td>General model alone, then person</td><td>0.7</td><td>95.3%</td><td>0.980</td><td>USD 0.17</td><td>about 2,060 ms</td></tr>
+            <tr><td>Decision model, then general model, then person</td><td>0.9</td><td>88.3%</td><td>0.997</td><td>USD 0.13</td><td>about 1,540 ms</td></tr>
+            <tr><td>Decision model alone, then person</td><td>0.9</td><td>75.3%</td><td>0.996</td><td>USD 0.02</td><td>about 190 ms</td></tr>
+          </tbody>
+        </table>
+        <p>At 0.7 the cascade halves the number of questions that reach a person compared with the decision model alone, in exchange for a small loss of precision and about three times the cost; it still costs about one third of the general model alone. Raising the threshold buys accuracy with more human review. These figures come from a synthetic set and must be recomputed on real traffic before choosing a threshold.</p>
+        <h3>7.3 Human review that works</h3>
+        <p>The strongest use of a person in an agent is as the last tier of a cascade, called only in specific conditions.</p>
+        <ul>
+          <li><strong>Uncertain band:</strong> the judge's probability lies between the thresholds.</li>
+          <li><strong>Irreversible action:</strong> payment, deletion, publication, or any step that cannot be undone, regardless of confidence.</li>
+          <li><strong>Exhausted budget:</strong> the loop reached its iteration, time, or cost limit.</li>
+        </ul>
+        <p>The reviewer needs a small, decision-ready package: the artifact, the failing evidence, the judge's probabilities, and three actions (approve, stop, or give feedback for another round). The decision and the reviewer's note must be written to the trace. A rate of human review that rises over time signals drift in the judge or in the input, and the recorded decisions are the labelled data for re-calibrating the thresholds.</p>
+        <h3>7.4 Escalating the generating model</h3>
+        <p>Routing also applies to the model that does the work. A first attempt on a small, fast model is cheap; a failed attempt is a deterministic signal, from the tests, that the task is harder than expected. The next attempt then uses a larger model with the failure as feedback. This keeps the average cost near that of the small model while preserving the capability of the large one for the cases that need it.</p>
+      </section>
+
+      <section class="panel">
+        <h2>8. Cost and observability</h2>
+        <h3>8.1 Cost model</h3>
+        <p>The cost of a run is the sum over iterations of the generator call and the evaluator calls, plus any person's time.</p>
+        <pre><code>run cost = iterations x (generator tokens x generator price
+                         + evaluator input tokens x evaluator price)
+         + cascade escalations x stronger judge price
+         + human reviews x reviewer cost</code></pre>
+        <p>Three observations follow from the measurements. First, iterations multiply everything, so the budget limit is also a cost limit. Second, a dedicated decision model priced on input tokens only makes the evaluator a small term, while a general model used as evaluator can approach the cost of the generator. Third, the cheapest path is often the one that avoids the call: deterministic checks first, then a fast judge, then stronger models only for what remains.</p>
+        <h3>8.2 What to trace</h3>
+        <p>Every node should append a structured record to the trace, with enough fields to reconstruct and price the run.</p>
+        <ul>
+          <li>Run identifier, iteration number, node name, and timestamps.</li>
+          <li>Model identifier and version, including the exact version of any hosted judge.</li>
+          <li>Input and output sizes in tokens, latency, and computed cost.</li>
+          <li>For every judge answer: the question, the value, the probabilities, and the decision taken.</li>
+          <li>For harness steps: test counts, failures, and static violations.</li>
+          <li>For human steps: the question shown, the reply, and the elapsed time.</li>
+        </ul>
+        <p>Tracing platforms and open instrumentation standards store such records and show a run as a tree of steps. The same records can be written as lines of JSON, which is sufficient for a small system.</p>
+        <h3>8.3 Metrics to watch</h3>
+        <table>
+          <thead>
+            <tr><th>Metric</th><th>Signals</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Iterations per run and success rate</td><td>Task difficulty, weak feedback, wrong budget</td></tr>
+            <tr><td>Cost and latency per run, by node</td><td>Where money and time go</td></tr>
+            <tr><td>Share of questions escalated or sent to a person</td><td>Judge quality and drift</td></tr>
+            <tr><td>Agreement between judge and later human decision</td><td>Calibration over time</td></tr>
+            <tr><td>Error and retry rate, by provider</td><td>Reliability of dependencies</td></tr>
+          </tbody>
+        </table>
+        <h3>8.4 Operating a judge</h3>
+        <ul>
+          <li>Pin the model version of a hosted judge once thresholds have been calibrated, because an alias can move to a new release.</li>
+          <li>Re-run the labelled benchmark whenever the judge, the question wording, or the thresholds change.</li>
+          <li>Treat a missing answer as an error and ask again for only the missing questions.</li>
+          <li>Do not send personal or private data to a hosted judge without approval; use a local judge or synthetic data for development.</li>
+          <li>Keep an offline fallback so that the system degrades to a local model when the hosted service or the network is unavailable.</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>9. Guided lab</h2>
+        <h3>9.1 Choose the judge by configuration</h3>
+        <p>The exercises are in the chapter 14 directory of the companion repository. The same questions run on different judges by changing environment variables.</p>
+        <pre><code>cd ch14
+LLM_PROVIDER=deepseek .venv/bin/python demo_judge.py
+JUDGE_BACKEND=jev JEV_MODEL=jev-1.14.0 .venv/bin/python demo_judge.py
+LLM_PROVIDER=ollama OLLAMA_MODEL=gemma4:e4b .venv/bin/python demo_judge.py
+JUDGE_BACKEND=cascade CASCADE_THRESHOLD=0.7 LLM_PROVIDER=deepseek .venv/bin/python demo_judge.py</code></pre>
+        <h3>9.2 Measure and route</h3>
+        <pre><code>.venv/bin/python bench/run_bench.py --backend llm --label my-model
+.venv/bin/python bench/report.py
+.venv/bin/python bench/routing_replay.py --tiers jev-1.14.0 deepseek-v4-flash</code></pre>
+        <ol>
+          <li>Run the benchmark on a judge of your choice and compare its calibration with the stored results.</li>
+          <li>Replay a cascade at thresholds 0.6, 0.7, and 0.8 and find the point where the share sent to a person is acceptable.</li>
+          <li>Add five tickets that contain negations and observe which judge fails first.</li>
+        </ol>
+        <h3>9.3 Close the loop</h3>
+        <ol>
+          <li>Run the agentic loop with a hosted decision model as evaluator and compare its cost with a general model as evaluator.</li>
+          <li>Run it with escalation enabled and a small first model, and read the trace to see which iteration used which model.</li>
+        </ol>
+      </section>
+
+      <section class="panel">
+        <h2>10. Source map</h2>
+        <h3>10.1 Primary references</h3>
+        <ul>
+          <li><a href="https://typesafe.ai/blog/introducing-system-one-models-and-jev" target="_blank" rel="noopener noreferrer">Introducing System One models and Jev</a></li>
+          <li><a href="https://docs.typesafe.ai/" target="_blank" rel="noopener noreferrer">TypeSafe documentation</a></li>
+          <li><a href="https://docs.typesafe.ai/models.md" target="_blank" rel="noopener noreferrer">Jev models, pricing, and context limits</a></li>
+          <li><a href="https://docs.typesafe.ai/primitives/noul.md" target="_blank" rel="noopener noreferrer">Writing yes/no questions and choosing thresholds</a></li>
+          <li><a href="https://github.com/manjunathshiva/opendecider" target="_blank" rel="noopener noreferrer">OpenDecider open decision models</a></li>
+          <li><a href="https://arxiv.org/abs/2306.05685" target="_blank" rel="noopener noreferrer">Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena</a></li>
+          <li><a href="https://docs.smith.langchain.com/" target="_blank" rel="noopener noreferrer">LangSmith documentation</a></li>
+          <li><a href="https://opentelemetry.io/docs/" target="_blank" rel="noopener noreferrer">OpenTelemetry documentation</a></li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch14" target="_blank" rel="noopener noreferrer">Chapter 14 judge, benchmark, and routing exercises</a></li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>11. Key takeaways</h2>
+        <h3>11.1 Design rules</h3>
+        <ul>
+          <li>Use a typed decision where the answer space is small; keep generation for work that needs it.</li>
+          <li>Keep the generating model out of its own verdict whenever the cost of an error is not negligible.</li>
+          <li>Measure calibration on the target data: a confident wrong judge defeats threshold-based routing.</li>
+          <li>Put thresholds in code, tune them per task, and send the uncertain band to a stronger judge or a person.</li>
+          <li>Ask a person for uncertainty, irreversible actions, and exhausted budgets, and record every decision.</li>
+          <li>Trace every node with model version, cost, latency, and the judge's probabilities.</li>
+          <li>Pin hosted model versions, keep an offline fallback, and treat vendor claims as hypotheses until measured.</li>
+        </ul>
+      </section>
+    </article>
+  </main>
+
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>
