@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>M10 - The Agentic Loop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/site.css">
+  <script defer src="../assets/js/site.js"></script>
+</head>
+<body id="top" data-page-lang="en">
+  <div id="google_translate_element" class="translate-host" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="shell">
+      <section class="hero">
+        <p><a href="../index.html">Home</a></p>
+        <h1>M10 - The Agentic Loop</h1>
+        <p class="hero-copy">Define the agentic loop, design its state and its entry, stop, and repeat criteria, and implement it with LangGraph under an explicit iteration budget.</p>
+      </section>
+    </div>
+  </header>
+
+  <main class="shell module-layout">
+    <aside class="panel outline-panel" aria-label="Module outline">
+      <h2 class="outline-title">Outline</h2>
+      <nav id="outline-nav"></nav>
+    </aside>
+
+    <article class="module-main">
+      <section class="panel">
+        <nav class="module-nav" aria-label="Module navigation">
+          <a href="chapter-09.html">M9 Previous</a>
+          <span>M10</span>
+          <span>Next</span>
+        </nav>
+      </section>
+
+      <section class="panel info-grid">
+        <div>
+          <h2>1. Learning outcomes</h2>
+          <h3>1.1 Designing loops that terminate</h3>
+          <ul>
+            <li>Distinguish chains, deterministic workflows, agents, and multi-agent systems by who controls the next step.</li>
+            <li>Define the agentic loop and name its stages: goal, plan, act, verify, decide.</li>
+            <li>Specify state, entry criteria, stop criteria, and repeat criteria before writing any prompt.</li>
+            <li>Choose between planner-executor, router, orchestrator-worker, and evaluator-optimizer.</li>
+            <li>Implement a bounded loop in LangGraph with conditional edges, checkpoints, and a human interrupt.</li>
+          </ul>
+        </div>
+        <div>
+          <h2>2. Topics</h2>
+          <h3>2.1 From definition to a running loop</h3>
+          <p>The module defines the loop, decomposes it into state and criteria, maps the standard orchestration patterns onto it, covers retries, parallelism, and memory, and ends with a complete loop that repairs a failing function until its tests pass.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>3. From chains to agentic loops</h2>
+        <h3>3.1 Four levels of control</h3>
+        <p>Applications that call a language model differ mainly in who decides the next step. The decision can be fixed in code, taken by the model inside one task, or distributed across several models.</p>
+        <table>
+          <thead>
+            <tr><th>Level</th><th>Who chooses the next step</th><th>Typical use</th><th>Main risk</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Chain</td><td>The developer, as a fixed sequence</td><td>Prompt, call, parse</td><td>Cannot adapt to unexpected input</td></tr>
+            <tr><td>Deterministic workflow</td><td>The developer, with branches and loops written in code</td><td>Routing, validation, retries around known steps</td><td>Branches multiply as cases grow</td></tr>
+            <tr><td>Agent</td><td>The model, choosing tools and when to stop</td><td>Open-ended tasks with verifiable outcomes</td><td>Unbounded cost and unpredictable paths</td></tr>
+            <tr><td>Multi-agent system</td><td>Several models with separate roles and contexts</td><td>Work that splits into independent specialties</td><td>Coordination overhead and error propagation</td></tr>
+          </tbody>
+        </table>
+        <p>Moving down the table trades predictability for flexibility. The correct level is the lowest one that solves the task.</p>
+        <h3>3.2 Definition of the agentic loop</h3>
+        <p>An <strong>agentic loop</strong> is a controlled repetition in which a system pursues a goal by cycling through five stages until an explicit completion criterion is met or a budget is exhausted.</p>
+        <ol>
+          <li><strong>Goal:</strong> a specification of what must be true when the work is complete.</li>
+          <li><strong>Plan:</strong> the next action or set of actions, chosen from the current state.</li>
+          <li><strong>Act:</strong> execution through tools, code, or specialized agents.</li>
+          <li><strong>Verify:</strong> evidence about the result, produced by something other than the actor wherever possible.</li>
+          <li><strong>Decide:</strong> stop, repeat with feedback, or hand over to a person.</li>
+        </ol>
+        <p>The defining property is that the verification result changes what happens next. A pipeline that always runs the same steps is a workflow; a loop reads its own outcome and decides.</p>
+        <h3>3.3 When a loop is the wrong tool</h3>
+        <p>A loop adds latency, cost, and variance. It is justified when two conditions hold: the first attempt is often wrong, and correctness can be checked cheaply and reliably. When the task is a known sequence, a workflow is simpler and cheaper. When correctness cannot be checked, repetition only produces more confident errors, so the loop needs a person as the verifier.</p>
+      </section>
+
+      <section class="panel">
+        <h2>4. Anatomy of a loop</h2>
+        <h3>4.1 State</h3>
+        <p>State is the only memory that survives between iterations, so it must hold everything the next decision needs and nothing else. A typed schema makes this explicit and lets the framework checkpoint it.</p>
+        <ul>
+          <li><strong>Inputs:</strong> the goal or specification, which no node should modify.</li>
+          <li><strong>Working data:</strong> the current artifact, such as the draft or generated code.</li>
+          <li><strong>Feedback:</strong> the verification result that the next attempt must address.</li>
+          <li><strong>Control data:</strong> iteration counter, budget, status, and accumulated cost.</li>
+          <li><strong>Trace:</strong> an append-only record of what each node did, used for observation and audit.</li>
+        </ul>
+        <h3>4.2 Entry criteria</h3>
+        <p>Entry criteria decide whether a loop should start at all. Typical checks are that the goal is specific enough to verify, that the required tools and credentials exist, and that the request is inside the permitted scope. A request that fails these checks should be rejected or clarified before any model is called, because a loop started on an unverifiable goal cannot terminate meaningfully.</p>
+        <h3>4.3 Stop criteria</h3>
+        <p>Every loop needs more than one way to end. The criteria are evaluated by code, not by the model that is doing the work.</p>
+        <table>
+          <thead>
+            <tr><th>Stop reason</th><th>Condition</th><th>Outcome</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Success</td><td>The verifier reports that the completion criteria are met</td><td>Accept the artifact</td></tr>
+            <tr><td>Budget</td><td>The iteration, token, time, or cost limit is reached</td><td>Escalate to a person or fail explicitly</td></tr>
+            <tr><td>No progress</td><td>The same failure repeats, or the artifact stops changing</td><td>Escalate; further iterations will not help</td></tr>
+            <tr><td>Uncertainty</td><td>The verifier cannot decide with enough confidence</td><td>Ask a person</td></tr>
+            <tr><td>Unsafe action</td><td>The next step is irreversible or outside the scope</td><td>Require approval before continuing</td></tr>
+          </tbody>
+        </table>
+        <h3>4.4 Repeat criteria and feedback</h3>
+        <p>When the loop does not stop, the quality of the feedback determines whether the next iteration improves. Feedback should name the specific failing check and quote its output, not state a general instruction to try again. A failing test report that names the assertion and the observed value gives the next attempt something to fix; the message "the result was wrong" does not.</p>
+        <p>Feedback also needs a limit. Passing the complete history of every attempt grows the context and anchors the model on its own earlier mistakes. Passing only the latest failure keeps the context small and focused.</p>
+      </section>
+
+      <section class="panel">
+        <h2>5. Orchestration patterns</h2>
+        <h3>5.1 Planner-executor</h3>
+        <p>A planner produces an ordered list of steps from the goal; an executor carries them out one at a time. The plan is a visible artifact that can be reviewed or edited before execution. The pattern fits tasks with a predictable shape, and it should include a replanning step, because a plan written at the start is wrong as soon as a step returns something unexpected.</p>
+        <h3>5.2 Router</h3>
+        <p>A router classifies the input and sends it to one specialized path: a prompt, a tool set, a model, or another agent. The router makes a single decision and does not loop. Its quality is the quality of its classification, so it benefits from a typed output with an explicit "none of the above" option and a rule for low confidence.</p>
+        <h3>5.3 Orchestrator-worker</h3>
+        <p>An orchestrator decomposes the task at run time, delegates the parts to workers, and combines their results. It differs from planner-executor because the subtasks are not known in advance and can run in parallel. Workers should receive only the context they need and return a structured result, so that one worker's failure does not corrupt the others.</p>
+        <h3>5.4 Evaluator-optimizer</h3>
+        <p>One component produces an artifact and another evaluates it against explicit criteria; the evaluation feeds the next attempt. This is the pattern closest to the agentic loop itself: generation, verification, and a decision to repeat. It works when criteria are clear and when revision improves the result. The evaluator may be deterministic code, a language model, a specialized decision model, or a person, and the strongest designs combine several of them.</p>
+        <h3>5.5 Specialized roles</h3>
+        <table>
+          <thead>
+            <tr><th>Role</th><th>Responsibility</th><th>Context it needs</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Orchestrator</td><td>Decomposes the goal, assigns work, merges results, applies stop criteria</td><td>Goal and summaries of results</td></tr>
+            <tr><td>Worker</td><td>Produces one artifact for one subtask</td><td>Its subtask and the relevant inputs</td></tr>
+            <tr><td>Reviewer</td><td>Judges the artifact against the specification</td><td>Specification and artifact, not the worker's reasoning</td></tr>
+            <tr><td>Tester</td><td>Runs executable checks and reports facts</td><td>Artifact and a test suite the worker cannot modify</td></tr>
+            <tr><td>Documenter</td><td>Records decisions, changes, and open points</td><td>Final artifact and the trace</td></tr>
+          </tbody>
+        </table>
+        <p>Roles are separated to keep contexts small and to prevent a component from grading its own work. A role that only changes the system prompt of the same model, with the same context, adds cost without adding independence.</p>
+      </section>
+
+      <section class="panel">
+        <h2>6. Implementing a loop with LangGraph</h2>
+        <h3>6.1 State and nodes</h3>
+        <p>The state is a typed dictionary. Fields that several nodes append to, such as the trace, declare a reducer so that updates are merged instead of overwritten.</p>
+        <pre><code>import operator
+from typing import Annotated, TypedDict
+
+class LoopState(TypedDict, total=False):
+    spec: str
+    code: str
+    feedback: str
+    iteration: int
+    max_iters: int
+    tests_passed: bool
+    status: str                      # running | accepted | stopped
+    cost_usd: float
+    trace: Annotated[list[dict], operator.add]</code></pre>
+        <p>Each node is a function that receives the state and returns only the fields it changes. The loop in this module has four working nodes: <code>generate</code> produces the artifact, <code>harness</code> runs the executable checks, <code>judge</code> answers typed questions about what the checks cannot cover, and <code>human</code> asks a person.</p>
+        <h3>6.2 Conditional edges as loop control</h3>
+        <p>The loop exists in the graph as an edge that returns to an earlier node. A routing function reads the state and names the next node, which keeps all stop and repeat logic in ordinary, testable code.</p>
+        <pre><code>def after_harness(state: LoopState) -&gt; str:
+    if state["tests_passed"]:
+        return "judge"
+    if state["iteration"] &lt; state["max_iters"]:
+        return "generate"           # repeat with the failure as feedback
+    return "human"                  # budget exhausted: escalate
+
+g = StateGraph(LoopState)
+g.add_edge(START, "generate")
+g.add_edge("generate", "harness")
+g.add_conditional_edges("harness", after_harness, ["judge", "generate", "human"])
+g.add_conditional_edges("judge", after_judge, ["finish", "human", "generate"])
+g.add_conditional_edges("human", after_human, ["generate", "finish"])
+g.add_edge("finish", END)
+graph = g.compile(checkpointer=MemorySaver())</code></pre>
+        <p>The iteration counter is incremented by <code>generate</code> and compared with <code>max_iters</code> in every routing function that can return to it. A loop without this comparison has no guaranteed end.</p>
+        <h3>6.3 Checkpoints and human interrupts</h3>
+        <p>Compiling the graph with a checkpointer saves the state after every node. This enables three behaviors: resuming after a crash, inspecting a past step, and pausing for a person. A node pauses the run by calling <code>interrupt</code>; the run resumes when the caller sends a value back.</p>
+        <pre><code>from langgraph.types import Command, interrupt
+
+def n_human(state: LoopState) -&gt; dict:
+    answer = interrupt({
+        "question": "Approve this code? Reply 'approve', 'stop', or write feedback.",
+        "iteration": state["iteration"],
+        "code": state["code"],
+    })
+    if str(answer).strip().lower() == "approve":
+        return {"status": "accepted"}
+    if str(answer).strip().lower() == "stop":
+        return {"status": "stopped"}
+    return {"feedback": f"Human feedback: {answer}", "status": "running",
+            "max_iters": state["max_iters"] + 2}   # a note buys two more attempts
+
+# resume the paused run
+graph.stream(Command(resume="approve"), {"configurable": {"thread_id": "run"}})</code></pre>
+        <p>The person is asked only in two cases: the evaluator is uncertain, or the budget is exhausted. Asking on every iteration turns the loop into a manual process and removes the benefit.</p>
+        <h3>6.4 The same pattern in ADK</h3>
+        <p>Agent Development Kit expresses the same idea as a workflow agent. A loop agent runs its sub-agents in order and repeats the sequence until a maximum number of iterations is reached or a sub-agent signals that the work is complete. The budget and the exit condition are therefore declared on the loop itself, and the generation and review steps are separate sub-agents that communicate through session state.</p>
+      </section>
+
+      <section class="panel">
+        <h2>7. Reliability inside the loop</h2>
+        <h3>7.1 Errors and retries</h3>
+        <p>Two kinds of failure require different handling. A <strong>technical failure</strong> is a timeout, a rate limit, or a malformed response; it is usually transient and can be retried with exponential backoff. A <strong>semantic failure</strong> is a well-formed result that does not meet the criteria; repeating the identical request returns the identical result at temperature zero, so the retry must change something, typically by adding the failure as feedback.</p>
+        <ul>
+          <li>Retry only operations that are safe to repeat, or make them idempotent with a key.</li>
+          <li>Bound every retry by count and by elapsed time.</li>
+          <li>Surface exhausted retries as errors. An API failure must never be converted into a negative answer such as "no".</li>
+          <li>When a model omits part of a requested structure, ask again for only the missing part instead of repeating the whole request.</li>
+        </ul>
+        <h3>7.2 Parallelization</h3>
+        <p>Independent subtasks can run concurrently, and independent checks on the same artifact can be evaluated together. LangGraph supports fan-out by returning several sends from a routing function, with a reducer on the receiving state field to merge the results. Parallel branches should not share mutable state, and the join step must define what happens when one branch fails: wait, continue with partial results, or fail the whole step.</p>
+        <h3>7.3 Memory and context across iterations</h3>
+        <p>Short-term memory is the loop state and the message history of the current run. It grows with every iteration, so the loop should summarize or drop old messages and keep the latest feedback verbatim. Long-term memory is a store that persists across runs, holding facts, preferences, or lessons learned. It should be read at the start of a run and written only through an explicit step, so that a bad iteration cannot silently corrupt it.</p>
+        <p>Tool use follows the same principle of least context. Each iteration should see only the tools relevant to its stage, with descriptions that state when not to use them.</p>
+      </section>
+
+      <section class="panel">
+        <h2>8. Worked example: repairing a payment-retry function</h2>
+        <h3>8.1 The task</h3>
+        <p>The goal is a function that authorizes a payment, retries on transient gateway errors, stops as soon as a request is approved, and returns a failure with a suggestion for an alternative payment method after three transient errors. A written specification states these requirements as three acceptance scenarios, and a test suite encodes them. The starting code is deliberately incomplete: it makes a single attempt.</p>
+        <h3>8.2 The harness as the stop criterion</h3>
+        <p>The generating model may modify only one file. The test suite is copied from a read-only location into a fresh temporary directory next to the candidate file on every run, so the model cannot make a test pass by editing it. Static checks reject behavior outside the specification, such as sleeping between attempts, importing network libraries, or running processes.</p>
+        <p>Test results are the hard completion criterion. An evaluator answers two typed questions that tests cannot settle, each as a probability: does the code implement the specification exactly, and does it add behavior that the specification does not request. The routing function applies thresholds to those probabilities:</p>
+        <pre><code>ACCEPT, REJECT = 0.7, 0.3
+
+def judge_decision(p_spec_ok: float, p_scope_creep: float) -&gt; str:
+    if p_spec_ok &gt;= ACCEPT and p_scope_creep &lt;= REJECT:
+        return "accept"
+    if p_spec_ok &lt;= REJECT or p_scope_creep &gt;= ACCEPT:
+        return "revise"
+    return "unsure"                  # goes to a person</code></pre>
+        <h3>8.3 Reading a trace</h3>
+        <p>Every node appends a record to the trace, so a run can be reviewed afterwards without rerunning it. A run with a hosted model as both generator and evaluator produced the following trace.</p>
+        <table>
+          <thead>
+            <tr><th>Iteration</th><th>Node</th><th>Result</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>generate</td><td>1,577 characters, 9.7 s, USD 0.0009</td></tr>
+            <tr><td>1</td><td>harness</td><td>Pass, three tests, no static violations</td></tr>
+            <tr><td>1</td><td>judge</td><td>P(specification met) 0.96, P(scope creep) 0.07, decision accept</td></tr>
+          </tbody>
+        </table>
+        <p>The run stopped after one iteration at a total cost of USD 0.0016. A capable model often passes at once, so the repair path is exercised in the automated tests with a scripted generator that first returns the failing starter and then a correct version: the first harness run fails, the failure text is passed to the second generation, and the second run passes. The same suite covers an uncertain evaluator that sends the run to a person, a person who stops the run, and an exhausted budget that escalates.</p>
+        <p>To observe the repair path with a real model, use a small local model as the generator: when its first attempt fails, the cost of the loop appears as additional iterations instead of a more expensive model.</p>
+      </section>
+
+      <section class="panel">
+        <h2>9. Guided lab</h2>
+        <h3>9.1 Run the loop</h3>
+        <p>The code is in the chapter 14 directory of the companion repository. Create an environment, run the offline tests, then run the loop against a model of choice.</p>
+        <pre><code>cd ch14
+python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
+.venv/bin/python -m pytest -q tests
+
+LLM_PROVIDER=ollama OLLAMA_MODEL=gemma4:e4b .venv/bin/python agentic_loop.py --human ask
+LLM_PROVIDER=deepseek .venv/bin/python agentic_loop.py --human ask</code></pre>
+        <h3>9.2 Observe the control flow</h3>
+        <ol>
+          <li>Read the printed trace and identify, for each record, which routing function chose the next node.</li>
+          <li>Run with <code>--max-iters 1</code> and a small local model; if its first attempt fails the tests, the exhausted budget escalates to the human prompt.</li>
+          <li>At the human prompt, reply with a sentence of feedback and observe that the budget is extended by two iterations.</li>
+        </ol>
+        <h3>9.3 Break it on purpose</h3>
+        <ol>
+          <li>Add a test to the case directory that the starter and the reference both fail, and observe which stop criterion ends the run.</li>
+          <li>Remove the comparison with <code>max_iters</code> from one routing function and describe the failure mode this introduces.</li>
+          <li>Add a static rule that forbids a new behavior and observe that a passing test suite does not override it.</li>
+        </ol>
+      </section>
+
+      <section class="panel">
+        <h2>10. Source map</h2>
+        <h3>10.1 Primary references</h3>
+        <ul>
+          <li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener noreferrer">Building effective agents</a></li>
+          <li><a href="https://langchain-ai.github.io/langgraph/" target="_blank" rel="noopener noreferrer">LangGraph documentation</a></li>
+          <li><a href="https://adk.dev/agents/workflow-agents/loop-agents/" target="_blank" rel="noopener noreferrer">ADK loop agents</a></li>
+          <li><a href="https://adk.dev/workflows/patterns/" target="_blank" rel="noopener noreferrer">ADK workflow patterns</a></li>
+          <li><a href="https://arxiv.org/abs/2210.03629" target="_blank" rel="noopener noreferrer">ReAct: Synergizing Reasoning and Acting in Language Models</a></li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch14" target="_blank" rel="noopener noreferrer">Chapter 14 agentic loop exercise</a></li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>11. Key takeaways</h2>
+        <h3>11.1 Design rules</h3>
+        <ul>
+          <li>Use the lowest level of control that solves the task; add a loop only when the first attempt is often wrong and correctness is cheap to check.</li>
+          <li>Define state, entry criteria, stop criteria, and feedback before writing prompts.</li>
+          <li>Give every loop several independent ways to end and an explicit iteration budget.</li>
+          <li>Evaluate the stop criteria in code and base them on evidence the generating component cannot alter.</li>
+          <li>Ask a person only when the evaluator is uncertain or the budget is exhausted.</li>
+          <li>Retry technical failures with backoff; answer semantic failures with specific feedback.</li>
+        </ul>
+      </section>
+    </article>
+  </main>
+
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>

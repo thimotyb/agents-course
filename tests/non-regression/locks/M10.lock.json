@@ -1,0 +1,41 @@
+{
+  "id": "M10",
+  "file": "site/chapters/chapter-10.html",
+  "required_texts": [
+    "M10 - The Agentic Loop",
+    "Outline",
+    "1. Learning outcomes",
+    "2. Topics",
+    "3. From chains to agentic loops",
+    "4. Anatomy of a loop",
+    "5. Orchestration patterns",
+    "6. Implementing a loop with LangGraph",
+    "7. Reliability inside the loop",
+    "8. Worked example: repairing a payment-retry function",
+    "9. Guided lab",
+    "10. Source map",
+    "11. Key takeaways",
+    "1.1 Designing loops that terminate",
+    "2.1 From definition to a running loop",
+    "3.1 Four levels of control",
+    "3.2 Definition of the agentic loop",
+    "3.3 When a loop is the wrong tool",
+    "4.1 State",
+    "4.2 Entry criteria",
+    "4.3 Stop criteria",
+    "4.4 Repeat criteria and feedback",
+    "5.1 Planner-executor",
+    "5.2 Router"
+  ],
+  "required_images": [],
+  "required_links": [
+    "../index.html",
+    "chapter-09.html",
+    "https://www.anthropic.com/engineering/building-effective-agents",
+    "https://langchain-ai.github.io/langgraph/",
+    "https://adk.dev/agents/workflow-agents/loop-agents/",
+    "https://adk.dev/workflows/patterns/",
+    "https://arxiv.org/abs/2210.03629",
+    "https://github.com/thimotyb/building-llm-applications/tree/main/ch14"
+  ]
+}

@@ -19,6 +19,7 @@
 | M7 | Labs and Exercises from Building LLM Applications | `site/chapters/chapter-07.html` | `building-llm-applications` repository | Practical implementation module with guided labs and exercises |
 | M8 | Agent Architectures: Foundational Patterns and Strategies | `site/chapters/chapter-08.html` | Claude Certified Architect - Foundations study guide and Exam Guide | Certification-informed foundations for agent loops, orchestration, tools, workflows, prompts, and reliability |
 | M9 | Agent2Agent Protocol and Agent Deployment | `site/chapters/chapter-09.html` | A2A Protocol, ADK A2A guides, Google Agent Runtime, and MuleSoft Agent Fabric documentation | Interoperable agents, ADK server/client implementation, deployment choices, and enterprise agent networks |
+| M10 | The Agentic Loop | `site/chapters/chapter-10.html` | Anthropic engineering article on building effective agents, LangGraph and ADK documentation, and `building-llm-applications/ch14` | Loop definition, state and stop criteria, orchestration patterns, bounded LangGraph implementation, and a verified repair loop |
 
 ## Source Inventory
 
@@ -61,11 +62,15 @@
 | `https://colab.research.google.com/github/GoogleCloudPlatform/generative-ai/blob/main/gemini/agent-engine/intro_agent_engine.ipynb?hl=it` | official Google Cloud Colab notebook | `M9` | Guided Agent Runtime setup, deployment, remote invocation, management, and cleanup |
 | `https://docs.mulesoft.com/agent-network/latest/af-agent-networks` | official MuleSoft documentation | `M9` | Agent Fabric networks, guided determinism, A2A agents, MCP servers, Exchange, CloudHub 2.0, Omni Gateway, and observability |
 | `https://github.com/thimotyb/building-llm-applications/tree/main/ch13` | runnable ADK A2A and Docker exercise | `M9` | Local-Ollama ADK server exposed with `to_a2a()`, ADK client consuming it through `RemoteA2aAgent`, and Docker/Compose containerization of the A2A server |
-| `resources/` | local supporting assets | `M1, M2, M3, M4, M5, M6, M7, M8, M9` | Labs, slides, notebooks, diagrams to be added incrementally |
+| `https://github.com/thimotyb/building-llm-applications/tree/main/ch14` | runnable agentic-loop exercise | `M10` | LiteLLM provider factory, typed judge interface, deterministic harness, and LangGraph loop with human interrupt for the payment-retry case |
+| `https://www.anthropic.com/engineering/building-effective-agents` | engineering article | `M10` | Workflow and agent patterns: routing, orchestrator-workers, evaluator-optimizer |
+| `https://langchain-ai.github.io/langgraph/` | official LangGraph documentation | `M10` | State graphs, conditional edges, checkpointers, interrupts |
+| `https://adk.dev/agents/workflow-agents/loop-agents/` | official ADK documentation | `M10` | Loop agent with maximum iterations and exit signal |
+| `resources/` | local supporting assets | `M1, M2, M3, M4, M5, M6, M7, M8, M9, M10` | Labs, slides, notebooks, diagrams to be added incrementally |
 
 ## Mapping Rules
 
 - Keep one module page per module under `site/chapters/`.
-- Keep module code stable (`M1` to `M9`) for the whole project lifecycle.
+- Keep module code stable (`M1` to `M10`) for the whole project lifecycle.
 - Update this file whenever modules are split, merged, or renamed.
 - Add every new source explicitly in Source Inventory.
