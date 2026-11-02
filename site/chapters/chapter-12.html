@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>M12 - The Agent Harness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/site.css">
+  <script defer src="../assets/js/site.js"></script>
+</head>
+<body id="top" data-page-lang="en">
+  <div id="google_translate_element" class="translate-host" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="shell">
+      <section class="hero">
+        <p><a href="../index.html">Home</a></p>
+        <h1>M12 - The Agent Harness</h1>
+        <p class="hero-copy">Define the harness around an agent: a written goal, contract checks, tests the agent cannot edit, gates, and permissions that make autonomous work bounded and verifiable.</p>
+      </section>
+    </div>
+  </header>
+
+  <main class="shell module-layout">
+    <aside class="panel outline-panel" aria-label="Module outline">
+      <h2 class="outline-title">Outline</h2>
+      <nav id="outline-nav"></nav>
+    </aside>
+
+    <article class="module-main">
+      <section class="panel">
+        <nav class="module-nav" aria-label="Module navigation">
+          <a href="chapter-11.html">M11 Previous</a>
+          <span>M12</span>
+          <span>Next</span>
+        </nav>
+      </section>
+
+      <section class="panel info-grid">
+        <div>
+          <h2>1. Learning outcomes</h2>
+          <h3>1.1 Making autonomous work verifiable</h3>
+          <ul>
+            <li>Define a harness and list its components.</li>
+            <li>Turn a goal into a specification with acceptance scenarios, explicit exclusions, and recorded open decisions.</li>
+            <li>Apply contract linting, mock-based playbooks, and executable tests as layered checks.</li>
+            <li>Protect the checks from the agent that they constrain, and recognize reward hacking.</li>
+            <li>Implement a harness whose result is the stop criterion of an agentic loop.</li>
+          </ul>
+        </div>
+        <div>
+          <h2>2. Topics</h2>
+          <h3>2.1 Specification, checks, gates, permissions</h3>
+          <p>The module starts from the definition of a harness, builds it from a written specification outward through contract checks and executable tests, orders the checks by cost, and finishes with a working harness for a payment-retry function.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>3. What a harness is</h2>
+        <h3>3.1 Definition</h3>
+        <p>An agent is a model plus everything that surrounds it. The <strong>harness</strong> is that surrounding system: the goal the agent pursues, the tools it may use, the constraints on what it may change, the checks that decide whether the work is correct, the gates that stop risky actions, the state it keeps, and the traces that record what happened. The model proposes; the harness decides what is accepted.</p>
+        <p>This division explains a common observation: when an agent fails, the cause is more often an unclear goal, a missing check, or an over-broad permission than a lack of model capability. Improving the harness usually raises reliability more than switching to a larger model.</p>
+        <h3>3.2 Components</h3>
+        <table>
+          <thead>
+            <tr><th>Component</th><th>Question it answers</th><th>Typical implementation</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Goal</td><td>What must be true when the work is complete?</td><td>Written specification with acceptance scenarios</td></tr>
+            <tr><td>Tools and permissions</td><td>What may the agent read, write, and call?</td><td>Allow-lists of files and commands, sandbox, synthetic data</td></tr>
+            <tr><td>Deterministic checks</td><td>Is the result correct by rule?</td><td>Linters, contract checks, tests</td></tr>
+            <tr><td>Evaluators</td><td>Does the result satisfy what rules cannot express?</td><td>Typed judge with probabilities</td></tr>
+            <tr><td>Gates</td><td>May this step proceed?</td><td>Approval before irreversible actions, confidence thresholds</td></tr>
+            <tr><td>State and memory</td><td>What does the next step need to know?</td><td>Typed loop state, checkpoints, a durable store</td></tr>
+            <tr><td>Observability</td><td>What happened, at what cost?</td><td>Structured trace per step</td></tr>
+          </tbody>
+        </table>
+        <h3>3.3 Harness before prompt</h3>
+        <p>A reliable build order starts with the checks. First write down the completion criteria, then make them executable, and only then let the agent try. An agent started without executable criteria has nothing to be corrected by, and its output can only be reviewed by reading it.</p>
+      </section>
+
+      <section class="panel">
+        <h2>4. The goal as a specification</h2>
+        <h3>4.1 Spec-driven development</h3>
+        <p>Spec-driven development makes the specification the primary artifact and the code a derived one. A toolkit that supports it, such as the open-source Spec Kit, organizes the work as a short sequence of reviewable documents.</p>
+        <table>
+          <thead>
+            <tr><th>Artifact</th><th>Content</th><th>Role in the harness</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Constitution</td><td>Project principles and boundaries</td><td>Standing constraints for every task</td></tr>
+            <tr><td>Specification</td><td>Scope, actors, functional requirements, acceptance scenarios, exclusions</td><td>The goal and its completion criteria</td></tr>
+            <tr><td>Clarifications and decisions</td><td>Open questions and approved answers</td><td>Blocks work that depends on unresolved choices</td></tr>
+            <tr><td>Plan</td><td>Technical approach and structure</td><td>Constrains design choices</td></tr>
+            <tr><td>Tasks</td><td>Ordered work items, each linked to requirements and a verification</td><td>Units the loop executes one at a time</td></tr>
+          </tbody>
+        </table>
+        <p>Every artifact is a proposal that a person reviews. No generated document authorizes a code change or a product decision on its own.</p>
+        <h3>4.2 Acceptance scenarios</h3>
+        <p>An acceptance scenario states a precondition, an action, and an observable outcome. It is the bridge between a requirement and a test. The payment-retry specification used in this module defines three functional requirements and one scenario for each.</p>
+        <table>
+          <thead>
+            <tr><th>Requirement</th><th>Scenario</th><th>Observable outcome</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Retry on transient errors, at most three attempts</td><td>A transient error followed by approval</td><td>A second attempt is made and the approval is returned</td></tr>
+            <tr><td>Stop at approval</td><td>Approval on the first attempt</td><td>One gateway call and no further attempt</td></tr>
+            <tr><td>Report exhaustion with an alternative</td><td>Three consecutive transient errors</td><td>Exactly three calls, no order, and a failure message that suggests another payment method</td></tr>
+          </tbody>
+        </table>
+        <h3>4.3 Exclusions and open decisions</h3>
+        <p>A specification is incomplete without what it forbids. The example lists explicit exclusions: no fourth attempt, no new order when payment is not approved, no calls to a real gateway, and no implied idempotency of the whole checkout. It also keeps a separate list of decisions that the source material does not settle, such as how to treat non-transient rejections. Tasks that depend on an open decision are marked not ready, and the agent must not code a guess.</p>
+        <h3>4.4 Traceability</h3>
+        <p>Each requirement has at least one scenario, each scenario at least one check, and each task names the requirements it implements and how to verify them. This chain lets a failing check point to the requirement it protects, and lets a reviewer see which requirements have no executable check at all.</p>
+      </section>
+
+      <section class="panel">
+        <h2>5. Contract checks</h2>
+        <h3>5.1 Contract-first and governance linting</h3>
+        <p>When the work crosses an API boundary, the OpenAPI document is part of the harness. A linter such as Spectral evaluates it against rulesets without running any service. Published style guides can be exported as rulesets; three are useful for most APIs.</p>
+        <ul>
+          <li><strong>Security:</strong> rules derived from the OWASP Top 10 guidance for APIs, for example required authentication and constrained inputs.</li>
+          <li><strong>URL style:</strong> naming and structure conventions for paths and resources.</li>
+          <li><strong>Documentation:</strong> descriptions, examples, and metadata that make the contract usable.</li>
+        </ul>
+        <pre><code>npx spectral lint openapi/checkout-api.yaml --ruleset rulesets/exported/owasp-top-10/.spectral.json
+npx spectral lint openapi/checkout-api.yaml --ruleset rulesets/exported/url-style-guidelines/.spectral.json
+npx spectral lint openapi/checkout-api.yaml --ruleset rulesets/exported/documentation/.spectral.json</code></pre>
+        <p>The ruleset files and the tool version are pinned in the repository, so the same input always yields the same findings. A non-zero exit code fails the check.</p>
+        <h3>5.2 Mocks and scenario playbooks</h3>
+        <p>A mock server generated from the contract, such as Prism, answers requests with the examples declared in the specification. The caller can select a named example with a request header, which makes error and success paths reproducible. A command-line runner such as Newman then executes a Postman collection against the mock. In the example, the collection is generated from a scenario map and the named examples in the contract, so it is never edited by hand and cannot drift from the specification.</p>
+        <h3>5.3 What mocks cannot prove</h3>
+        <p>A mock returns fixed responses, so it tests the shape of the interaction, not the behavior of a backend. In the example, the playbook shows the sequence of calls at the API boundary but does not verify the internal retry counter, the deduplication of repeated requests, or the absence of a persisted order after a failed payment. Those properties require integration tests against the implementation. A harness should state these limits next to the checks, so that a green result is not read as more than it proves.</p>
+      </section>
+
+      <section class="panel">
+        <h2>6. Executable checks as stop criteria</h2>
+        <h3>6.1 Tests the agent cannot edit</h3>
+        <p>An agent that is rewarded for passing tests will, if it can, change the tests. The harness therefore treats the test suite as read-only input. On every run it copies the candidate file into a new temporary directory, copies the original test file next to it, runs the tests there, and discards the directory. The agent can only influence the single file it is allowed to produce.</p>
+        <h3>6.2 Static scope rules</h3>
+        <p>Passing tests do not prove that nothing else was added. Cheap textual or syntactic rules reject behavior that the specification excludes: sleeping between attempts, importing network libraries, starting processes, or lacking the required public names. These rules enforce the exclusions of the specification without consulting any model.</p>
+        <h3>6.3 Levels of test</h3>
+        <table>
+          <thead>
+            <tr><th>Level</th><th>Proves</th><th>Cost</th><th>Use as</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Static rules</td><td>Forbidden constructs are absent</td><td>Milliseconds</td><td>First gate</td></tr>
+            <tr><td>Unit tests</td><td>Logic satisfies the scenarios</td><td>Seconds</td><td>Hard stop criterion of the loop</td></tr>
+            <tr><td>Contract lint and mock playbooks</td><td>The API boundary follows the contract</td><td>Seconds</td><td>Gate for interface changes</td></tr>
+            <tr><td>Integration tests</td><td>Real components behave correctly together</td><td>Minutes</td><td>Gate before acceptance</td></tr>
+            <tr><td>Evaluator</td><td>What rules cannot express, such as fit to the specification</td><td>Model call</td><td>Advisory, with thresholds</td></tr>
+            <tr><td>Person</td><td>Judgment, risk, accountability</td><td>Human time</td><td>Last tier</td></tr>
+          </tbody>
+        </table>
+        <h3>6.4 Reward hacking</h3>
+        <p>Reward hacking occurs when an agent satisfies the measured check without achieving the intended goal. Typical forms are editing or deleting tests, special-casing the inputs that tests use, catching and hiding errors, and weakening an assertion. The defenses are structural: keep checks outside the agent's write scope, add cases the agent has not seen, compare the changed files with the allowed list, and let an independent evaluator read the final artifact against the specification.</p>
+      </section>
+
+      <section class="panel">
+        <h2>7. Gates and permissions</h2>
+        <h3>7.1 Order checks by cost</h3>
+        <p>Run the cheapest and most discriminating checks first, and stop at the first failure. Static rules reject most bad output before any test runs, tests reject most of the rest before a model is called, and the evaluator and the person see only what survives. This ordering minimizes both cost and the time to feedback.</p>
+        <h3>7.2 Feedback format</h3>
+        <p>A failure is only useful if the next attempt can act on it. The harness returns the failing checks by name with the observed output, truncated to the part that matters. It separates static violations from test failures and states the number of tests run, so that a run that executed nothing is not read as a pass.</p>
+        <h3>7.3 The same checks in the pipeline</h3>
+        <p>The checks that stop an agent locally should be the same ones that stop a change in the delivery pipeline. Running them in both places means an agent's work is held to the standard that applies to a person's, and a change that bypasses the agent still meets the harness.</p>
+        <h3>7.4 Permissions and blast radius</h3>
+        <ul>
+          <li>Give the agent a working directory and an allow-list of files it may modify.</li>
+          <li>Run generated code in a subprocess with isolated interpreter settings and a timeout.</li>
+          <li>Use synthetic data and no production credentials in development loops.</li>
+          <li>Require approval before any irreversible or external action, regardless of confidence.</li>
+          <li>Record every run in a trace that includes the harness result.</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>8. Worked example: a harness for payment retry</h2>
+        <h3>8.1 Layout</h3>
+        <table>
+          <thead>
+            <tr><th>File</th><th>Role</th><th>Writable by the agent</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>case_retry/spec.md</code></td><td>Specification with requirements, scenarios, and exclusions</td><td>No</td></tr>
+            <tr><td><code>case_retry/test_payment_retry.py</code></td><td>Three tests, one per scenario</td><td>No</td></tr>
+            <tr><td><code>case_retry/payment_retry.py</code></td><td>Starter that makes a single attempt</td><td>Replaced by the agent's candidate</td></tr>
+            <tr><td><code>case_retry/expected/payment_retry.py</code></td><td>Reference solution used by the automated tests</td><td>No</td></tr>
+            <tr><td><code>harness.py</code></td><td>Static checks, isolated test run, and report</td><td>No</td></tr>
+          </tbody>
+        </table>
+        <h3>8.2 The run</h3>
+        <pre><code>def run_harness(code: str, case_dir: Path = CASE_DIR, timeout: int = 30) -&gt; HarnessReport:
+    violations = static_checks(code)
+    with tempfile.TemporaryDirectory(prefix="harness_") as tmp:
+        work = Path(tmp)
+        (work / "payment_retry.py").write_text(code, encoding="utf-8")
+        shutil.copy(case_dir / "test_payment_retry.py", work / "test_payment_retry.py")
+        proc = subprocess.run(
+            [sys.executable, "-I", "-m", "unittest", "-v"],
+            cwd=work, capture_output=True, text=True, timeout=timeout)
+    ...
+    return HarnessReport(passed=proc.returncode == 0 and not violations, ...)</code></pre>
+        <p>The interpreter flag isolates the run from the user's environment, the timeout stops an infinite loop in generated code, and the report passes only when the tests pass and no static rule is violated.</p>
+        <h3>8.3 Verified behavior</h3>
+        <table>
+          <thead>
+            <tr><th>Candidate</th><th>Expected harness result</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Starter with a single attempt</td><td>Fail: the retry scenarios fail</td></tr>
+            <tr><td>Reference solution</td><td>Pass: three tests, no static violation</td></tr>
+            <tr><td>Reference plus a sleep between attempts</td><td>Fail on a static rule even though the tests pass</td></tr>
+          </tbody>
+        </table>
+        <p>These three cases are automated checks of the harness itself. A harness is software and needs tests: before relying on it, confirm that it fails the bad candidate, passes the good one, and rejects the out-of-scope one.</p>
+        <h3>8.4 Connecting the harness to the loop</h3>
+        <p>In the agentic loop, the harness result is the first routing decision after generation: on a pass the run continues to the evaluator, on a fail it returns to generation with the report as feedback, and when the iteration budget is exhausted it goes to a person. The harness therefore supplies both the stop criterion and the repair signal.</p>
+      </section>
+
+      <section class="panel">
+        <h2>9. Guided lab</h2>
+        <h3>9.1 Run and test the harness</h3>
+        <p>The code is in the chapter 14 directory of the companion repository.</p>
+        <pre><code>cd ch14
+.venv/bin/python -m pytest -q tests
+.venv/bin/python - &lt;&lt;'EOF'
+from pathlib import Path
+from harness import run_harness, CASE_DIR
+print(run_harness((CASE_DIR / "payment_retry.py").read_text()).summary)
+print(run_harness((CASE_DIR / "expected" / "payment_retry.py").read_text()).summary)
+EOF</code></pre>
+        <h3>9.2 Attack the harness</h3>
+        <ol>
+          <li>Write a candidate that returns the expected values only for the inputs in the tests and observe whether the harness catches it.</li>
+          <li>Write a candidate that raises no error but never calls the gateway and observe which check rejects it.</li>
+          <li>Add a fourth scenario to the specification and a matching test, then confirm the reference solution still passes.</li>
+        </ol>
+        <h3>9.3 Contract checks</h3>
+        <p>The sibling demonstration repository contains the contract, the Spectral rulesets, the Prism mock, and the generated Postman playbooks for the same checkout case.</p>
+        <ol>
+          <li>Lint the contract with the three rulesets and read the findings.</li>
+          <li>Start the mock, run the playbooks with Newman, and identify which properties the playbooks cannot prove.</li>
+          <li>Write the integration test that would prove one of those properties.</li>
+        </ol>
+      </section>
+
+      <section class="panel">
+        <h2>10. Source map</h2>
+        <h3>10.1 Primary references</h3>
+        <ul>
+          <li><a href="https://github.com/github/spec-kit" target="_blank" rel="noopener noreferrer">Spec Kit</a></li>
+          <li><a href="https://github.com/stoplightio/spectral" target="_blank" rel="noopener noreferrer">Spectral OpenAPI linter</a></li>
+          <li><a href="https://apistylebook.stoplight.io/" target="_blank" rel="noopener noreferrer">API Stylebook</a></li>
+          <li><a href="https://github.com/stoplightio/prism" target="_blank" rel="noopener noreferrer">Prism mock server</a></li>
+          <li><a href="https://learning.postman.com/docs/collections/using-newman-cli/command-line-integration-with-newman/" target="_blank" rel="noopener noreferrer">Newman command-line runner</a></li>
+          <li><a href="https://github.com/thimotyb/demo-augmented-coding" target="_blank" rel="noopener noreferrer">Demonstration repository for the checkout case</a></li>
+          <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch14" target="_blank" rel="noopener noreferrer">Chapter 14 harness exercise</a></li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>11. Key takeaways</h2>
+        <h3>11.1 Design rules</h3>
+        <ul>
+          <li>Write the completion criteria first, make them executable, and only then run the agent.</li>
+          <li>Keep requirements, scenarios, exclusions, and open decisions in a reviewed specification.</li>
+          <li>Layer the checks from static rules to tests, contracts, evaluators, and people, cheapest first.</li>
+          <li>Keep every check outside the agent's write scope and test the harness itself.</li>
+          <li>State what each check cannot prove so that a green result is not over-read.</li>
+          <li>Use the same checks in the loop and in the delivery pipeline.</li>
+          <li>Limit permissions, use synthetic data in development, and gate irreversible actions.</li>
+        </ul>
+      </section>
+    </article>
+  </main>
+
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>

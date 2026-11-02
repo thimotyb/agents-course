@@ -21,6 +21,7 @@
 | M9 | Agent2Agent Protocol and Agent Deployment | `site/chapters/chapter-09.html` | A2A Protocol, ADK A2A guides, Google Agent Runtime, and MuleSoft Agent Fabric documentation | Interoperable agents, ADK server/client implementation, deployment choices, and enterprise agent networks |
 | M10 | The Agentic Loop | `site/chapters/chapter-10.html` | Anthropic engineering article on building effective agents, LangGraph and ADK documentation, and `building-llm-applications/ch14` | Loop definition, state and stop criteria, orchestration patterns, bounded LangGraph implementation, and a verified repair loop |
 | M11 | Decision Models, Judges, Cost, and Observability | `site/chapters/chapter-11.html` | TypeSafe Jev documentation, OpenDecider, LLM-as-a-judge literature, and `building-llm-applications/ch14` benchmark and routing code | Typed decision models, judge placement, calibration measurements on labelled tickets, cascades, human review, cost model, and traces |
+| M12 | The Agent Harness | `site/chapters/chapter-12.html` | Spec Kit, Spectral and API Stylebook rulesets, Prism, Newman, the checkout demonstration repository, and `building-llm-applications/ch14` harness | Harness definition, specification as goal, contract checks, tests the agent cannot edit, reward hacking, gates, and a verified payment-retry harness |
 
 ## Source Inventory
 
@@ -72,7 +73,13 @@
 | `https://github.com/manjunathshiva/opendecider` | open-weight decision models | `M11` | Local decision models with the same typed-question interface; self-reported benchmarks |
 | `https://arxiv.org/abs/2306.05685` | research paper | `M11` | Position, verbosity, and self-enhancement bias of language models used as judges |
 | `notes/benchmark-judge-results.md` | measured results | `M11` | Calibration, cost, latency, and routing replay on 120 synthetic tickets; gemma-12b on 49 tickets |
-| `resources/` | local supporting assets | `M1, M2, M3, M4, M5, M6, M7, M8, M9, M10, M11` | Labs, slides, notebooks, diagrams to be added incrementally |
+| `https://github.com/github/spec-kit` | open-source toolkit | `M12` | Spec-driven development artifacts: constitution, specification, plan, tasks |
+| `https://github.com/stoplightio/spectral` | open-source linter | `M12` | OpenAPI linting with exported rulesets |
+| `https://apistylebook.stoplight.io/` | style guide catalogue | `M12` | OWASP, URL style, and documentation rulesets exported for Spectral |
+| `https://github.com/stoplightio/prism` | open-source mock server | `M12` | Contract-derived mock with named example selection |
+| `https://learning.postman.com/docs/collections/using-newman-cli/command-line-integration-with-newman/` | tool documentation | `M12` | Running Postman collections from the command line |
+| `https://github.com/thimotyb/demo-augmented-coding` | companion demonstration repository | `M12` | Checkout case: specification, contract, Spectral rulesets, Prism mock, Postman playbooks |
+| `resources/` | local supporting assets | `M1, M2, M3, M4, M5, M6, M7, M8, M9, M10, M11, M12` | Labs, slides, notebooks, diagrams to be added incrementally |
 
 ## Mapping Rules
 
