@@ -561,3 +561,41 @@ body[data-theme="dark"] .modern-table tr:nth-child(even) {
 .modern-table td strong {
   color: var(--accent-strong);
 }
+
+/* Plain tables (M10+): visible grid so columns are distinguishable */
+.panel table:not(.modern-table) {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin: 1rem 0;
+  background: var(--surface);
+  border: 1px solid var(--line-strong, #8a9aa5);
+}
+
+.panel table:not(.modern-table) th,
+.panel table:not(.modern-table) td {
+  border: 1px solid var(--line-strong, #8a9aa5);
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.45;
+}
+
+.panel table:not(.modern-table) th {
+  background: var(--accent);
+  color: #ffffff;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+}
+
+.panel table:not(.modern-table) tbody tr:nth-child(even) {
+  background: rgba(10, 109, 136, 0.06);
+}
+
+body[data-theme="dark"] .panel table:not(.modern-table) {
+  --line-strong: #5d7280;
+}
+
+body[data-theme="dark"] .panel table:not(.modern-table) tbody tr:nth-child(even) {
+  background: rgba(83, 184, 214, 0.08);
+}
