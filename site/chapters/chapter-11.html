@@ -166,6 +166,17 @@ def decide(answer, accept=0.7, reject=0.3):
           </tbody>
         </table>
         <p>ECE is the average of the gaps weighted by the share of answers in each group: 5/10 x 0.10 + 5/10 x 0.00 = <strong>0.05</strong>. A judge that said 0.90 on all ten answers and got six right would have a single group with a gap of 0.90 - 0.60 = 0.30, so an ECE of 0.30: its "90%" would mean "60%" in practice. The measurements below use ten confidence bins instead of two, and the local 12B model in section 5.5 is the case to remember: a mean confidence of 0.92 against an accuracy of 0.77 on the team question, with an ECE of 0.233. A low ECE does not mean a high accuracy; it means the probabilities can be trusted when thresholds are applied to them.</p>
+        <p><strong>Worked example of accuracy and coverage at confidence 0.7 or more.</strong> Both metrics are computed on the same subset: the answers for which the judge states a confidence of at least 0.7. <em>Coverage</em> is the size of that subset, and <em>accuracy when confident</em> is the share of correct answers inside it. Take the team question answered by Jev on 100 tickets (see the results below).</p>
+        <table>
+          <thead>
+            <tr><th>Group</th><th>Answers</th><th>What happens</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Confident (confidence 0.7 or more)</td><td>88</td><td>The judge answers alone; about 85 are correct</td></tr>
+            <tr><td>Not confident</td><td>12</td><td>Passed to the next judge or to a person</td></tr>
+          </tbody>
+        </table>
+        <p>Coverage is 88 / 100 = 0.88. Accuracy when confident is 85 / 88, about 0.97. The two answer different questions: coverage says how much of the work the judge can do alone, and accuracy when confident says whether its confident answers can be trusted. Each is misleading on its own. A judge with accuracy 1.00 and coverage 0.10 is reliable but leaves nine tenths of the work to others; a judge with coverage 1.00 is never unsure, and if its accuracy is low it answers wrongly with confidence, as the local 12B model does in section 5.5 (coverage 1.00, accuracy 0.77 on the team question).</p>
         <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/report.py#L41-L63" target="_blank" rel="noopener noreferrer">metrics per task (accuracy, ECE, Brier, confident accuracy and coverage)</a></p>
         <h3>5.2 The ticket case</h3>
         <p>This module uses two cases for two purposes. The <strong>repair loop</strong> shows a judge at work: it asks whether generated code meets a specification and whether it adds behavior outside it. That case has no ground truth that can be counted, because there is no list of correct verdicts for arbitrary code. To measure accuracy and calibration the module uses a second case, <strong>support-ticket triage</strong>, in which every item has a known correct label. The judge interface, the typed questions, the probabilities, and the thresholds are the same in both, so the measurements on tickets say how a judge behaves, not how it behaves on code in particular.</p>
