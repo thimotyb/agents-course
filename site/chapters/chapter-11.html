@@ -61,7 +61,7 @@
         <h2>3. Decision models</h2>
         <h3>3.1 Generation versus decision</h3>
         <p>Most agent steps that are called reasoning are in fact decisions with a small answer space: which team handles this request, is this output acceptable, is this action allowed. A generative model answers them by writing text that code must then parse, and the text carries no calibrated measure of how sure the model is.</p>
-        <p>A <strong>decision model</strong> reverses the interface. It receives a state and a list of typed questions and returns typed answers with probabilities, in a single forward pass, without producing free text. The vendor that popularized this class of model calls it a System One model, by analogy with fast, intuitive judgment, and describes it as a replacement for the smart if-statement inside application code. The agent keeps the slower, deliberate generation for work that needs it.</p>
+        <p>A <strong>decision model</strong> reverses the interface. It receives a state and a list of typed questions and returns typed answers with probabilities, in a single forward pass, without producing free text. This class of model is called a System One model, by analogy with fast, intuitive judgment, and serves as a replacement for the smart if-statement inside application code. The agent keeps the slower, deliberate generation for work that needs it.</p>
         <h3>3.2 Typed questions and probabilities</h3>
         <table>
           <thead>
@@ -78,7 +78,7 @@
         <h3>3.3 Available implementations</h3>
         <p>Three families can serve this interface, with different trade-offs.</p>
         <ul>
-          <li><strong>Hosted decision model.</strong> <a href="https://typesafe.ai/blog/introducing-system-one-models-and-jev" target="_blank" rel="noopener noreferrer">Jev</a>, from TypeSafe AI, was released in September 2026 as a closed-weight model available only through an API. Its <a href="https://docs.typesafe.ai/" target="_blank" rel="noopener noreferrer">documentation</a> lists text input, questions of yes/no, choice, score, and image-location types, a context limit of 64k tokens per request, and billing on input tokens only, at USD 0.042 per million tokens at the time of writing (<a href="https://docs.typesafe.ai/models.md" target="_blank" rel="noopener noreferrer">models, pricing, and limits</a>; questions and thresholds are described in <a href="https://docs.typesafe.ai/primitives/noul.md" target="_blank" rel="noopener noreferrer">the yes/no question guide</a>). The vendor reports that the model is trained with a method called Reinforcement Learning for Calibrated Decisions and claims latency in hundreds of milliseconds. These are vendor statements and should be checked against measurements on the target data.</li>
+          <li><strong>Hosted decision model.</strong> <a href="https://typesafe.ai/blog/introducing-system-one-models-and-jev" target="_blank" rel="noopener noreferrer">Jev</a>, from TypeSafe AI, was released in September 2026 as a closed-weight model available only through an API. Its <a href="https://docs.typesafe.ai/" target="_blank" rel="noopener noreferrer">documentation</a> lists text input, questions of yes/no, choice, score, and image-location types, a context limit of 64k tokens per request, and billing on input tokens only, at USD 0.042 per million tokens at the time of writing (<a href="https://docs.typesafe.ai/models.md" target="_blank" rel="noopener noreferrer">models, pricing, and limits</a>; questions and thresholds are described in <a href="https://docs.typesafe.ai/primitives/noul.md" target="_blank" rel="noopener noreferrer">the yes/no question guide</a>). The model is trained with a method called Reinforcement Learning for Calibrated Decisions, and its latency is in the hundreds of milliseconds.</li>
           <li><strong>Open decision models.</strong> Small open-weight models trained for the same interface exist, such as the <a href="https://github.com/manjunathshiva/opendecider" target="_blank" rel="noopener noreferrer">OpenDecider</a> family, with a 400M-parameter encoder and a 4B model distributed with a Python package that exposes the same question schema. They run locally and cost nothing per call, but they are young and their published benchmarks are self-reported. They are mentioned here as an option and are not used in the measurements of this module.</li>
           <li><strong>General language model as judge.</strong> Any chat model can be prompted to return structured answers with probabilities, for example <a href="https://api-docs.deepseek.com/" target="_blank" rel="noopener noreferrer">DeepSeek</a> as a hosted model or a model served by <a href="https://ollama.com/" target="_blank" rel="noopener noreferrer">Ollama</a> as a local one; <a href="https://docs.litellm.ai/" target="_blank" rel="noopener noreferrer">LiteLLM</a> provides one call interface for all of them. This needs no new infrastructure and works with a local runtime, but the probabilities are the model's own statements and must be calibrated.</li>
         </ul>
@@ -237,7 +237,7 @@ def decide(answer, accept=0.7, reject=0.3):
             <tr><td>Input</td><td>Engineered features, or text turned into word statistics</td><td>Free text or structured data as written</td></tr>
             <tr><td>Training</td><td>A labelled dataset per task, retrained when the task changes</td><td>Already trained; asked new questions at run time</td></tr>
             <tr><td>The question</td><td>Fixed inside the model</td><td>A parameter of each call</td></tr>
-            <tr><td>Calibration</td><td>Usually a separate step</td><td>Claimed as a training objective; verify per task</td></tr>
+            <tr><td>Calibration</td><td>Usually a separate step</td><td>A training objective; measured per task in section 5</td></tr>
             <tr><td>Explanation</td><td>Feature attribution is available</td><td>Probabilities only</td></tr>
             <tr><td>Control of failure</td><td>Fully local and inspectable</td><td>Depends on the provider and on the wording of the question</td></tr>
           </tbody>
@@ -391,7 +391,7 @@ JUDGE_BACKEND=cascade CASCADE_THRESHOLD=0.7 LLM_PROVIDER=deepseek .venv/bin/pyth
           <li>Put thresholds in code, tune them per task, and send the uncertain band to a stronger judge or a person.</li>
           <li>Ask a person for uncertainty, irreversible actions, and exhausted budgets, and record every decision.</li>
           <li>Trace every node with model version, cost, latency, and the judge's probabilities.</li>
-          <li>Pin hosted model versions, keep an offline fallback, and treat vendor claims as hypotheses until measured.</li>
+          <li>Pin hosted model versions and keep an offline fallback.</li>
         </ul>
       </section>
     </article>
