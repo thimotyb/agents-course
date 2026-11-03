@@ -224,8 +224,6 @@ def n_human(state: LoopState) -&gt; dict:
 graph.stream(Command(resume="approve"), {"configurable": {"thread_id": "run"}})</code></pre>
         <p>The person is asked only in two cases: the evaluator is uncertain, or the budget is exhausted. Asking on every iteration turns the loop into a manual process and removes the benefit.</p>
         <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/f3a11a7/ch14/agentic_loop.py#L191-L210" target="_blank" rel="noopener noreferrer"><code>n_human</code> with <code>interrupt</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/f3a11a7/ch14/agentic_loop.py#L266-L299" target="_blank" rel="noopener noreferrer"><code>run</code> and <code>Command(resume=...)</code></a></p>
-        <h3>6.4 The same pattern in ADK</h3>
-        <p>Agent Development Kit expresses the same idea as a workflow agent. A loop agent runs its sub-agents in order and repeats the sequence until a maximum number of iterations is reached or a sub-agent signals that the work is complete. The budget and the exit condition are therefore declared on the loop itself, and the generation and review steps are separate sub-agents that communicate through session state.</p>
       </section>
 
       <section class="panel">
@@ -308,8 +306,6 @@ LLM_PROVIDER=deepseek .venv/bin/python agentic_loop.py --human ask</code></pre>
         <ul>
           <li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener noreferrer">Building effective agents</a></li>
           <li><a href="https://langchain-ai.github.io/langgraph/" target="_blank" rel="noopener noreferrer">LangGraph documentation</a></li>
-          <li><a href="https://adk.dev/agents/workflow-agents/loop-agents/" target="_blank" rel="noopener noreferrer">ADK loop agents</a></li>
-          <li><a href="https://adk.dev/workflows/patterns/" target="_blank" rel="noopener noreferrer">ADK workflow patterns</a></li>
           <li><a href="https://arxiv.org/abs/2210.03629" target="_blank" rel="noopener noreferrer">ReAct: Synergizing Reasoning and Acting in Language Models</a></li>
           <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch14" target="_blank" rel="noopener noreferrer">Chapter 14 agentic loop exercise</a></li>
         </ul>
