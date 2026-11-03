@@ -74,6 +74,7 @@
           </tbody>
         </table>
         <p>Several questions about the same state can be sent in one call. The calling code receives numbers, so thresholds, comparisons, and routing remain ordinary code that can be tested.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/judge.py#L27-L53" target="_blank" rel="noopener noreferrer"><code>Choice</code>, <code>Noul</code>, <code>Score</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/judge.py#L62-L85" target="_blank" rel="noopener noreferrer"><code>Answer</code> and <code>Verdict</code></a></p>
         <h3>3.3 Available implementations</h3>
         <p>Three families can serve this interface, with different trade-offs.</p>
         <ul>
@@ -82,6 +83,7 @@
           <li><strong>General language model as judge.</strong> Any chat model can be prompted to return structured answers with probabilities. This needs no new infrastructure and works with a local runtime, but the probabilities are the model's own statements and must be calibrated.</li>
         </ul>
         <p>Because the three expose the same contract, an agent can select the implementation by configuration and compare them on the same questions.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/jev_judge.py#L55-L93" target="_blank" rel="noopener noreferrer"><code>JevJudge</code> (hosted decision model)</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/opendecider_judge.py#L25-L48" target="_blank" rel="noopener noreferrer"><code>OpenDeciderJudge</code> (local, not yet measured)</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/judge.py#L136-L195" target="_blank" rel="noopener noreferrer"><code>LLMJudge</code> (general model as judge)</a></p>
       </section>
 
       <section class="panel">
@@ -134,6 +136,7 @@ def decide(answer, accept=0.7, reject=0.3):
     return "yes" if p &gt;= accept else "no" if p &lt;= reject else "unsure"</code></pre>
         <p>The interface is the same for every use. The repair loop, in which a judge checks generated code against a specification, asks two questions; the snippet above uses support-ticket triage as a neutral example, and section 5 measures judges on tickets for the reason given there.</p>
         <p>A backend failure must raise an error. Converting a timeout or an authorization failure into a negative answer silently approves or rejects work for the wrong reason.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/judge.py#L88-L89" target="_blank" rel="noopener noreferrer"><code>Judge</code> protocol</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/judge.py#L225-L229" target="_blank" rel="noopener noreferrer"><code>decide</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/judge_factory.py#L18-L55" target="_blank" rel="noopener noreferrer"><code>make_judge</code> selecting the backend</a></p>
       </section>
 
       <section class="panel">
@@ -152,9 +155,11 @@ def decide(answer, accept=0.7, reject=0.3):
           </tbody>
         </table>
         <p>Accuracy alone hides the failure that matters most in a routed system: a judge that is wrong and certain never triggers escalation.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/bench/report.py#L41-L63" target="_blank" rel="noopener noreferrer">metrics per task (accuracy, ECE, Brier, confident accuracy and coverage)</a></p>
         <h3>5.2 Benchmark design</h3>
         <p>This module uses two different cases for two different purposes. The <strong>repair loop</strong> is the case that shows a judge at work: it asks whether generated code meets a specification and whether it adds behaviour outside it. That case has no ground truth that can be counted, because there is no list of correct verdicts for arbitrary code. To measure accuracy and calibration, the module therefore uses a second case, <strong>support-ticket triage</strong>, where every item has a known correct label. The judge interface, the typed questions, the probabilities, and the thresholds are the same in both, so the measurements on tickets say how a judge behaves, not how it behaves on code in particular.</p>
         <p>The measurements below use 120 synthetic support tickets without personal data: 100 built from templates with labels correct by construction, and 20 written by hand to include negations, implicit refunds, and urgency without keywords. Each ticket carries three questions sent in one call: which team (three options), whether resolution is needed within 24 hours, and whether a refund or credit is explicitly requested. Four systems answered the same questions: Jev (jev-1.14.0, hosted decision model), DeepSeek (deepseek-v4-flash, hosted general language model), Gemma 12B (served by Ollama, local general language model), and an XGBoost classifier on TF-IDF word features trained with five-fold cross-validation.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/bench/dataset.py#L15-L23" target="_blank" rel="noopener noreferrer">teams and question wording</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/bench/dataset.py#L72-L84" target="_blank" rel="noopener noreferrer">building the 120 tickets</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/bench/run_bench.py#L34-L99" target="_blank" rel="noopener noreferrer">running a judge or the XGBoost baseline</a></p>
         <h3>5.3 Results on the full ticket set</h3>
         <table>
           <thead>
@@ -255,6 +260,7 @@ def decide(answer, accept=0.7, reject=0.3):
           <figcaption><strong>Figure M11.1.</strong> Cascade of judges. Each question is answered by the first tier whose confidence reaches the threshold; only the unsure questions go to the next tier, and what remains unsure after the last tier goes to a person. The latency and cost shown are those measured for each judge alone on 120 synthetic tickets with three questions each.</figcaption>
         </figure>
 
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/router.py#L21-L46" target="_blank" rel="noopener noreferrer"><code>CascadeJudge</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/bench/routing_replay.py#L35-L69" target="_blank" rel="noopener noreferrer">replaying a cascade from stored answers</a></p>
         <h3>7.3 Human review that works</h3>
         <p>The strongest use of a person in an agent is as the last tier of a cascade, called only in specific conditions.</p>
         <ul>
@@ -265,6 +271,7 @@ def decide(answer, accept=0.7, reject=0.3):
         <p>The reviewer needs a small, decision-ready package: the artifact, the failing evidence, the judge's probabilities, and three actions (approve, stop, or give feedback for another round). The decision and the reviewer's note must be written to the trace. A rate of human review that rises over time signals drift in the judge or in the input, and the recorded decisions are the labelled data for re-calibrating the thresholds.</p>
         <h3>7.4 Escalating the generating model</h3>
         <p>Routing also applies to the model that does the work. A first attempt on a small, fast model is cheap; a failed attempt is a deterministic signal, from the tests, that the task is harder than expected. The next attempt then uses a larger model with the failure as feedback. This keeps the average cost near that of the small model while preserving the capability of the large one for the cases that need it.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/router.py#L49-L55" target="_blank" rel="noopener noreferrer"><code>escalating_generate</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/agentic_loop.py#L367-L370" target="_blank" rel="noopener noreferrer">enabled by <code>--escalate</code></a></p>
       </section>
 
       <section class="panel">
@@ -287,6 +294,7 @@ def decide(answer, accept=0.7, reject=0.3):
           <li>For human steps: the question shown, the reply, and the elapsed time.</li>
         </ul>
         <p>Tracing platforms and open instrumentation standards store such records and show a run as a tree of steps. The same records can be written as lines of JSON, which is sufficient for a small system.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/agentic_loop.py#L157" target="_blank" rel="noopener noreferrer"><code>generate</code> record</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/agentic_loop.py#L168" target="_blank" rel="noopener noreferrer"><code>harness</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/agentic_loop.py#L186" target="_blank" rel="noopener noreferrer"><code>judge</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/agentic_loop.py#L203-L209" target="_blank" rel="noopener noreferrer"><code>human</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/f16afad/ch14/traces/live-deepseek-jev.jsonl" target="_blank" rel="noopener noreferrer">example trace</a></p>
         <h3>8.3 Metrics to watch</h3>
         <table>
           <thead>
