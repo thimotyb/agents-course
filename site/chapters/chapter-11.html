@@ -148,7 +148,7 @@ def decide(answer, accept=0.7, reject=0.3):
           </thead>
           <tbody>
             <tr><td>Accuracy</td><td>Share of correct top answers</td><td>Basic quality</td></tr>
-            <tr><td>Expected calibration error (ECE)</td><td>Average gap between stated confidence and actual accuracy, over confidence bins</td><td>Whether a probability of 0.9 means correct nine times in ten</td></tr>
+            <tr><td>Expected calibration error (ECE)</td><td>Average gap between stated confidence and actual accuracy, over confidence bins; lower is better, 0 is perfect</td><td>Whether a probability of 0.9 means correct nine times in ten</td></tr>
             <tr><td>Brier score</td><td>Mean squared error of the probability vector</td><td>Combines accuracy and calibration; lower is better</td></tr>
             <tr><td>Accuracy at confidence 0.7 or more</td><td>Accuracy on the answers the judge is sure about</td><td>What a threshold-based router can trust</td></tr>
             <tr><td>Coverage at confidence 0.7 or more</td><td>Share of answers the judge is sure about</td><td>How much work remains for a larger model or a person</td></tr>
@@ -172,20 +172,21 @@ def decide(answer, accept=0.7, reject=0.3):
         <p>The measurements below use 120 synthetic support tickets without personal data: 100 built from templates with labels correct by construction, and 20 written by hand to include negations, implicit refunds, and urgency without keywords. Each ticket carries three questions sent in one call: which team (three options), whether resolution is needed within 24 hours, and whether a refund or credit is explicitly requested. Four systems answered the same questions: Jev (jev-1.14.0, hosted decision model), DeepSeek (deepseek-v4-flash, hosted general language model), Gemma 12B (served by Ollama, local general language model), and an XGBoost classifier on TF-IDF word features trained with five-fold cross-validation.</p>
         <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/dataset.py#L15-L23" target="_blank" rel="noopener noreferrer">teams and question wording</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/dataset.py#L72-L84" target="_blank" rel="noopener noreferrer">building the 120 tickets</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/run_bench.py#L34-L99" target="_blank" rel="noopener noreferrer">running a judge or the XGBoost baseline</a></p>
         <h3>5.3 Results on the full ticket set</h3>
+        <p>In the tables below, green marks the best value and red the worst for each task: higher is better for accuracy and for accuracy when confident, and <strong>lower is better for ECE and for Brier</strong> (0 means perfect calibration for ECE). Mean confidence and coverage are not colored, because a high value is not good in itself: confidence is read against accuracy, and a judge that covers everything is one that is never unsure. Latency and cost, where shown, are also better when lower.</p>
         <table>
           <thead>
             <tr><th>Task</th><th>System</th><th>Accuracy</th><th>ECE</th><th>Brier</th><th>Mean confidence</th><th>Accuracy when confident</th><th>Coverage when confident</th></tr>
           </thead>
           <tbody>
             <tr><td>Team</td><td>DeepSeek (deepseek-v4-flash)</td><td>0.87</td><td>0.063</td><td>0.153</td><td>0.87</td><td>0.93</td><td>0.88</td></tr>
-            <tr><td>Team</td><td>Jev (jev-1.14.0)</td><td>0.91</td><td>0.032</td><td>0.114</td><td>0.93</td><td>0.97</td><td>0.88</td></tr>
-            <tr><td>Team</td><td>XGBoost (TF-IDF)</td><td>0.86</td><td>0.076</td><td>0.196</td><td>0.89</td><td>0.91</td><td>0.90</td></tr>
-            <tr><td>Urgent</td><td>DeepSeek (deepseek-v4-flash)</td><td>0.98</td><td>0.063</td><td>0.023</td><td>0.94</td><td>1.00</td><td>0.98</td></tr>
-            <tr><td>Urgent</td><td>Jev (jev-1.14.0)</td><td>0.99</td><td>0.128</td><td>0.055</td><td>0.86</td><td>1.00</td><td>0.93</td></tr>
-            <tr><td>Urgent</td><td>XGBoost (TF-IDF)</td><td>0.87</td><td>0.055</td><td>0.196</td><td>0.89</td><td>0.92</td><td>0.88</td></tr>
-            <tr><td>Refund</td><td>DeepSeek (deepseek-v4-flash)</td><td>1.00</td><td>0.033</td><td>0.007</td><td>0.97</td><td>1.00</td><td>1.00</td></tr>
-            <tr><td>Refund</td><td>Jev (jev-1.14.0)</td><td>0.99</td><td>0.047</td><td>0.012</td><td>0.96</td><td>1.00</td><td>0.99</td></tr>
-            <tr><td>Refund</td><td>XGBoost (TF-IDF)</td><td>0.97</td><td>0.033</td><td>0.063</td><td>0.95</td><td>0.97</td><td>0.99</td></tr>
+            <tr><td>Team</td><td>Jev (jev-1.14.0)</td><td class="cell-best">0.91</td><td class="cell-best">0.032</td><td class="cell-best">0.114</td><td>0.93</td><td class="cell-best">0.97</td><td>0.88</td></tr>
+            <tr><td>Team</td><td>XGBoost (TF-IDF)</td><td class="cell-worst">0.86</td><td class="cell-worst">0.076</td><td class="cell-worst">0.196</td><td>0.89</td><td class="cell-worst">0.91</td><td>0.90</td></tr>
+            <tr><td>Urgent</td><td>DeepSeek (deepseek-v4-flash)</td><td>0.98</td><td>0.063</td><td class="cell-best">0.023</td><td>0.94</td><td class="cell-best">1.00</td><td>0.98</td></tr>
+            <tr><td>Urgent</td><td>Jev (jev-1.14.0)</td><td class="cell-best">0.99</td><td class="cell-worst">0.128</td><td>0.055</td><td>0.86</td><td class="cell-best">1.00</td><td>0.93</td></tr>
+            <tr><td>Urgent</td><td>XGBoost (TF-IDF)</td><td class="cell-worst">0.87</td><td class="cell-best">0.055</td><td class="cell-worst">0.196</td><td>0.89</td><td class="cell-worst">0.92</td><td>0.88</td></tr>
+            <tr><td>Refund</td><td>DeepSeek (deepseek-v4-flash)</td><td class="cell-best">1.00</td><td class="cell-best">0.033</td><td class="cell-best">0.007</td><td>0.97</td><td class="cell-best">1.00</td><td>1.00</td></tr>
+            <tr><td>Refund</td><td>Jev (jev-1.14.0)</td><td>0.99</td><td class="cell-worst">0.047</td><td>0.012</td><td>0.96</td><td class="cell-best">1.00</td><td>0.99</td></tr>
+            <tr><td>Refund</td><td>XGBoost (TF-IDF)</td><td class="cell-worst">0.97</td><td class="cell-best">0.033</td><td class="cell-worst">0.063</td><td>0.95</td><td class="cell-worst">0.97</td><td>0.99</td></tr>
           </tbody>
         </table>
         <table>
@@ -193,9 +194,9 @@ def decide(answer, accept=0.7, reject=0.3):
             <tr><th>System</th><th>Mean latency per ticket</th><th>Cost for 120 tickets</th><th>Preparation</th></tr>
           </thead>
           <tbody>
-            <tr><td>DeepSeek (deepseek-v4-flash)</td><td>2,057 ms</td><td>USD 0.0202</td><td>Prompt only</td></tr>
+            <tr><td>DeepSeek (deepseek-v4-flash)</td><td class="cell-worst">2,057 ms</td><td class="cell-worst">USD 0.0202</td><td>Prompt only</td></tr>
             <tr><td>Jev (jev-1.14.0)</td><td>187 ms</td><td>USD 0.0020</td><td>Question wording only</td></tr>
-            <tr><td>XGBoost (TF-IDF)</td><td>Negligible</td><td>None</td><td>Labelled data for every task, retraining on change</td></tr>
+            <tr><td>XGBoost (TF-IDF)</td><td class="cell-best">Negligible</td><td class="cell-best">None</td><td>Labelled data for every task, retraining on change</td></tr>
           </tbody>
         </table>
         <h3>5.4 A local model on the first 49 tickets</h3>
@@ -205,12 +206,12 @@ def decide(answer, accept=0.7, reject=0.3):
             <tr><th>Task</th><th>System</th><th>Accuracy</th><th>ECE</th><th>Mean confidence</th><th>Coverage when confident</th></tr>
           </thead>
           <tbody>
-            <tr><td>Team</td><td>Gemma 12B (Ollama, local)</td><td>0.77</td><td>0.233</td><td>0.92</td><td>1.00</td></tr>
-            <tr><td>Team</td><td>Jev (jev-1.14.0)</td><td>0.90</td><td>0.077</td><td>0.91</td><td>0.82</td></tr>
-            <tr><td>Urgent</td><td>Gemma 12B (Ollama, local)</td><td>0.85</td><td>0.096</td><td>0.90</td><td>1.00</td></tr>
-            <tr><td>Urgent</td><td>Jev (jev-1.14.0)</td><td>0.98</td><td>0.132</td><td>0.87</td><td>0.94</td></tr>
-            <tr><td>Refund</td><td>Gemma 12B (Ollama, local)</td><td>0.94</td><td>0.048</td><td>0.98</td><td>1.00</td></tr>
-            <tr><td>Refund</td><td>Jev (jev-1.14.0)</td><td>1.00</td><td>0.043</td><td>0.96</td><td>1.00</td></tr>
+            <tr><td>Team</td><td>Gemma 12B (Ollama, local)</td><td class="cell-worst">0.77</td><td class="cell-worst">0.233</td><td>0.92</td><td>1.00</td></tr>
+            <tr><td>Team</td><td>Jev (jev-1.14.0)</td><td class="cell-best">0.90</td><td class="cell-best">0.077</td><td>0.91</td><td>0.82</td></tr>
+            <tr><td>Urgent</td><td>Gemma 12B (Ollama, local)</td><td class="cell-worst">0.85</td><td class="cell-best">0.096</td><td>0.90</td><td>1.00</td></tr>
+            <tr><td>Urgent</td><td>Jev (jev-1.14.0)</td><td class="cell-best">0.98</td><td class="cell-worst">0.132</td><td>0.87</td><td>0.94</td></tr>
+            <tr><td>Refund</td><td>Gemma 12B (Ollama, local)</td><td class="cell-worst">0.94</td><td class="cell-worst">0.048</td><td>0.98</td><td>1.00</td></tr>
+            <tr><td>Refund</td><td>Jev (jev-1.14.0)</td><td class="cell-best">1.00</td><td class="cell-best">0.043</td><td>0.96</td><td>1.00</td></tr>
           </tbody>
         </table>
         <p>The local model needed about 16 seconds per ticket. On two tickets it never answered the refund question, which both contained the phrase "I do not want a refund"; those two tickets are counted as failures, not as correct answers.</p>

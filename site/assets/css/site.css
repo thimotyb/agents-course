@@ -599,3 +599,9 @@ body[data-theme="dark"] .panel table:not(.modern-table) {
 body[data-theme="dark"] .panel table:not(.modern-table) tbody tr:nth-child(even) {
   background: rgba(83, 184, 214, 0.08);
 }
+
+/* Result tables: best and worst value per metric */
+td.cell-best { background: #d4f0dc !important; color: #14532d; font-weight: 700; }
+td.cell-worst { background: #fbdcdc !important; color: #7f1d1d; }
+body[data-theme="dark"] td.cell-best { background: rgba(46, 160, 67, 0.30) !important; color: #b7f0c4; }
+body[data-theme="dark"] td.cell-worst { background: rgba(220, 68, 68, 0.30) !important; color: #ffc9c9; }
