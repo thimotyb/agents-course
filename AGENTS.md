@@ -158,6 +158,16 @@ Authoring workflow constraints:
 - proceed step-by-step
 - add figures and content only when explicitly requested by the user
 
+## Code Links in Chapters (Required)
+
+Chapters that cite implementation code from the companion repo link to specific lines on GitHub (see M10 §6-7 for the pattern: a `<p class="code-ref">` paragraph at the end of the section).
+
+Rules:
+- use permalinks pinned to a commit SHA (`.../blob/<sha>/chNN/file.py#Lx-Ly`), never a branch name, and only commits already pushed
+- **whenever code in the companion repo is moved, renamed, or edited so that cited lines shift, update every affected link** (new SHA and line ranges) in the same working session
+- verify before finishing a content change: `grep -rn "building-llm-applications/blob" site/chapters` and open each cited range at the pinned SHA (or `git show <sha>:path | sed -n 'a,bp'`) to confirm it still shows the named function
+- after updating links, re-run the non-regression `lock` and `check`
+
 ## Lab Snippets File (Required)
 
 The project uses `snippets-agents_v1.txt` as the live classroom execution file.
