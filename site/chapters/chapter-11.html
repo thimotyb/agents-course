@@ -53,7 +53,7 @@
         <div>
           <h2>2. Topics</h2>
           <h3>2.1 From a probability to a decision</h3>
-          <p>The module separates producing text from deciding, shows how a decision model fits into an evaluator-optimizer loop, reports a measured comparison of four judges on labelled tickets, and uses the measurements to set thresholds, build a cascade, and budget cost.</p>
+          <p>The module separates producing text from deciding, shows how a decision model fits into an evaluator-optimizer loop, reports a measured comparison of four judges on a labelled benchmark of support tickets, and uses the measurements to set thresholds, build a cascade, and budget cost.</p>
         </div>
       </section>
 
@@ -132,6 +132,7 @@ verdict["urgent"].probabilities["true"]                  # for example 0.90
 def decide(answer, accept=0.7, reject=0.3):
     p = answer.probabilities["true"]
     return "yes" if p &gt;= accept else "no" if p &lt;= reject else "unsure"</code></pre>
+        <p>The interface is the same for every use. The repair loop, in which a judge checks generated code against a specification, asks two questions; the snippet above uses support-ticket triage as a neutral example, and section 5 measures judges on tickets for the reason given there.</p>
         <p>A backend failure must raise an error. Converting a timeout or an authorization failure into a negative answer silently approves or rejects work for the wrong reason.</p>
       </section>
 
@@ -152,6 +153,7 @@ def decide(answer, accept=0.7, reject=0.3):
         </table>
         <p>Accuracy alone hides the failure that matters most in a routed system: a judge that is wrong and certain never triggers escalation.</p>
         <h3>5.2 Benchmark design</h3>
+        <p>This module uses two different cases for two different purposes. The <strong>repair loop</strong> is the case that shows a judge at work: it asks whether generated code meets a specification and whether it adds behaviour outside it. That case has no ground truth that can be counted, because there is no list of correct verdicts for arbitrary code. To measure accuracy and calibration, the module therefore uses a second case, <strong>support-ticket triage</strong>, where every item has a known correct label. The judge interface, the typed questions, the probabilities, and the thresholds are the same in both, so the measurements on tickets say how a judge behaves, not how it behaves on code in particular.</p>
         <p>The measurements below use 120 synthetic support tickets without personal data: 100 built from templates with labels correct by construction, and 20 written by hand to include negations, implicit refunds, and urgency without keywords. Each ticket carries three questions sent in one call: which team (three options), whether resolution is needed within 24 hours, and whether a refund or credit is explicitly requested. Four systems answered the same questions: Jev (jev-1.14.0, hosted decision model), DeepSeek (deepseek-v4-flash, hosted general language model), Gemma 12B (served by Ollama, local general language model), and an XGBoost classifier on TF-IDF word features trained with five-fold cross-validation.</p>
         <h3>5.3 Results on the full ticket set</h3>
         <table>
