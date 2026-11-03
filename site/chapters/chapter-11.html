@@ -102,7 +102,7 @@
         </table>
         <p>In an evaluator-optimizer loop the judge sits between generation and the decision to repeat. Deterministic checks, such as tests, remain the hard stop criterion; the judge covers what tests cannot express, such as fit to a written specification or behavior outside its scope.</p>
         <h3>4.2 One model or a separate judge</h3>
-        <p>Using the same model to generate and to judge is the cheapest design and the weakest. Evaluations of language models as judges report systematic tendencies: a preference for output produced by the same model, a preference for longer answers, and sensitivity to the order of candidates. A separate judge reduces shared blind spots, particularly when it differs in provider or training.</p>
+        <p>Using the same model to generate and to judge is the cheapest design and the weakest. Evaluations of language models as judges report systematic tendencies: a preference for output produced by the same model, a preference for longer answers, and sensitivity to the order of candidates when two are compared: swapping the positions can change the verdict. The judges in this module evaluate one artifact per call, so this last risk does not apply to them. A separate judge reduces shared blind spots, particularly when it differs in provider or training.</p>
         <ul>
           <li><strong>One model:</strong> acceptable for low-stakes drafts, with deterministic checks doing the real verification.</li>
           <li><strong>Separate model of the same size:</strong> removes self-preference at the price of a second call.</li>
