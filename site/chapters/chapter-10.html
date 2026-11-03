@@ -127,12 +127,28 @@
         <h2>5. Orchestration patterns</h2>
         <h3>5.1 Planner-executor</h3>
         <p>A planner produces an ordered list of steps from the goal; an executor carries them out one at a time. The plan is a visible artifact that can be reviewed or edited before execution. The pattern fits tasks with a predictable shape, and it should include a replanning step, because a plan written at the start is wrong as soon as a step returns something unexpected.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m10-figure-2-planner-executor.svg" alt="Planner-executor: the goal goes to a planner that writes steps 1 to 3; an executor runs them in order and produces the result; an unexpected step result returns to the planner.">
+          <figcaption><strong>Figure M10.2.</strong> Planner-executor. The planner turns the goal into an ordered, reviewable list of steps; the executor runs them one at a time. An unexpected step result sends control back to the planner for replanning.</figcaption>
+        </figure>
         <h3>5.2 Router</h3>
         <p>A router classifies the input and sends it to one specialized path: a prompt, a tool set, a model, or another agent. The router makes a single decision and does not loop. Its quality is the quality of its classification, so it benefits from a typed output with an explicit "none of the above" option and a rule for low confidence.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m10-figure-3-router.svg" alt="Router: the input goes to a router that picks path A, B or C, or a none-of-the-above path, and all paths lead to the output.">
+          <figcaption><strong>Figure M10.3.</strong> Router. A single typed decision sends the input to one specialized path (prompt or tool set, model, or agent); an explicit "none of the above" option handles low confidence. There is no loop.</figcaption>
+        </figure>
         <h3>5.3 Orchestrator-worker</h3>
         <p>An orchestrator decomposes the task at run time, delegates the parts to workers, and combines their results. It differs from planner-executor because the subtasks are not known in advance and can run in parallel. Workers should receive only the context they need and return a structured result, so that one worker's failure does not corrupt the others.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m10-figure-4-orchestrator-worker.svg" alt="Orchestrator-worker: a task goes to an orchestrator that fans out to several workers in parallel, whose results are combined by a synthesis step.">
+          <figcaption><strong>Figure M10.4.</strong> Orchestrator-worker. The orchestrator splits the task at run time and delegates to workers that each receive only their own context; a synthesis step combines the structured results.</figcaption>
+        </figure>
         <h3>5.4 Evaluator-optimizer</h3>
         <p>One component produces an artifact and another evaluates it against explicit criteria; the evaluation feeds the next attempt. This is the pattern closest to the agentic loop itself: generation, verification, and a decision to repeat. It works when criteria are clear and when revision improves the result. The evaluator may be deterministic code, a language model, a specialized decision model, or a person, and the strongest designs combine several of them.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m10-figure-5-evaluator-optimizer.svg" alt="Evaluator-optimizer: generator, evaluator and a pass decision; failure returns feedback to the generator, success accepts, exhausted budget goes to a person.">
+          <figcaption><strong>Figure M10.5.</strong> Evaluator-optimizer. The generator produces an artifact, the evaluator checks it against the criteria, and a pass decision accepts it; otherwise the findings return as feedback, and an exhausted budget goes to a person.</figcaption>
+        </figure>
         <h3>5.5 Specialized roles</h3>
         <table>
           <thead>

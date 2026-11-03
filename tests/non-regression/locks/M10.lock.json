@@ -28,7 +28,11 @@
     "5.2 Router"
   ],
   "required_images": [
-    "../assets/images/m10-figure-1-agentic-loop.svg"
+    "../assets/images/m10-figure-1-agentic-loop.svg",
+    "../assets/images/m10-figure-2-planner-executor.svg",
+    "../assets/images/m10-figure-3-router.svg",
+    "../assets/images/m10-figure-4-orchestrator-worker.svg",
+    "../assets/images/m10-figure-5-evaluator-optimizer.svg"
   ],
   "required_links": [
     "../index.html",
