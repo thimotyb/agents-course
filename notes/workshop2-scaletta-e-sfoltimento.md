@@ -35,10 +35,12 @@ Legenda: **D** = da dire, **S** = se c'è tempo, **X** = non presentare (resta n
 | 4.1 | Quattro posizioni del giudice | **D** |
 | 4.2 | Un modello o un giudice separato | **D** |
 | 4.3–4.4 | Come scrivere le domande, contratto indipendente dal backend | S (mostra il codice di `decide`) |
-| 5.1 | Metriche (accuratezza, ECE, Brier, accuratezza se confidente) | **D** con ECE spiegato in una frase |
-| 5.3 | Risultati sul full set | **D** (una tabella: solo `team`) |
-| 5.4 | gemma-12b su 49 ticket | **D** (è il punto "locale sicuro e sbagliato") |
-| 5.5 | Lettura dei risultati | **D** |
+| 5.1 | Metriche (accuratezza, ECE, Brier, accuratezza se confidente) | **D** con ECE spiegato con l'esempio a due gruppi |
+| 5.2 | Il caso dei ticket (tre domande, 120 ticket, 20 difficili) | **D** (2 minuti, mostra due esempi) |
+| 5.3 | Disegno del benchmark | S |
+| 5.4 | Risultati sul full set | **D** (una tabella: solo `team`) |
+| 5.5 | gemma-12b su 49 ticket | **D** (è il punto "locale sicuro e sbagliato") |
+| 5.6 | Lettura dei risultati | **D** |
 | 6 | Modello decisionale vs XGBoost | **D** (la domanda arriverà comunque) |
 | 7.1 | Decisioni a tre vie | **D** |
 | 7.2 | Cascate + **Figure M11.1** | **D** |

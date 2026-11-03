@@ -165,13 +165,38 @@ def decide(answer, accept=0.7, reject=0.3):
             <tr><td>Hesitant</td><td>5</td><td>0.60</td><td>3 of 5</td><td>0.60</td><td>0.00</td></tr>
           </tbody>
         </table>
-        <p>ECE is the average of the gaps weighted by the share of answers in each group: 5/10 x 0.10 + 5/10 x 0.00 = <strong>0.05</strong>. A judge that said 0.90 on all ten answers and got six right would have a single group with a gap of 0.90 - 0.60 = 0.30, so an ECE of 0.30: its "90%" would mean "60%" in practice. The measurements below use ten confidence bins instead of two, and the local 12B model in section 5.4 is the case to remember: a mean confidence of 0.92 against an accuracy of 0.77 on the team question, with an ECE of 0.233. A low ECE does not mean a high accuracy; it means the probabilities can be trusted when thresholds are applied to them.</p>
+        <p>ECE is the average of the gaps weighted by the share of answers in each group: 5/10 x 0.10 + 5/10 x 0.00 = <strong>0.05</strong>. A judge that said 0.90 on all ten answers and got six right would have a single group with a gap of 0.90 - 0.60 = 0.30, so an ECE of 0.30: its "90%" would mean "60%" in practice. The measurements below use ten confidence bins instead of two, and the local 12B model in section 5.5 is the case to remember: a mean confidence of 0.92 against an accuracy of 0.77 on the team question, with an ECE of 0.233. A low ECE does not mean a high accuracy; it means the probabilities can be trusted when thresholds are applied to them.</p>
         <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/report.py#L41-L63" target="_blank" rel="noopener noreferrer">metrics per task (accuracy, ECE, Brier, confident accuracy and coverage)</a></p>
-        <h3>5.2 Benchmark design</h3>
-        <p>This module uses two different cases for two different purposes. The <strong>repair loop</strong> is the case that shows a judge at work: it asks whether generated code meets a specification and whether it adds behaviour outside it. That case has no ground truth that can be counted, because there is no list of correct verdicts for arbitrary code. To measure accuracy and calibration, the module therefore uses a second case, <strong>support-ticket triage</strong>, where every item has a known correct label. The judge interface, the typed questions, the probabilities, and the thresholds are the same in both, so the measurements on tickets say how a judge behaves, not how it behaves on code in particular.</p>
-        <p>The measurements below use 120 synthetic support tickets without personal data: 100 built from templates with labels correct by construction, and 20 written by hand to include negations, implicit refunds, and urgency without keywords. Each ticket carries three questions sent in one call: which team (three options), whether resolution is needed within 24 hours, and whether a refund or credit is explicitly requested. Four systems answered the same questions: Jev (jev-1.14.0, hosted decision model), DeepSeek (deepseek-v4-flash, hosted general language model), Gemma 12B (served by Ollama, local general language model), and an XGBoost classifier on TF-IDF word features trained with five-fold cross-validation.</p>
+        <h3>5.2 The ticket case</h3>
+        <p>This module uses two cases for two purposes. The <strong>repair loop</strong> shows a judge at work: it asks whether generated code meets a specification and whether it adds behavior outside it. That case has no ground truth that can be counted, because there is no list of correct verdicts for arbitrary code. To measure accuracy and calibration the module uses a second case, <strong>support-ticket triage</strong>, in which every item has a known correct label. The judge interface, the typed questions, the probabilities, and the thresholds are the same in both, so the measurements on tickets say how a judge behaves, not how it behaves on code in particular.</p>
+        <p>A ticket is a short customer message, such as the ones a support desk receives. For each message the judge answers three questions, and the correct answers are stored with the message.</p>
+        <table>
+          <thead>
+            <tr><th>Question</th><th>Type</th><th>Correct answers</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Which team should handle this ticket?</td><td>Choice</td><td>billing, engineering, or sales</td></tr>
+            <tr><td>Does the customer need a resolution within 24 hours?</td><td>Yes/no</td><td>yes or no</td></tr>
+            <tr><td>Does the customer explicitly ask for a refund or a credit back?</td><td>Yes/no</td><td>yes or no</td></tr>
+          </tbody>
+        </table>
+        <p>The set has 120 synthetic tickets, with no personal data. One hundred are assembled from templates, with labels correct by construction. Twenty are written by hand to be hard: negations ("I do not want a refund"), refunds that are implied without the word, and urgency expressed without keywords. Four examples follow.</p>
+        <table>
+          <thead>
+            <tr><th>Ticket text</th><th>Team</th><th>Urgent</th><th>Refund</th><th>Kind</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Invoice 5441 shows the wrong amount. Please just fix it. This blocks our launch tomorrow morning.</td><td>billing</td><td>yes</td><td>no</td><td>template</td></tr>
+            <tr><td>What is the difference between the Pro and Team plans? Please just fix it. Take your time.</td><td>sales</td><td>no</td><td>no</td><td>template</td></tr>
+            <tr><td>I do not want a refund, I want the double charge on order 5521 explained. Next week is fine.</td><td>billing</td><td>no</td><td>no</td><td>hand-written: negation</td></tr>
+            <tr><td>The refund you promised last month has still not arrived, and the bank closes my account tomorrow.</td><td>billing</td><td>yes</td><td>yes</td><td>hand-written: implicit refund and urgency</td></tr>
+          </tbody>
+        </table>
+        <p>The data are in the repository: <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/dataset.jsonl" target="_blank" rel="noopener noreferrer">the full set of 120 tickets</a> (one JSON object per line, with the text and the three labels; lines 101 to 120 are the hand-written ones, <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/dataset.jsonl#L101-L120" target="_blank" rel="noopener noreferrer">lines 101-120</a>), and <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/dataset.py#L25-L69" target="_blank" rel="noopener noreferrer">the templates and the hand-written tickets</a> that generate it. Reading a few of the hand-written tickets is the quickest way to see where a judge is likely to fail.</p>
+        <h3>5.3 Benchmark design</h3>
+        <p>The measurements use the 120 tickets and the three questions of section 5.2, each ticket sent in one call. Four systems answered the same questions: Jev (jev-1.14.0, hosted decision model), DeepSeek (deepseek-v4-flash, hosted general language model), Gemma 12B (served by Ollama, local general language model), and an XGBoost classifier on TF-IDF word features trained with five-fold cross-validation.</p>
         <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/dataset.py#L15-L23" target="_blank" rel="noopener noreferrer">teams and question wording</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/dataset.py#L72-L84" target="_blank" rel="noopener noreferrer">building the 120 tickets</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/run_bench.py#L34-L99" target="_blank" rel="noopener noreferrer">running a judge or the XGBoost baseline</a></p>
-        <h3>5.3 Results on the full ticket set</h3>
+        <h3>5.4 Results on the full ticket set</h3>
         <p>In the tables below, green marks the best value and red the worst for each task: higher is better for accuracy and for accuracy when confident, and <strong>lower is better for ECE and for Brier</strong> (0 means perfect calibration for ECE). Mean confidence and coverage are not colored, because a high value is not good in itself: confidence is read against accuracy, and a judge that covers everything is one that is never unsure. Latency and cost, where shown, are also better when lower.</p>
         <table>
           <thead>
@@ -199,7 +224,7 @@ def decide(answer, accept=0.7, reject=0.3):
             <tr><td>XGBoost (TF-IDF)</td><td class="cell-best">Negligible</td><td class="cell-best">None</td><td>Labelled data for every task, retraining on change</td></tr>
           </tbody>
         </table>
-        <h3>5.4 A local model on the first 49 tickets</h3>
+        <h3>5.5 A local model on the first 49 tickets</h3>
         <p>A 12B-parameter local language model run on a GPU was interrupted after the first 49 tickets, all template-built. The comparison below uses the same 49 tickets for every system.</p>
         <table>
           <thead>
@@ -215,7 +240,7 @@ def decide(answer, accept=0.7, reject=0.3):
           </tbody>
         </table>
         <p>The local model needed about 16 seconds per ticket. On two tickets it never answered the refund question, which both contained the phrase "I do not want a refund"; those two tickets are counted as failures, not as correct answers.</p>
-        <h3>5.5 Reading the results</h3>
+        <h3>5.6 Reading the results</h3>
         <ul>
           <li>On the full set the hosted decision model had the best team accuracy and calibration, about one tenth of the cost, and about eleven times lower latency than the hosted general model.</li>
           <li>The decision model was under-confident on urgency: mean confidence 0.86 against accuracy 0.99. A threshold chosen for one task should not be reused for another.</li>
