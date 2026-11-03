@@ -152,22 +152,22 @@ def decide(answer, accept=0.7, reject=0.3):
         </table>
         <p>Accuracy alone hides the failure that matters most in a routed system: a judge that is wrong and certain never triggers escalation.</p>
         <h3>5.2 Benchmark design</h3>
-        <p>The measurements below use 120 synthetic support tickets without personal data: 100 built from templates with labels correct by construction, and 20 written by hand to include negations, implicit refunds, and urgency without keywords. Each ticket carries three questions sent in one call: which team (three options), whether resolution is needed within 24 hours, and whether a refund or credit is explicitly requested. Four systems answered the same questions: a hosted decision model, a hosted general language model, a local general language model, and a gradient-boosted classifier on word features trained with five-fold cross-validation.</p>
+        <p>The measurements below use 120 synthetic support tickets without personal data: 100 built from templates with labels correct by construction, and 20 written by hand to include negations, implicit refunds, and urgency without keywords. Each ticket carries three questions sent in one call: which team (three options), whether resolution is needed within 24 hours, and whether a refund or credit is explicitly requested. Four systems answered the same questions: Jev (jev-1.14.0, hosted decision model), DeepSeek (deepseek-v4-flash, hosted general language model), Gemma 12B (served by Ollama, local general language model), and an XGBoost classifier on TF-IDF word features trained with five-fold cross-validation.</p>
         <h3>5.3 Results on the full ticket set</h3>
         <table>
           <thead>
             <tr><th>Task</th><th>System</th><th>Accuracy</th><th>ECE</th><th>Brier</th><th>Mean confidence</th><th>Accuracy when confident</th><th>Coverage when confident</th></tr>
           </thead>
           <tbody>
-            <tr><td>Team</td><td>Hosted general model</td><td>0.87</td><td>0.063</td><td>0.153</td><td>0.87</td><td>0.93</td><td>0.88</td></tr>
-            <tr><td>Team</td><td>Hosted decision model</td><td>0.91</td><td>0.032</td><td>0.114</td><td>0.93</td><td>0.97</td><td>0.88</td></tr>
-            <tr><td>Team</td><td>Gradient boosting</td><td>0.86</td><td>0.076</td><td>0.196</td><td>0.89</td><td>0.91</td><td>0.90</td></tr>
-            <tr><td>Urgent</td><td>Hosted general model</td><td>0.98</td><td>0.063</td><td>0.023</td><td>0.94</td><td>1.00</td><td>0.98</td></tr>
-            <tr><td>Urgent</td><td>Hosted decision model</td><td>0.99</td><td>0.128</td><td>0.055</td><td>0.86</td><td>1.00</td><td>0.93</td></tr>
-            <tr><td>Urgent</td><td>Gradient boosting</td><td>0.87</td><td>0.055</td><td>0.196</td><td>0.89</td><td>0.92</td><td>0.88</td></tr>
-            <tr><td>Refund</td><td>Hosted general model</td><td>1.00</td><td>0.033</td><td>0.007</td><td>0.97</td><td>1.00</td><td>1.00</td></tr>
-            <tr><td>Refund</td><td>Hosted decision model</td><td>0.99</td><td>0.047</td><td>0.012</td><td>0.96</td><td>1.00</td><td>0.99</td></tr>
-            <tr><td>Refund</td><td>Gradient boosting</td><td>0.97</td><td>0.033</td><td>0.063</td><td>0.95</td><td>0.97</td><td>0.99</td></tr>
+            <tr><td>Team</td><td>DeepSeek (deepseek-v4-flash)</td><td>0.87</td><td>0.063</td><td>0.153</td><td>0.87</td><td>0.93</td><td>0.88</td></tr>
+            <tr><td>Team</td><td>Jev (jev-1.14.0)</td><td>0.91</td><td>0.032</td><td>0.114</td><td>0.93</td><td>0.97</td><td>0.88</td></tr>
+            <tr><td>Team</td><td>XGBoost (TF-IDF)</td><td>0.86</td><td>0.076</td><td>0.196</td><td>0.89</td><td>0.91</td><td>0.90</td></tr>
+            <tr><td>Urgent</td><td>DeepSeek (deepseek-v4-flash)</td><td>0.98</td><td>0.063</td><td>0.023</td><td>0.94</td><td>1.00</td><td>0.98</td></tr>
+            <tr><td>Urgent</td><td>Jev (jev-1.14.0)</td><td>0.99</td><td>0.128</td><td>0.055</td><td>0.86</td><td>1.00</td><td>0.93</td></tr>
+            <tr><td>Urgent</td><td>XGBoost (TF-IDF)</td><td>0.87</td><td>0.055</td><td>0.196</td><td>0.89</td><td>0.92</td><td>0.88</td></tr>
+            <tr><td>Refund</td><td>DeepSeek (deepseek-v4-flash)</td><td>1.00</td><td>0.033</td><td>0.007</td><td>0.97</td><td>1.00</td><td>1.00</td></tr>
+            <tr><td>Refund</td><td>Jev (jev-1.14.0)</td><td>0.99</td><td>0.047</td><td>0.012</td><td>0.96</td><td>1.00</td><td>0.99</td></tr>
+            <tr><td>Refund</td><td>XGBoost (TF-IDF)</td><td>0.97</td><td>0.033</td><td>0.063</td><td>0.95</td><td>0.97</td><td>0.99</td></tr>
           </tbody>
         </table>
         <table>
@@ -175,9 +175,9 @@ def decide(answer, accept=0.7, reject=0.3):
             <tr><th>System</th><th>Mean latency per ticket</th><th>Cost for 120 tickets</th><th>Preparation</th></tr>
           </thead>
           <tbody>
-            <tr><td>Hosted general model</td><td>2,057 ms</td><td>USD 0.0202</td><td>Prompt only</td></tr>
-            <tr><td>Hosted decision model</td><td>187 ms</td><td>USD 0.0020</td><td>Question wording only</td></tr>
-            <tr><td>Gradient boosting</td><td>Negligible</td><td>None</td><td>Labelled data for every task, retraining on change</td></tr>
+            <tr><td>DeepSeek (deepseek-v4-flash)</td><td>2,057 ms</td><td>USD 0.0202</td><td>Prompt only</td></tr>
+            <tr><td>Jev (jev-1.14.0)</td><td>187 ms</td><td>USD 0.0020</td><td>Question wording only</td></tr>
+            <tr><td>XGBoost (TF-IDF)</td><td>Negligible</td><td>None</td><td>Labelled data for every task, retraining on change</td></tr>
           </tbody>
         </table>
         <h3>5.4 A local model on the first 49 tickets</h3>
@@ -187,12 +187,12 @@ def decide(answer, accept=0.7, reject=0.3):
             <tr><th>Task</th><th>System</th><th>Accuracy</th><th>ECE</th><th>Mean confidence</th><th>Coverage when confident</th></tr>
           </thead>
           <tbody>
-            <tr><td>Team</td><td>Local 12B model</td><td>0.77</td><td>0.233</td><td>0.92</td><td>1.00</td></tr>
-            <tr><td>Team</td><td>Hosted decision model</td><td>0.90</td><td>0.077</td><td>0.91</td><td>0.82</td></tr>
-            <tr><td>Urgent</td><td>Local 12B model</td><td>0.85</td><td>0.096</td><td>0.90</td><td>1.00</td></tr>
-            <tr><td>Urgent</td><td>Hosted decision model</td><td>0.98</td><td>0.132</td><td>0.87</td><td>0.94</td></tr>
-            <tr><td>Refund</td><td>Local 12B model</td><td>0.94</td><td>0.048</td><td>0.98</td><td>1.00</td></tr>
-            <tr><td>Refund</td><td>Hosted decision model</td><td>1.00</td><td>0.043</td><td>0.96</td><td>1.00</td></tr>
+            <tr><td>Team</td><td>Gemma 12B (Ollama, local)</td><td>0.77</td><td>0.233</td><td>0.92</td><td>1.00</td></tr>
+            <tr><td>Team</td><td>Jev (jev-1.14.0)</td><td>0.90</td><td>0.077</td><td>0.91</td><td>0.82</td></tr>
+            <tr><td>Urgent</td><td>Gemma 12B (Ollama, local)</td><td>0.85</td><td>0.096</td><td>0.90</td><td>1.00</td></tr>
+            <tr><td>Urgent</td><td>Jev (jev-1.14.0)</td><td>0.98</td><td>0.132</td><td>0.87</td><td>0.94</td></tr>
+            <tr><td>Refund</td><td>Gemma 12B (Ollama, local)</td><td>0.94</td><td>0.048</td><td>0.98</td><td>1.00</td></tr>
+            <tr><td>Refund</td><td>Jev (jev-1.14.0)</td><td>1.00</td><td>0.043</td><td>0.96</td><td>1.00</td></tr>
           </tbody>
         </table>
         <p>The local model needed about 16 seconds per ticket. On two tickets it never answered the refund question, which both contained the phrase "I do not want a refund"; those two tickets are counted as failures, not as correct answers.</p>
@@ -201,7 +201,7 @@ def decide(answer, accept=0.7, reject=0.3):
           <li>On the full set the hosted decision model had the best team accuracy and calibration, about one tenth of the cost, and about eleven times lower latency than the hosted general model.</li>
           <li>The decision model was under-confident on urgency: mean confidence 0.86 against accuracy 0.99. A threshold chosen for one task should not be reused for another.</li>
           <li>The local general model was over-confident and never uncertain: on the team task its mean confidence was 0.92 with accuracy 0.77, and every answer exceeded the 0.7 threshold. A router built on it would never escalate its errors.</li>
-          <li>Gradient boosting was competitive where wording is simple and fell to 0.87 on urgency, where negations such as "no rush" matter.</li>
+          <li>XGBoost was competitive where wording is simple and fell to 0.87 on urgency, where negations such as "no rush" matter.</li>
         </ul>
         <p>The data are limited. The set is synthetic and template-heavy, which favors the classifier; it has only 120 tickets, so differences of a few points are not significant; and some team errors may stem from ambiguous labels, which were not audited. Thresholds must be tuned on the target data before deployment.</p>
       </section>
@@ -240,11 +240,11 @@ def decide(answer, accept=0.7, reject=0.3):
             <tr><th>Setup</th><th>Threshold</th><th>Resolved automatically</th><th>Accuracy</th><th>Cost per 1,000 tickets</th><th>Latency per ticket</th></tr>
           </thead>
           <tbody>
-            <tr><td>Decision model, then general model, then person</td><td>0.7</td><td>96.9%</td><td>0.983</td><td>USD 0.06</td><td>about 760 ms</td></tr>
-            <tr><td>Decision model alone, then person</td><td>0.7</td><td>93.3%</td><td>0.991</td><td>USD 0.02</td><td>about 190 ms</td></tr>
-            <tr><td>General model alone, then person</td><td>0.7</td><td>95.3%</td><td>0.980</td><td>USD 0.17</td><td>about 2,060 ms</td></tr>
-            <tr><td>Decision model, then general model, then person</td><td>0.9</td><td>88.3%</td><td>0.997</td><td>USD 0.13</td><td>about 1,540 ms</td></tr>
-            <tr><td>Decision model alone, then person</td><td>0.9</td><td>75.3%</td><td>0.996</td><td>USD 0.02</td><td>about 190 ms</td></tr>
+            <tr><td>Jev, then DeepSeek, then person</td><td>0.7</td><td>96.9%</td><td>0.983</td><td>USD 0.06</td><td>about 760 ms</td></tr>
+            <tr><td>Jev alone, then person</td><td>0.7</td><td>93.3%</td><td>0.991</td><td>USD 0.02</td><td>about 190 ms</td></tr>
+            <tr><td>DeepSeek alone, then person</td><td>0.7</td><td>95.3%</td><td>0.980</td><td>USD 0.17</td><td>about 2,060 ms</td></tr>
+            <tr><td>Jev, then DeepSeek, then person</td><td>0.9</td><td>88.3%</td><td>0.997</td><td>USD 0.13</td><td>about 1,540 ms</td></tr>
+            <tr><td>Jev alone, then person</td><td>0.9</td><td>75.3%</td><td>0.996</td><td>USD 0.02</td><td>about 190 ms</td></tr>
           </tbody>
         </table>
         <p>At 0.7 the cascade halves the number of questions that reach a person compared with the decision model alone, in exchange for a small loss of precision and about three times the cost; it still costs about one third of the general model alone. Raising the threshold buys accuracy with more human review. These figures come from a synthetic set and must be recomputed on real traffic before choosing a threshold.</p>
