@@ -184,27 +184,13 @@ Maintenance rules:
 - prefer additive updates; avoid rewriting already validated command blocks
 - when an exercise is finalized, preserve its snippet block unless an explicit change is approved
 
-## Netlify Deploy Skill
+## Publishing (ITECH OnDemand)
 
-A local deploy skill is available at:
-- `skills/netlify-deploy/SKILL.md`
-- global reusable skill: `/home/thimoty/.codex/skills/netlify-deploy-agents-course/SKILL.md`
+The site is no longer deployed to Netlify. Publishing to ITECH OnDemand is done from Codex with the global skill:
+- `/home/thimoty/.codex/skills/ondemand-course-publish/SKILL.md` (skill name: `ondemand-course-publish`)
 
-Operational baseline (aligned with `ai-ttt-course`):
+Rules:
+- this repository is the canonical source; a Git push does not update OnDemand by itself
 - static publish directory is `site/`
-- Netlify deploy is executed in production mode
-- credentials are reused from the same Netlify account context
-
-Project deploy files:
-- `netlify.toml`
-- `scripts/deploy_netlify.sh`
-
-Run from project root:
-- `scripts/deploy_netlify.sh "deploy message"`
-
-Standard for future deploys:
-- use `/home/thimoty/.codex/skills/netlify-deploy-agents-course/scripts/deploy.sh`
-
-Required environment variables:
-- `NETLIFY_AUTH_TOKEN`
-- `NETLIFY_SITE_ID`
+- Claude Code commits and pushes only; the publish step is run by the user in Codex
+- `netlify.toml`, `scripts/deploy_netlify.sh` and `skills/netlify-deploy/` are obsolete and kept only for reference
