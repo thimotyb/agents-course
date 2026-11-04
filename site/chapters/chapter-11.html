@@ -451,15 +451,43 @@ JUDGE_BACKEND=cascade CASCADE_THRESHOLD=0.7 LLM_PROVIDER=deepseek .venv/bin/pyth
           <img src="../assets/images/m11-figure-5-benchmark-report.png" alt="Terminal output of bench/report.py: one table per question with accuracy, calibration, and confidence for each backend, and a final table of latency and cost.">
           <figcaption>
             <strong>Figure M11.5.</strong> Output of <code>report.py</code> on the stored results. The team, urgent, and refund tables compare all backends on the same 49 tickets because the local model was run on only part of the set.
-            <p><strong>Question-table columns:</strong> <code>backend</code> is the system; <code>n</code> is the number of tickets compared, including any whose call failed (failed tickets are left out of every metric after <code>n</code>). For each ticket, the <em>confidence</em> is the probability the system gives to the answer it chose (for a yes/no question, the larger of P(yes) and P(no)). <code>acc</code> is the share of chosen answers that match the label. <code>ECE</code> is the expected calibration error: answers are grouped into ten confidence bins, and the gap between mean confidence and accuracy in each bin is averaged, weighted by bin size. <code>Brier</code> is the squared error of the whole probability vector against the correct answer (summed over the classes), averaged over tickets. <code>conf</code> is the mean confidence, to be compared with <code>acc</code>: a value well above it means over-confidence. <code>acc@c</code> is the accuracy on the answers with confidence of at least 0.7, and <code>cov@c</code> is the share of answers that reach 0.7. Lower ECE and Brier are better.</p>
-            <p><strong>Speed-and-cost columns:</strong> all three questions of a ticket are asked in one call. <code>backend</code> identifies the system; <code>errors</code> is the number of tickets whose call failed; <code>mean latency / ticket</code> is the average time of the successful calls; <code>total cost</code> is the sum of the recorded costs over the compared tickets; <code>note</code> carries the model name or a limitation of the run, such as a partial run.</p>
+            <p><strong>Question-table columns.</strong> For each ticket, the <em>confidence</em> is the probability the system gives to the answer it chose (for a yes/no question, the larger of P(yes) and P(no)).</p>
+            <ul>
+              <li><code>backend</code>: the system.</li>
+              <li><code>n</code>: the number of tickets compared, including any whose call failed. Failed tickets are left out of every metric after <code>n</code>.</li>
+              <li><code>acc</code>: the share of chosen answers that match the label.</li>
+              <li><code>ECE</code>: the expected calibration error. Answers are grouped into ten confidence bins, and the gap between mean confidence and accuracy in each bin is averaged, weighted by bin size. Lower is better.</li>
+              <li><code>Brier</code>: the squared error of the whole probability vector against the correct answer, summed over the classes and averaged over tickets. Lower is better.</li>
+              <li><code>conf</code>: the mean confidence. Compared with <code>acc</code>, a value well above it means over-confidence.</li>
+              <li><code>acc@c</code>: the accuracy on the answers with confidence of at least 0.7.</li>
+              <li><code>cov@c</code>: the share of answers that reach a confidence of 0.7.</li>
+            </ul>
+            <p><strong>Speed-and-cost columns.</strong> All three questions of a ticket are asked in one call.</p>
+            <ul>
+              <li><code>backend</code>: the system.</li>
+              <li><code>errors</code>: the number of tickets whose call failed.</li>
+              <li><code>mean latency / ticket</code>: the average time of the successful calls.</li>
+              <li><code>total cost</code>: the sum of the recorded costs over the compared tickets.</li>
+              <li><code>note</code>: the model name or a limitation of the run, such as a partial run.</li>
+            </ul>
           </figcaption>
         </figure>
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m11-figure-6-routing-replay.png" alt="Terminal output of bench/routing_replay.py: for thresholds from 0.5 to 0.9, accuracy, share sent to a person, escalation share, cost per thousand tickets, and latency, for the cascade and for each judge alone.">
           <figcaption>
             <strong>Figure M11.6.</strong> Output of <code>routing_replay.py</code>, which recomputes the cascade from stored answers without calling a model. Rows compare the cascade with each judge alone at several thresholds.
-            <p><strong>Column legend:</strong> the rows named with two judges are the cascade; those ending in "alone" use a single judge with the same threshold, and anything below it goes to a person. <code>setup</code> is the route; <code>threshold</code> is the minimum confidence for a judge's answer to be accepted. <code>auto-acc</code> is the accuracy on the questions answered without a person. <code>human%</code> is the share of questions that end with a person. <code>eff-acc</code> is the accuracy of the whole system if the person always answers correctly: every question sent to a person is counted as correct. It is the best result that the setup could reach, since real reviewers also make mistakes. <code>escal%</code> is the share of tickets in which at least one question was passed on to the second judge (always 0 for a judge alone). <code>$/1k tickets</code> is the estimated cost per 1,000 tickets and <code>ms/ticket</code> the mean latency per ticket; in both, a ticket is charged for every judge it reaches with the whole ticket, so a live cascade that re-asks only the unsure questions is slightly cheaper.</p>
+            <p><strong>Column legend.</strong> The rows named with two judges are the cascade; those ending in "alone" use a single judge with the same threshold, and anything below it goes to a person.</p>
+            <ul>
+              <li><code>setup</code>: the judge, or the chain of judges, that answers.</li>
+              <li><code>threshold</code>: the minimum confidence for a judge's answer to be accepted.</li>
+              <li><code>auto-acc</code>: the accuracy on the questions answered without a person.</li>
+              <li><code>human%</code>: the share of questions that end with a person.</li>
+              <li><code>eff-acc</code>: the accuracy of the whole system if the person always answers correctly: every question sent to a person is counted as correct. It is the best result that the setup could reach, since real reviewers also make mistakes.</li>
+              <li><code>escal%</code>: the share of tickets in which at least one question was passed on to the second judge (always 0 for a judge alone).</li>
+              <li><code>$/1k tickets</code>: the estimated cost per 1,000 tickets.</li>
+              <li><code>ms/ticket</code>: the mean latency per ticket.</li>
+            </ul>
+            <p>In both cost and latency, a ticket is charged for every judge it reaches with the whole ticket, so a live cascade that re-asks only the unsure questions is slightly cheaper.</p>
           </figcaption>
         </figure>
         <ol>
