@@ -351,6 +351,25 @@ body {
   margin-bottom: 0.2rem;
 }
 
+.cascade-run-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0.8rem 0 1.2rem;
+  font-size: 0.9rem;
+}
+
+.cascade-run-title {
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  font-size: 1.08rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.4rem;
+  padding-top: 0.9rem;
+  scroll-margin-top: 1rem;
+}
+
 .module-figure {
   margin: 1rem 0;
 }

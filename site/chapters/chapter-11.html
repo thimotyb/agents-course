@@ -295,7 +295,7 @@ def decide(answer, accept=0.7, reject=0.3):
           <img src="../assets/images/m11-figure-tfidf-weights.svg" alt="TF-IDF computation for one ticket: the term frequency and inverse document frequency formulas, and a table of eight features with their count, document frequency, IDF, TF times IDF, and final weight as a bar.">
           <figcaption><strong>Figure M11.2.</strong> TF-IDF weights computed on the 120 tickets for the ticket "The API has been timing out since this morning. Please refund the amount. This blocks our launch tomorrow morning." The word "morning" appears twice but occurs in 29 tickets, "timing" and "api" appear once but occur in 7 and 8 tickets, so they weigh almost the same; the frequent words "the" (78 tickets), "please" (43), and "refund" (46) receive the lowest weights. The pair "refund the" (12 tickets) is a feature of its own and weighs more than the single word "refund".</figcaption>
         </figure>
-        <p>Two properties follow. First, the weights measure only how distinctive a word is: TF-IDF knows nothing about refunds or teams, and which words matter for a given question is learned afterwards by the classifier from the labels. Second, the representation ignores meaning and almost all word order. Synonyms are unrelated features, and a negation is visible only when the pair that contains it was seen in training, as with "not want" in the refund question. A decision model reads the ticket as written and does not need this step, which is why it can answer a new question without a labelled set.</p>
+        <p>Two properties follow. First, the weights measure only how distinctive a word is: TF-IDF knows nothing about refunds or teams, and which words matter for a given question is learned afterwards by the classifier from the labels. Second, the representation ignores meaning and almost all word order. Synonyms are unrelated features, and TF-IDF does not interpret negation. It can give the classifier a specific clue such as the two-word feature "not want" only if that pair appeared in training; unfamiliar ways of saying "I do not want a refund" may not provide the same clue. A decision model reads the ticket as written and does not need this step, which is why it can answer a new question without a labelled set.</p>
       </section>
 
       <section class="panel">
@@ -311,6 +311,16 @@ def decide(answer, accept=0.7, reject=0.3):
         <p>A probability supports three outcomes instead of two: act, reject, or defer. The thresholds that separate them express the cost of each error. Raising the acceptance threshold fits actions where a false yes is expensive, such as a refund or an alert to a person on call; lowering it fits situations where a missed detection is expensive, such as a safety issue. The band between the thresholds is the share of work that goes to a person or to a stronger model, and it is the quantity to measure.</p>
         <h3>7.2 Cascades</h3>
         <p>A cascade orders judges from cheap and fast to slow and strong. Each question is answered by the first judge whose confidence reaches the threshold; only the unsure questions go to the next judge, and what is still unsure after the last judge goes to a person.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m11-figure-1-judge-cascade.svg" alt="Cascade of judges: a ticket with typed questions goes to a fast decision model; confident answers stop there, unsure questions are re-asked to a general language model, and questions still unsure go to a person.">
+          <figcaption><strong>Figure M11.3.</strong> Cascade of judges. Each question is answered by the first tier whose confidence reaches the threshold; only the unsure questions go to the next tier, and what remains unsure after the last tier goes to a person. The latency and cost shown are those measured for each judge alone on 120 synthetic tickets with three questions each.</figcaption>
+        </figure>
+        <nav class="cascade-run-nav" aria-label="Cascade experiments">
+          <a href="#cascade-replay">7.2.1 Replay on 120 tickets</a>
+          <a href="#cascade-live-07">7.2.2 Live run at 0.7</a>
+          <a href="#cascade-live-095">7.2.3 Live run at 0.95</a>
+        </nav>
+        <p class="cascade-run-title" id="cascade-replay" role="heading" aria-level="4">7.2.1 Offline replay on 120 tickets</p>
         <p>The table replays a cascade from stored answers on all 120 tickets, with three questions per ticket. "Resolved automatically" is the share of questions answered without a person; "accuracy" is measured on those questions. The replay charges a whole ticket to every judge it reaches, which slightly overstates the cost of a live cascade that re-asks only the unsure questions.</p>
         <table>
           <thead>
@@ -325,22 +335,34 @@ def decide(answer, accept=0.7, reject=0.3):
           </tbody>
         </table>
         <p>At 0.7 the cascade halves the number of questions that reach a person compared with the decision model alone, in exchange for a small loss of precision and about three times the cost; it still costs about one third of the general model alone. Raising the threshold buys accuracy with more human review. These figures come from a synthetic set and must be recomputed on real traffic before choosing a threshold.</p>
-        <p>The replay above is a computation. The same cascade was also run live on 12 tickets (nine of the hand-written tricky ones and three template-built), with Jev as the first tier and DeepSeek as the second, and every call to every tier was saved in a trace: <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/traces/cascade-live.jsonl" target="_blank" rel="noopener noreferrer"><code>cascade-live.jsonl</code></a> for a threshold of 0.7 and <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/traces/cascade-live-threshold-095.jsonl" target="_blank" rel="noopener noreferrer"><code>cascade-live-threshold-095.jsonl</code></a> for 0.95. Each ticket record lists the calls (which tier was asked which questions, the answers and confidences, latency, cost) and the final answers with the tier that produced each one and whether it was correct.</p>
+        <p class="cascade-run-title" id="cascade-live-07" role="heading" aria-level="4">7.2.2 Live run on 12 tickets at threshold 0.7</p>
+        <p>A second experiment ran the cascade live on 12 tickets, with Jev as the first tier and DeepSeek as the second. At a threshold of 0.7, the run escalated 2 of the 36 questions, flagged none for a person, and recorded 33 correct model answers. Its total judge cost was USD 0.000386. The <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/traces/cascade-live.jsonl" target="_blank" rel="noopener noreferrer">0.7 live trace</a> records these totals first, followed by the calls and final answers for each ticket.</p>
+        <p>The table shows the two questions sent to DeepSeek. Each ticket link opens its record in the 0.7 live trace; the known answer comes from the labelled dataset.</p>
         <table>
           <thead>
-            <tr><th>Threshold</th><th>Questions</th><th>Escalated to the second tier</th><th>Sent to a person</th><th>Correct</th><th>Cost</th></tr>
+            <tr><th>Ticket and trace record</th><th>Question / known label</th><th>Jev answer (confidence)</th><th>DeepSeek answer (confidence)</th><th>Final outcome</th></tr>
           </thead>
           <tbody>
-            <tr><td>0.7</td><td>36</td><td>2</td><td>0</td><td>33</td><td>USD 0.0004</td></tr>
-            <tr><td>0.95</td><td>36</td><td>16</td><td>10</td><td>33</td><td>USD 0.0014</td></tr>
+            <tr><td><a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/traces/cascade-live.jsonl#L3" target="_blank" rel="noopener noreferrer">101: promised refund not received</a></td><td>Refund requested: yes</td><td>No (0.59)</td><td>No (0.95)</td><td>Wrong; not escalated to human review</td></tr>
+            <tr><td><a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/traces/cascade-live.jsonl#L12" target="_blank" rel="noopener noreferrer">1: API timing out, no refund wanted</a></td><td>Urgent: no</td><td>Yes (0.57)</td><td>Yes (0.78)</td><td>Wrong; not escalated to human review</td></tr>
           </tbody>
         </table>
-        <p>Two escalations at 0.7 show how the mechanism works and what it does not guarantee. For the ticket "The refund you promised last month has still not arrived...", Jev answered the refund question with confidence 0.59, below the threshold, so only that question went to DeepSeek, which answered "no refund requested" with confidence 0.95 and was wrong. For "The API has been timing out since this morning. I do not want a refund...", Jev's urgency answer had confidence 0.57; DeepSeek answered "urgent" with 0.78, against a label of not urgent. In both cases the stronger judge was more confident and still wrong, and neither answer reached a person. Escalation raises confidence, not necessarily correctness; the threshold chooses how many answers are checked, and the benchmark of section 5 is what tells whether the confidence can be trusted. Raising the threshold to 0.95 sends 10 questions to a person but does not change the number of correct answers on this small sample, at about 3.7 times the cost.</p>
-        <figure class="module-figure" data-zoomable>
-          <img src="../assets/images/m11-figure-1-judge-cascade.svg" alt="Cascade of judges: a ticket with typed questions goes to a fast decision model; confident answers stop there, unsure questions are re-asked to a general language model, and questions still unsure go to a person.">
-          <figcaption><strong>Figure M11.3.</strong> Cascade of judges. Each question is answered by the first tier whose confidence reaches the threshold; only the unsure questions go to the next tier, and what remains unsure after the last tier goes to a person. The latency and cost shown are those measured for each judge alone on 120 synthetic tickets with three questions each.</figcaption>
-        </figure>
-
+        <ul>
+          <li><strong>Routing:</strong> each ticket has three questions: team, urgency, and refund. For ticket 101, only refund went to DeepSeek; team and urgency kept Jev's answers. For ticket 1, only urgency went to DeepSeek; team and refund kept Jev's answers. DeepSeek exceeded 0.7 on both escalated questions, so neither went to human review.</li>
+          <li><strong>Reliability:</strong> DeepSeek was more confident in both wrong answers. A higher confidence after escalation does not establish correctness; labelled evaluation is needed to test whether confidence is trustworthy.</li>
+        </ul>
+        <p class="cascade-run-title" id="cascade-live-095" role="heading" aria-level="4">7.2.3 Live run on 12 tickets at threshold 0.95</p>
+        <p>A separate live experiment used the same 12 tickets and raised the threshold to 0.95. The <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/traces/cascade-live-threshold-095.jsonl" target="_blank" rel="noopener noreferrer">0.95 live trace</a> records this run. The table compares the totals in the first record of each live trace; the answers were generated in separate calls.</p>
+        <table>
+          <thead>
+            <tr><th>Live threshold</th><th>Tickets / questions</th><th>Escalated to DeepSeek</th><th>Flagged for a person</th><th>Correct model answers</th><th>Total judge cost</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>0.7</td><td>12 / 36</td><td>2</td><td>0</td><td>33 / 36</td><td>USD 0.000386</td></tr>
+            <tr><td>0.95</td><td>12 / 36</td><td>16</td><td>10</td><td>33 / 36</td><td>USD 0.001416</td></tr>
+          </tbody>
+        </table>
+        <p>At 0.95, more questions reached DeepSeek and 10 were flagged for a person. The recorded model answers were still correct on 33 of 36 questions, while judge cost was about 3.7 times the 0.7 run. The traces do not include decisions by people, so the 33 correct answers are measured before any human correction.</p>
         <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/router.py#L21-L46" target="_blank" rel="noopener noreferrer"><code>CascadeJudge</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/routing_replay.py#L35-L69" target="_blank" rel="noopener noreferrer">replaying a cascade from stored answers</a></p>
         <h3>7.3 Human review that works</h3>
         <p>The strongest use of a person in an agent is as the last tier of a cascade, called only in specific conditions.</p>
@@ -374,8 +396,17 @@ def decide(answer, accept=0.7, reject=0.3):
           <li>For harness steps: test counts, failures, and static violations.</li>
           <li>For human steps: the question shown, the reply, and the elapsed time.</li>
         </ul>
-        <p>Tracing platforms and open instrumentation standards store such records and show a run as a tree of steps. The same records can be written as lines of JSON, which is sufficient for a small system.</p>
-        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/agentic_loop.py#L157" target="_blank" rel="noopener noreferrer"><code>generate</code> record</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/agentic_loop.py#L168" target="_blank" rel="noopener noreferrer"><code>harness</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/agentic_loop.py#L186" target="_blank" rel="noopener noreferrer"><code>judge</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/agentic_loop.py#L203-L209" target="_blank" rel="noopener noreferrer"><code>human</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/traces/live-deepseek-jev.jsonl" target="_blank" rel="noopener noreferrer">example trace</a></p>
+        <p>Tracing platforms and open instrumentation standards store such records and show a run as a tree of steps. The same records can be written as lines of JSON, which is sufficient for a small system. The two saved examples below trace different workflows:</p>
+        <table>
+          <thead>
+            <tr><th>Example</th><th>Saved trace</th><th>What the records show</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Support-ticket cascade</td><td><a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/traces/cascade-live.jsonl" target="_blank" rel="noopener noreferrer"><code>cascade-live.jsonl</code></a></td><td>A summary record, then one record per ticket with the questions sent to Jev and DeepSeek, their answers and confidences, the final route, latency, and cost.</td></tr>
+            <tr><td>Payment-retry agentic loop</td><td><a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/traces/live-deepseek-jev.jsonl" target="_blank" rel="noopener noreferrer"><code>live-deepseek-jev.jsonl</code></a></td><td>A run summary followed by the generator, harness, and judge steps for a payment-retry function accepted after one iteration.</td></tr>
+          </tbody>
+        </table>
+        <p class="code-ref"><strong>Payment-retry trace code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/agentic_loop.py#L157" target="_blank" rel="noopener noreferrer"><code>generate</code> record</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/agentic_loop.py#L168" target="_blank" rel="noopener noreferrer"><code>harness</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/agentic_loop.py#L186" target="_blank" rel="noopener noreferrer"><code>judge</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/agentic_loop.py#L203-L209" target="_blank" rel="noopener noreferrer"><code>human</code></a></p>
         <h3>8.3 Metrics to watch</h3>
         <table>
           <thead>
@@ -418,11 +449,18 @@ JUDGE_BACKEND=cascade CASCADE_THRESHOLD=0.7 LLM_PROVIDER=deepseek .venv/bin/pyth
 .venv/bin/python bench/routing_replay.py --tiers jev-1.14.0 deepseek-v4-flash</code></pre>
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m11-figure-5-benchmark-report.png" alt="Terminal output of bench/report.py: one table per question with accuracy, calibration, and confidence for each backend, and a final table of latency and cost.">
-          <figcaption><strong>Figure M11.5.</strong> Output of <code>report.py</code> on the stored results. It prints one table per question (accuracy, expected calibration error, Brier score, mean confidence, accuracy and coverage above the 0.7 confidence threshold) and a closing table of errors, latency, and cost. Because the local model was run on only part of the set, all backends are compared on the 49 tickets they have in common.</figcaption>
+          <figcaption>
+            <strong>Figure M11.5.</strong> Output of <code>report.py</code> on the stored results. The team, urgent, and refund tables compare all backends on the same 49 tickets because the local model was run on only part of the set.
+            <p><strong>Question-table columns:</strong> <code>backend</code> is the model; <code>n</code> is the number of shared tickets attempted; <code>acc</code> is answer accuracy; <code>ECE</code> is expected calibration error; <code>Brier</code> is the mean squared error of the probability vector; <code>conf</code> is mean confidence in the predicted answer; <code>acc@c</code> is accuracy among answers with confidence at least 0.7; <code>cov@c</code> is the share of answers reaching that threshold. Lower ECE and Brier are better.</p>
+            <p><strong>Speed-and-cost columns:</strong> <code>backend</code> identifies the model; <code>errors</code> counts failed ticket calls; <code>mean latency / ticket</code> is average response time for successful calls; <code>total cost</code> sums recorded call costs; <code>note</code> identifies the model or a limitation of the run. Failed calls are excluded from accuracy metrics.</p>
+          </figcaption>
         </figure>
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m11-figure-6-routing-replay.png" alt="Terminal output of bench/routing_replay.py: for thresholds from 0.5 to 0.9, accuracy, share sent to a person, escalation share, cost per thousand tickets, and latency, for the cascade and for each judge alone.">
-          <figcaption><strong>Figure M11.6.</strong> Output of <code>routing_replay.py</code>, which recomputes a cascade from stored answers without calling any model. For each threshold it reports the accuracy of the automatic answers, the share sent to a person, the share escalated to the second tier, the cost per 1,000 tickets, and the latency per ticket, for the cascade and for each judge alone. This is the table to read when choosing the threshold.</figcaption>
+          <figcaption>
+            <strong>Figure M11.6.</strong> Output of <code>routing_replay.py</code>, which recomputes the cascade from stored answers without calling a model. Rows compare the cascade with each judge alone at several thresholds.
+            <p><strong>Column legend:</strong> <code>setup</code> is the judge route; <code>threshold</code> is the minimum confidence for an automatic answer; <code>auto-acc</code> is accuracy among automatically answered questions; <code>human%</code> is the percentage of questions sent to a person; <code>eff-acc</code> is an upper bound that assumes every human answer is correct; <code>escal%</code> is the percentage of tickets with at least one question sent to the second judge; <code>$/1k tickets</code> is estimated cost per 1,000 tickets; <code>ms/ticket</code> is mean latency per ticket.</p>
+          </figcaption>
         </figure>
         <ol>
           <li>Run the benchmark on a judge of your choice and compare its calibration with the stored results.</li>
