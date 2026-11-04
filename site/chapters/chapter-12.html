@@ -63,6 +63,17 @@
         <p>An agent is a model plus everything that surrounds it. The <strong>harness</strong> is that surrounding system: the goal the agent pursues, the tools it may use, the constraints on what it may change, the checks that decide whether the work is correct, the gates that stop risky actions, the state it keeps, and the traces that record what happened. The model proposes; the harness decides what is accepted.</p>
         <p>This division explains a common observation: when an agent fails, the cause is more often an unclear goal, a missing check, or an over-broad permission than a lack of model capability. Improving the harness usually raises reliability more than switching to a larger model.</p>
         <h3>3.2 Components</h3>
+        <p>The definition above lists what surrounds the model. Each item of that list is a component of the harness: a separate part with its own job, which can be designed, tested, and replaced on its own.</p>
+        <p>The table below takes the components one at a time. For each one it states the question it answers about the agent's work and a typical implementation.</p>
+        <p>Together the components cover the whole life of a task:</p>
+        <ul>
+          <li>what the agent is asked to do;</li>
+          <li>what it may touch;</li>
+          <li>how its result is checked;</li>
+          <li>when it must stop;</li>
+          <li>what it remembers;</li>
+          <li>what is recorded.</li>
+        </ul>
         <table>
           <thead>
             <tr><th>Component</th><th>Question it answers</th><th>Typical implementation</th></tr>
@@ -79,12 +90,26 @@
         </table>
         <h3>3.3 Harness before prompt</h3>
         <p>A reliable build order starts with the checks. First write down the completion criteria, then make them executable, and only then let the agent try. An agent started without executable criteria has nothing to be corrected by, and its output can only be reviewed by reading it.</p>
+        <h3>3.4 Where the harness sits in the loop</h3>
+        <p>In an agentic loop the harness is the first thing that looks at what the model has just produced. After every generation it runs its deterministic checks, and only when they pass is the artifact shown to a judge.</p>
+        <p>This early position is deliberate, because the checks are cheap, always give the same answer, and do not involve a model.</p>
+        <ul>
+          <li><strong>A candidate that fails</strong> a test or breaks a static rule is rejected before any model call is spent on judging it.</li>
+          <li><strong>Its failure becomes the feedback</strong> of the next attempt.</li>
+          <li><strong>The judge</strong>, which costs a call and returns probabilities rather than certainties, sees only candidates that the harness has already accepted.</li>
+          <li><strong>A person</strong> sees only what is left after both.</li>
+        </ul>
+        <p>Alongside the loop, a tracer records every step with its result, cost, and time, so that each accepted or rejected candidate can be traced back to the checks that decided it.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m12-figure-1-harness-in-loop.svg" alt="Agentic loop with the harness highlighted: Generate feeds the Harness, which runs first with no model call; a pass leads to the Judge and then to Decide, a fail returns to Generate with the test output as feedback.">
+          <figcaption><strong>Figure M12.1.</strong> Position of the harness in the agentic loop. The harness, highlighted, is the first check after Generate. A fail returns to Generate with the test output as feedback and never reaches the judge; a pass goes on to the judge, then to Decide, which accepts, sends feedback back, or asks a person. The typed loop state is checkpointed after every node, and the tracer, whose dots mark the nodes it records (generate, harness, judge, and the person), documents the run with one record per step.</figcaption>
+        </figure>
       </section>
 
       <section class="panel">
         <h2>4. The goal as a specification</h2>
         <h3>4.1 Spec-driven development</h3>
-        <p>Spec-driven development makes the specification the primary artifact and the code a derived one. A toolkit that supports it, such as the open-source Spec Kit, organizes the work as a short sequence of reviewable documents.</p>
+        <p>Spec-driven development makes the specification the primary artifact and the code a derived one. A toolkit that supports it, such as the open-source <a href="https://github.com/github/spec-kit" target="_blank" rel="noopener noreferrer">Spec Kit</a>, organizes the work as a short sequence of reviewable documents.</p>
         <table>
           <thead>
             <tr><th>Artifact</th><th>Content</th><th>Role in the harness</th></tr>
@@ -98,6 +123,7 @@
           </tbody>
         </table>
         <p>Every artifact is a proposal that a person reviews. No generated document authorizes a code change or a product decision on its own.</p>
+        <p class="code-ref"><strong>Example:</strong> <a href="https://github.com/thimotyb/building-llm-applications/tree/9f0b9dd/ch14/case_retry/speckit" target="_blank" rel="noopener noreferrer">the Spec Kit artifacts of the payment-retry case</a>: constitution, specification, decisions, plan, checklist, tasks, and the prompts that produced them</p>
         <h3>4.2 Acceptance scenarios</h3>
         <p>An acceptance scenario states a precondition, an action, and an observable outcome. It is the bridge between a requirement and a test. The payment-retry specification used in this module defines three functional requirements and one scenario for each.</p>
         <table>
@@ -110,10 +136,41 @@
             <tr><td>Report exhaustion with an alternative</td><td>Three consecutive transient errors</td><td>Exactly three calls, no order, and a failure message that suggests another payment method</td></tr>
           </tbody>
         </table>
+        <p>In the harness of the payment-retry case, each scenario is checked by one unit test. The tests run the retry function against a fake gateway that returns a scripted sequence of outcomes and counts its calls, so the observable outcomes of the table are asserted directly, including the number of attempts.</p>
+        <table>
+          <thead>
+            <tr><th>Scenario</th><th>Test in <code>test_payment_retry.py</code></th><th>What it asserts</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Approval on the first attempt</td><td><a href="https://github.com/thimotyb/building-llm-applications/blob/9f0b9dd/ch14/case_retry/test_payment_retry.py#L7-L15" target="_blank" rel="noopener noreferrer"><code>test_approval_on_first_attempt_stops</code></a></td><td>Status approved, one attempt, one gateway call</td></tr>
+            <tr><td>Transient error, then approval</td><td><a href="https://github.com/thimotyb/building-llm-applications/blob/9f0b9dd/ch14/case_retry/test_payment_retry.py#L17-L25" target="_blank" rel="noopener noreferrer"><code>test_transient_then_approval_retries_and_stops</code></a></td><td>Approved with the second payment identifier, two attempts, two gateway calls</td></tr>
+            <tr><td>Three transient errors</td><td><a href="https://github.com/thimotyb/building-llm-applications/blob/9f0b9dd/ch14/case_retry/test_payment_retry.py#L27-L36" target="_blank" rel="noopener noreferrer"><code>test_three_transient_errors_suggest_alternative</code></a></td><td>Failed, no payment identifier, three attempts, three gateway calls, a message that suggests an alternative</td></tr>
+          </tbody>
+        </table>
+        <p>The same scenarios can also be checked at the API boundary with scenario playbooks, the Postman collections introduced in section 5.2. In the demonstration repository:</p>
+        <ul>
+          <li>a <a href="https://github.com/thimotyb/demo-augmented-coding/blob/10d8de3/moduli/m05/step-01-contratto/scenarios/postman-playbooks.yaml" target="_blank" rel="noopener noreferrer">scenario map</a> describes, for each sequence, the requests, the named contract examples to return, and the fields to assert;</li>
+          <li>a script turns the map into a <a href="https://github.com/thimotyb/demo-augmented-coding/blob/10d8de3/moduli/m05/step-01-contratto/postman/checkout-sequence-playbooks.postman_collection.json" target="_blank" rel="noopener noreferrer">Postman collection</a>.</li>
+        </ul>
+        <p>The playbooks for a transient error followed by approval and for the exhaustion of the three attempts replay the same scenarios as the tests above, against a mock server built from the contract.</p>
+        <p>The two kinds of check prove different things, and the harness of this module uses only the first.</p>
+        <ul>
+          <li><strong>Unit tests:</strong> they verify the behavior of the function, including the internal attempt counter.</li>
+          <li><strong>Playbooks:</strong> they verify the shape of the requests and of the responses declared in the contract. They cannot see the counter, because the mock returns fixed examples.</li>
+        </ul>
+        <p>The harness does not run the playbooks today, because the case has no API under change, only a function. If a task did change the contract or an endpoint, the harness would add the playbooks as a second gate after the unit tests:</p>
+        <ol>
+          <li>Start the mock server built from the contract.</li>
+          <li>Run the collection with the command-line runner.</li>
+          <li>Treat a non-zero exit code as a failure.</li>
+          <li>Return the failing steps as feedback, in the same format as the test output.</li>
+        </ol>
         <h3>4.3 Exclusions and open decisions</h3>
-        <p>A specification is incomplete without what it forbids. The example lists explicit exclusions: no fourth attempt, no new order when payment is not approved, no calls to a real gateway, and no implied idempotency of the whole checkout. It also keeps a separate list of decisions that the source material does not settle, such as how to treat non-transient rejections. Tasks that depend on an open decision are marked not ready, and the agent must not code a guess.</p>
+        <p>A specification is incomplete without what it forbids. The example lists explicit exclusions: no fourth attempt, no new order when payment is not approved, no calls to a real gateway, and no implied idempotency of the whole checkout. It also keeps a separate <a href="https://github.com/thimotyb/building-llm-applications/blob/9f0b9dd/ch14/case_retry/speckit/specs/001-payment-retry/decisions.md" target="_blank" rel="noopener noreferrer">list of decisions</a> that the source material does not settle, such as how to treat non-transient rejections. Tasks that depend on an open decision are marked not ready, and the agent must not code a guess.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/9f0b9dd/ch14/case_retry/spec.md#L47-L52" target="_blank" rel="noopener noreferrer">exclusions in the specification</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/harness.py#L25-L32" target="_blank" rel="noopener noreferrer">the same exclusions as static rules (<code>FORBIDDEN</code>)</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/harness.py#L61-L67" target="_blank" rel="noopener noreferrer"><code>static_checks</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9f0b9dd/ch14/case_retry/speckit/specs/001-payment-retry/tasks.md#L17-L19" target="_blank" rel="noopener noreferrer">what the tasks must not implement</a></p>
         <h3>4.4 Traceability</h3>
         <p>Each requirement has at least one scenario, each scenario at least one check, and each task names the requirements it implements and how to verify them. This chain lets a failing check point to the requirement it protects, and lets a reviewer see which requirements have no executable check at all.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/9f0b9dd/ch14/case_retry/spec.md#L21-L23" target="_blank" rel="noopener noreferrer">requirements FR-1 to FR-3</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9f0b9dd/ch14/case_retry/spec.md#L35-L45" target="_blank" rel="noopener noreferrer">scenarios AC-1 to AC-3</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9f0b9dd/ch14/case_retry/speckit/specs/001-payment-retry/tasks.md#L11-L13" target="_blank" rel="noopener noreferrer">tasks that name the requirements and scenarios they implement</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9f0b9dd/ch14/case_retry/test_payment_retry.py#L7-L36" target="_blank" rel="noopener noreferrer">the three tests, one per scenario</a></p>
       </section>
 
       <section class="panel">
@@ -129,8 +186,16 @@
 npx spectral lint openapi/checkout-api.yaml --ruleset rulesets/exported/url-style-guidelines/.spectral.json
 npx spectral lint openapi/checkout-api.yaml --ruleset rulesets/exported/documentation/.spectral.json</code></pre>
         <p>The ruleset files and the tool version are pinned in the repository, so the same input always yields the same findings. A non-zero exit code fails the check.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m12-figure-2-spectral-run.png" alt="Terminal in an editor showing Spectral applying the exported rulesets to the OpenAPI contract: a list of errors and warnings with line numbers, rule names, messages, and a summary of problems per ruleset.">
+          <figcaption><strong>Figure M12.2.</strong> Spectral run on the checkout contract with the exported rulesets. Each finding gives the line and column, the severity, the rule name, the message, and the path in the document. Each report ends with a summary: one ends with 102 problems (60 errors, 42 warnings), the URL-style report lists 6 (2 errors, 3 warnings, 1 information). Findings of error severity make the command exit with a non-zero code and fail the check.</figcaption>
+        </figure>
         <h3>5.2 Mocks and scenario playbooks</h3>
         <p>A mock server generated from the contract, such as Prism, answers requests with the examples declared in the specification. The caller can select a named example with a request header, which makes error and success paths reproducible. A command-line runner such as Newman then executes a Postman collection against the mock. In the example, the collection is generated from a scenario map and the named examples in the contract, so it is never edited by hand and cannot drift from the specification.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m12-figure-3-newman-run.png" alt="Terminal output of Newman running the Postman playbooks against the mock server: each request with its status and passed assertions, and a summary table with 11 requests, 33 assertions, and no failures.">
+          <figcaption><strong>Figure M12.3.</strong> Newman running the playbook collection against the mock server on the local port 4010. Each step shows the request, the response status and size, and the assertions that passed: status code, scenario code, and the idempotency key of the attempt. The summary reports 11 requests, 11 test scripts, 33 assertions, and no failure, so the shape of the contract examples is confirmed; the internal retry counter of an implementation is not visible here.</figcaption>
+        </figure>
         <h3>5.3 What mocks cannot prove</h3>
         <p>A mock returns fixed responses, so it tests the shape of the interaction, not the behavior of a backend. In the example, the playbook shows the sequence of calls at the API boundary but does not verify the internal retry counter, the deduplication of repeated requests, or the absence of a persisted order after a failed payment. Those properties require integration tests against the implementation. A harness should state these limits next to the checks, so that a green result is not read as more than it proves.</p>
       </section>
@@ -156,15 +221,47 @@ npx spectral lint openapi/checkout-api.yaml --ruleset rulesets/exported/document
           </tbody>
         </table>
         <h3>6.4 Reward hacking</h3>
-        <p>Reward hacking occurs when an agent satisfies the measured check without achieving the intended goal. Typical forms are editing or deleting tests, special-casing the inputs that tests use, catching and hiding errors, and weakening an assertion. The defenses are structural: keep checks outside the agent's write scope, add cases the agent has not seen, compare the changed files with the allowed list, and let an independent evaluator read the final artifact against the specification.</p>
+        <p>Reward hacking occurs when an agent satisfies the measured check without achieving the intended goal.</p>
+        <p>The table lists the typical techniques and what each one can do against the harness of the payment-retry case. Every case marked "possible" was run: the modified candidate gets a pass from the harness, with no static violation, although it does not implement the specification.</p>
+        <table>
+          <thead>
+            <tr><th>Technique</th><th>What the agent does</th><th>In our harness</th><th>Weak point</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Editing or deleting the tests</td><td>Rewrites or removes the test file so that nothing can fail</td><td><strong>Blocked:</strong> every run copies the original test file into a fresh directory</td><td><a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/harness.py#L80-L82" target="_blank" rel="noopener noreferrer">the copy of the original tests</a></td></tr>
+            <tr><td>Weakening an assertion</td><td>Replaces the assertion methods with functions that do nothing, from inside the candidate file</td><td><strong>Possible:</strong> three lines appended to the failing starter give 3 tests run and 0 failing</td><td><a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/harness.py#L79-L91" target="_blank" rel="noopener noreferrer">the candidate is imported by the tests, in the same directory and the same process</a></td></tr>
+            <tr><td>Ending the run before the tests execute</td><td>Exits the process with code 0 when the file is imported</td><td><strong>Possible:</strong> the harness reports a pass with 0 tests run</td><td><a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/harness.py#L98-L110" target="_blank" rel="noopener noreferrer">the pass depends on the exit code and the number of tests is not required</a></td></tr>
+            <tr><td>Special-casing the inputs of the tests</td><td>Returns constants when the scripted outcomes match one of the three scenarios, and sets the attempt counter by hand</td><td><strong>Possible:</strong> three tests pass without any retry logic</td><td><a href="https://github.com/thimotyb/building-llm-applications/blob/9f0b9dd/ch14/case_retry/test_payment_retry.py#L7-L36" target="_blank" rel="noopener noreferrer">only three fixed scenarios</a>; <a href="https://github.com/thimotyb/building-llm-applications/blob/9f0b9dd/ch14/case_retry/test_payment_retry.py#L3" target="_blank" rel="noopener noreferrer">the fake gateway is imported from the candidate file</a></td></tr>
+            <tr><td>Evading the scope rules</td><td>Writes <code>from time import sleep</code> or <code>from requests import get</code> instead of the forbidden forms</td><td><strong>Possible:</strong> the sleep and the network import are not detected</td><td><a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/harness.py#L25-L32" target="_blank" rel="noopener noreferrer">the rules are literal text patterns</a></td></tr>
+            <tr><td>Copying the reference solution</td><td>Reads the reference file from the repository and executes it</td><td><strong>Possible:</strong> the harness passes a candidate that only loads the reference</td><td><a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/harness.py#L20-L21" target="_blank" rel="noopener noreferrer">the case directory</a> and <a href="https://github.com/thimotyb/building-llm-applications/blob/9f0b9dd/ch14/case_retry/expected/payment_retry.py" target="_blank" rel="noopener noreferrer">the reference solution</a> are readable by the candidate</td></tr>
+            <tr><td>Catching and hiding errors</td><td>Wraps the call in a blanket <code>except</code> and returns an approval</td><td><strong>Not effective:</strong> 2 of 3 tests fail, because they assert the status and the number of attempts</td><td><a href="https://github.com/thimotyb/building-llm-applications/blob/9f0b9dd/ch14/case_retry/test_payment_retry.py#L27-L36" target="_blank" rel="noopener noreferrer">assertions on status, payment identifier, attempts, and message</a></td></tr>
+          </tbody>
+        </table>
+        <p>The harness protects the test file, but not the process in which the tests run. The candidate is code that the tests execute, so it can act before and around them.</p>
+        <p>The defenses are structural:</p>
+        <ul>
+          <li>keep checks outside the agent's write scope;</li>
+          <li>add cases the agent has not seen;</li>
+          <li>compare the changed files with the allowed list;</li>
+          <li>let an independent evaluator read the final artifact against the specification.</li>
+        </ul>
+        <p>For this harness, closing the gaps found above would mean:</p>
+        <ul>
+          <li><strong>Move the fake gateway</strong> and the assertions to the read-only side, so that the candidate cannot supply or patch them.</li>
+          <li><strong>Require the expected number of tests</strong> to have run (three here) before a pass is reported.</li>
+          <li><strong>Add hidden scenarios</strong> with outcome sequences the agent has not seen, such as two transient errors and then an approval.</li>
+          <li><strong>Check the parsed code</strong> for imports and calls instead of matching text, and run the candidate where the reference solution is not readable.</li>
+        </ul>
       </section>
 
       <section class="panel">
         <h2>7. Gates and permissions</h2>
         <h3>7.1 Order checks by cost</h3>
         <p>Run the cheapest and most discriminating checks first, and stop at the first failure. Static rules reject most bad output before any test runs, tests reject most of the rest before a model is called, and the evaluator and the person see only what survives. This ordering minimizes both cost and the time to feedback.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/agentic_loop.py#L218-L222" target="_blank" rel="noopener noreferrer">routing after the harness: the judge is reached only when the tests pass</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/agentic_loop.py#L224-L231" target="_blank" rel="noopener noreferrer">routing after the judge</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/agentic_loop.py#L242-L247" target="_blank" rel="noopener noreferrer">the order harness, judge, person in the graph</a></p>
         <h3>7.2 Feedback format</h3>
         <p>A failure is only useful if the next attempt can act on it. The harness returns the failing checks by name with the observed output, truncated to the part that matters. It separates static violations from test failures and states the number of tests run, so that a run that executed nothing is not read as a pass.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/harness.py#L35-L58" target="_blank" rel="noopener noreferrer"><code>HarnessReport</code>: static violations first, then the test output, and a one-line summary with the number of tests run</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/agentic_loop.py#L161-L169" target="_blank" rel="noopener noreferrer">the harness node turns the report into the feedback of the next attempt</a></p>
         <h3>7.3 The same checks in the pipeline</h3>
         <p>The checks that stop an agent locally should be the same ones that stop a change in the delivery pipeline. Running them in both places means an agent's work is held to the standard that applies to a person's, and a change that bypasses the agent still meets the harness.</p>
         <h3>7.4 Permissions and blast radius</h3>
@@ -175,6 +272,7 @@ npx spectral lint openapi/checkout-api.yaml --ruleset rulesets/exported/document
           <li>Require approval before any irreversible or external action, regardless of confidence.</li>
           <li>Record every run in a trace that includes the harness result.</li>
         </ul>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/harness.py#L79-L91" target="_blank" rel="noopener noreferrer">one file written in a temporary directory, an isolated interpreter, and a timeout</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/agentic_loop.py#L191-L210" target="_blank" rel="noopener noreferrer">the person as a gate: approve, stop, or give feedback</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/agentic_loop.py#L168" target="_blank" rel="noopener noreferrer">the harness result recorded in the trace</a></p>
       </section>
 
       <section class="panel">
