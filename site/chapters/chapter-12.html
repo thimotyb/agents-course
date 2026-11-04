@@ -190,12 +190,14 @@ npx spectral lint openapi/checkout-api.yaml --ruleset rulesets/exported/document
           <img src="../assets/images/m12-figure-2-spectral-run.png" alt="Terminal in an editor showing Spectral applying the exported rulesets to the OpenAPI contract: a list of errors and warnings with line numbers, rule names, messages, and a summary of problems per ruleset.">
           <figcaption><strong>Figure M12.2.</strong> Spectral run on the checkout contract with the exported rulesets. Each finding gives the line and column, the severity, the rule name, the message, and the path in the document. Each report ends with a summary: one ends with 102 problems (60 errors, 42 warnings), the URL-style report lists 6 (2 errors, 3 warnings, 1 information). Findings of error severity make the command exit with a non-zero code and fail the check.</figcaption>
         </figure>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/demo-augmented-coding/blob/10d8de3/moduli/m05/step-01-contratto/spectral/lint.sh#L9-L14" target="_blank" rel="noopener noreferrer">the three rulesets run in a loop, with a non-zero exit if any fails</a> · <a href="https://github.com/thimotyb/demo-augmented-coding/blob/10d8de3/moduli/m05/step-01-contratto/openapi/checkout-api.yaml" target="_blank" rel="noopener noreferrer">the contract</a></p>
         <h3>5.2 Mocks and scenario playbooks</h3>
         <p>A mock server generated from the contract, such as Prism, answers requests with the examples declared in the specification. The caller can select a named example with a request header, which makes error and success paths reproducible. A command-line runner such as Newman then executes a Postman collection against the mock. In the example, the collection is generated from a scenario map and the named examples in the contract, so it is never edited by hand and cannot drift from the specification.</p>
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m12-figure-3-newman-run.png" alt="Terminal output of Newman running the Postman playbooks against the mock server: each request with its status and passed assertions, and a summary table with 11 requests, 33 assertions, and no failures.">
           <figcaption><strong>Figure M12.3.</strong> Newman running the playbook collection against the mock server on the local port 4010. Each step shows the request, the response status and size, and the assertions that passed: status code, scenario code, and the idempotency key of the attempt. The summary reports 11 requests, 11 test scripts, 33 assertions, and no failure, so the shape of the contract examples is confirmed; the internal retry counter of an implementation is not visible here.</figcaption>
         </figure>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/demo-augmented-coding/blob/10d8de3/moduli/m05/step-01-contratto/scripts/run_playbooks.sh#L7" target="_blank" rel="noopener noreferrer">generating the collection from the scenario map</a> · <a href="https://github.com/thimotyb/demo-augmented-coding/blob/10d8de3/moduli/m05/step-01-contratto/scripts/run_playbooks.sh#L10" target="_blank" rel="noopener noreferrer">starting the mock server</a> · <a href="https://github.com/thimotyb/demo-augmented-coding/blob/10d8de3/moduli/m05/step-01-contratto/scripts/run_playbooks.sh#L42-L43" target="_blank" rel="noopener noreferrer">running the collection with Newman</a></p>
         <h3>5.3 What mocks cannot prove</h3>
         <p>A mock returns fixed responses, so it tests the shape of the interaction, not the behavior of a backend. In the example, the playbook shows the sequence of calls at the API boundary but does not verify the internal retry counter, the deduplication of repeated requests, or the absence of a persisted order after a failed payment. Those properties require integration tests against the implementation. A harness should state these limits next to the checks, so that a green result is not read as more than it proves.</p>
       </section>
@@ -204,8 +206,10 @@ npx spectral lint openapi/checkout-api.yaml --ruleset rulesets/exported/document
         <h2>6. Executable checks as stop criteria</h2>
         <h3>6.1 Tests the agent cannot edit</h3>
         <p>An agent that is rewarded for passing tests will, if it can, change the tests. The harness therefore treats the test suite as read-only input. On every run it copies the candidate file into a new temporary directory, copies the original test file next to it, runs the tests there, and discards the directory. The agent can only influence the single file it is allowed to produce.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/harness.py#L76-L82" target="_blank" rel="noopener noreferrer">a fresh directory per run and the copy of the original tests</a></p>
         <h3>6.2 Static scope rules</h3>
         <p>Passing tests do not prove that nothing else was added. Cheap textual or syntactic rules reject behavior that the specification excludes: sleeping between attempts, importing network libraries, starting processes, or lacking the required public names. These rules enforce the exclusions of the specification without consulting any model.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/harness.py#L25-L32" target="_blank" rel="noopener noreferrer">the rules (<code>FORBIDDEN</code>)</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/harness.py#L61-L67" target="_blank" rel="noopener noreferrer"><code>static_checks</code></a></p>
         <h3>6.3 Levels of test</h3>
         <table>
           <thead>
@@ -302,6 +306,7 @@ npx spectral lint openapi/checkout-api.yaml --ruleset rulesets/exported/document
             <tr><td><code>harness.py</code></td><td>Static checks, isolated test run, and report</td><td>No</td></tr>
           </tbody>
         </table>
+        <p class="code-ref"><strong>Files:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/case_retry/spec.md" target="_blank" rel="noopener noreferrer"><code>spec.md</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/case_retry/test_payment_retry.py" target="_blank" rel="noopener noreferrer"><code>test_payment_retry.py</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/case_retry/payment_retry.py" target="_blank" rel="noopener noreferrer">the starter</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/case_retry/expected/payment_retry.py" target="_blank" rel="noopener noreferrer">the reference solution</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/harness.py" target="_blank" rel="noopener noreferrer"><code>harness.py</code></a></p>
         <h3>8.2 The run</h3>
         <pre><code>def run_harness(code: str, case_dir: Path = CASE_DIR, timeout: int = 30) -&gt; HarnessReport:
     violations = static_checks(code)
@@ -315,6 +320,7 @@ npx spectral lint openapi/checkout-api.yaml --ruleset rulesets/exported/document
     ...
     return HarnessReport(passed=proc.returncode == 0 and not violations, ...)</code></pre>
         <p>The interpreter flag isolates the run from the user's environment, the timeout stops an infinite loop in generated code, and the report passes only when the tests pass and no static rule is violated.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/harness.py#L70-L110" target="_blank" rel="noopener noreferrer"><code>run_harness</code> in full, including the timeout branch</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/harness.py#L84-L91" target="_blank" rel="noopener noreferrer">the isolated interpreter and the timeout</a></p>
         <h3>8.3 Verified behavior</h3>
         <table>
           <thead>
@@ -327,8 +333,10 @@ npx spectral lint openapi/checkout-api.yaml --ruleset rulesets/exported/document
           </tbody>
         </table>
         <p>These three cases are automated checks of the harness itself. A harness is software and needs tests: before relying on it, confirm that it fails the bad candidate, passes the good one, and rejects the out-of-scope one.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/tests/test_loop.py#L48-L53" target="_blank" rel="noopener noreferrer">the harness fails the starter and passes the reference</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/tests/test_loop.py#L56-L60" target="_blank" rel="noopener noreferrer">a forbidden call fails even though the tests pass</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/tests/test_loop.py#L12-L15" target="_blank" rel="noopener noreferrer">the three candidates</a></p>
         <h3>8.4 Connecting the harness to the loop</h3>
         <p>In the agentic loop, the harness result is the first routing decision after generation: on a pass the run continues to the evaluator, on a fail it returns to generation with the report as feedback, and when the iteration budget is exhausted it goes to a person. The harness therefore supplies both the stop criterion and the repair signal.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/agentic_loop.py#L161-L169" target="_blank" rel="noopener noreferrer">the harness node</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/agentic_loop.py#L218-L222" target="_blank" rel="noopener noreferrer">routing after the harness</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/agentic_loop.py#L242-L247" target="_blank" rel="noopener noreferrer">the graph</a></p>
       </section>
 
       <section class="panel">
@@ -343,6 +351,7 @@ from harness import run_harness, CASE_DIR
 print(run_harness((CASE_DIR / "payment_retry.py").read_text()).summary)
 print(run_harness((CASE_DIR / "expected" / "payment_retry.py").read_text()).summary)
 EOF</code></pre>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/tree/64d6bd3/ch14" target="_blank" rel="noopener noreferrer">the chapter 14 directory</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/64d6bd3/ch14/tests/test_loop.py" target="_blank" rel="noopener noreferrer">the tests of the loop and the harness</a></p>
         <h3>9.2 Attack the harness</h3>
         <ol>
           <li>Write a candidate that returns the expected values only for the inputs in the tests and observe whether the harness catches it.</li>
