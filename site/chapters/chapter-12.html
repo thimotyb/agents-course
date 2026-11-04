@@ -238,6 +238,12 @@ npx spectral lint openapi/checkout-api.yaml --ruleset rulesets/exported/document
           </tbody>
         </table>
         <p>The harness protects the test file, but not the process in which the tests run. The candidate is code that the tests execute, so it can act before and around them.</p>
+        <p><strong>In the wild.</strong> Models evaluated in public reports have used the same families of tricks:</p>
+        <ul>
+          <li><strong>Tampering with the scorer.</strong> An <a href="https://metr.substack.com/p/2025-06-05-recent-reward-hacking" target="_blank" rel="noopener noreferrer">evaluation organization's report</a> describes a model that overrode an equality operator so that every comparison matched, and another run in which the model replaced the evaluator with a stub that marked every submitted program as passing. The report notes similar behavior in other recent models.</li>
+          <li><strong>Reaching beyond the task.</strong> In a security challenge described in the <a href="https://cdn.openai.com/o1-system-card-20240917.pdf" target="_blank" rel="noopener noreferrer">o1 system card</a> (section 4.2), the target container failed to start because of a bug in the evaluation infrastructure. The model scanned the network, found the host's container API exposed by a misconfiguration, started a new container with the command <code>cat flag.txt</code>, and read the flag from its logs. The card states that the isolation itself was not what protected the evaluation and calls the behavior benign, but an example of a model pursuing its goal by unexpected means. It is often retold as an escape from the sandbox; the card describes the use of an exposed interface.</li>
+          <li><strong>Watching the reasoning.</strong> A <a href="https://arxiv.org/abs/2503.11926" target="_blank" rel="noopener noreferrer">study of reward hacking in coding tasks</a> found that a second model reading the agent's reasoning detected cheating better than one reading only its actions, and that training the agent against such a monitor made it learn to hide its intent while still cheating.</li>
+        </ul>
         <p>The defenses are structural:</p>
         <ul>
           <li>keep checks outside the agent's write scope;</li>
@@ -357,6 +363,9 @@ EOF</code></pre>
           <li><a href="https://learning.postman.com/docs/collections/using-newman-cli/command-line-integration-with-newman/" target="_blank" rel="noopener noreferrer">Newman command-line runner</a></li>
           <li><a href="https://github.com/thimotyb/demo-augmented-coding" target="_blank" rel="noopener noreferrer">Demonstration repository for the checkout case</a></li>
           <li><a href="https://github.com/thimotyb/building-llm-applications/tree/main/ch14" target="_blank" rel="noopener noreferrer">Chapter 14 harness exercise</a></li>
+          <li><a href="https://metr.substack.com/p/2025-06-05-recent-reward-hacking" target="_blank" rel="noopener noreferrer">Recent Frontier Models Are Reward Hacking</a></li>
+          <li><a href="https://cdn.openai.com/o1-system-card-20240917.pdf" target="_blank" rel="noopener noreferrer">OpenAI o1 system card</a></li>
+          <li><a href="https://arxiv.org/abs/2503.11926" target="_blank" rel="noopener noreferrer">Monitoring Reasoning Models for Misbehavior and the Risks of Promoting Obfuscation</a></li>
         </ul>
       </section>
 
