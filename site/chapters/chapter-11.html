@@ -207,8 +207,13 @@ def decide(answer, accept=0.7, reject=0.3):
         <h3>5.3 Benchmark design</h3>
         <p>The measurements use the 120 tickets and the three questions of section 5.2, each ticket sent in one call. Four systems answered the same questions: Jev (jev-1.14.0, hosted decision model), DeepSeek (deepseek-v4-flash, hosted general language model), Gemma 12B (served by Ollama, local general language model), and an XGBoost classifier on TF-IDF word features trained with five-fold cross-validation.</p>
         <p><strong>How the XGBoost baseline works.</strong> It is a classical supervised classifier, and it is trained on the same tickets that the other systems judge. There is one separate model for each question: one with three classes for the team, and two with two classes for urgency and refund. The <em>target variable</em> of each model is the label stored with the ticket for that question (billing, engineering, or sales; urgent or not; refund requested or not). The only <em>features</em> are derived from the ticket text: it is converted into a TF-IDF vector over single words and pairs of consecutive words, in which each feature is a word or a pair and its value grows with how often it appears in the ticket and shrinks with how common it is across tickets. The classifier is a set of 120 shallow decision trees (depth 3, learning rate 0.1) built one after another, each correcting the errors of the previous ones, and its output for a ticket is a probability for each class, which is used as the confidence.</p>
-        <p>To evaluate it fairly on only 120 tickets, the set is split into five folds. For each fold, the vocabulary and the model are fitted on the other four folds (about 96 tickets) and used to predict the held-out ticket, so every prediction comes from a model that has never seen that ticket. No hyperparameters were tuned. The consequence is that this baseline needs labels for every question before it can answer, and must be retrained when a question changes, while the judges only need the wording of the question. <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/run_bench.py#L74-L99" target="_blank" rel="noopener noreferrer">The training and evaluation code is in <code>run_xgboost</code></a>.</p>
-        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/dataset.py#L15-L23" target="_blank" rel="noopener noreferrer">teams and question wording</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/dataset.py#L72-L84" target="_blank" rel="noopener noreferrer">building the 120 tickets</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/run_bench.py#L34-L99" target="_blank" rel="noopener noreferrer">running a judge or the XGBoost baseline</a></p>
+        <p><strong>Decision trees and ensembles.</strong> A decision tree is a sequence of yes/no questions about the features, ending in a leaf that holds a score. Here a question has the form "does the ticket contain this word?", and a depth of 3 means at most three questions before a leaf. One shallow tree is a weak classifier. An ensemble combines many of them, and in gradient boosting they are built in sequence: each new tree is fitted to the error that the sum of the previous trees still makes, and its leaf scores are scaled by the learning rate so that no single tree dominates. The prediction for a ticket is the prior plus the sum of the leaf scores it reaches in all trees, converted into a probability. Figure M11.1 shows the first tree learned for the refund question and how the probability of two tickets moves as trees are added.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m11-figure-xgboost-boosting.svg" alt="Left: the first decision tree learned for the refund question, with splits on the words back, refund, and not want and leaf scores. Right: the probability of refund for two tickets as the number of trees grows from 0 to 120.">
+          <figcaption><strong>Figure M11.1.</strong> Boosting on the refund question, from a model fitted on all 120 tickets for illustration (the evaluation uses five folds). Left: the first of the 120 trees. A ticket containing "back" scores +0.228 (12 tickets, all refund requests); otherwise, one containing "refund" but also "not want" scores -0.116 (18 tickets, none a request), while one containing "refund" without "not want" scores +0.243 (28 tickets, 26 requests); a ticket with none of these words scores -0.136. The second and third trees ask the same questions with smaller scores (+0.200 and +0.179 for the first leaf), because they only correct what is left. Right: the probability starts at the prior 0.32 and, as the scores of more trees are added, rises to 0.98 for a ticket that asks for a refund and falls to 0.01 for one that does not.</figcaption>
+        </figure>
+        <p>To evaluate it fairly on only 120 tickets, the set is split into five folds. For each fold, the vocabulary and the model are fitted on the other four folds (about 96 tickets) and used to predict the held-out ticket, so every prediction comes from a model that has never seen that ticket. No hyperparameters were tuned. The consequence is that this baseline needs labels for every question before it can answer, and must be retrained when a question changes, while the judges only need the wording of the question. <a href="https://github.com/thimotyb/building-llm-applications/blob/40d8057/ch14/bench/run_bench.py#L87-L128" target="_blank" rel="noopener noreferrer">The training and evaluation code is in <code>run_xgboost</code></a>.</p>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/dataset.py#L15-L23" target="_blank" rel="noopener noreferrer">teams and question wording</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/dataset.py#L72-L84" target="_blank" rel="noopener noreferrer">building the 120 tickets</a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/40d8057/ch14/bench/run_bench.py#L37-L128" target="_blank" rel="noopener noreferrer">running a judge or the XGBoost baseline</a></p>
         <h3>5.4 Results on the full ticket set</h3>
         <p>In the tables below, green marks the best value and red the worst <strong>within each task</strong> (the groups of rows separated by a thicker line), never across tasks, because the values of different tasks are not comparable: higher is better for accuracy and for accuracy when confident, and <strong>lower is better for ECE and for Brier</strong> (0 means perfect calibration for ECE). Mean confidence and coverage are not colored, because a high value is not good in itself: confidence is read against accuracy, and a judge that covers everything is one that is never unsure. Latency and cost, where shown, are also better when lower.</p>
         <table>
@@ -283,10 +288,25 @@ def decide(answer, accept=0.7, reject=0.3):
         </table>
         <h3>6.3 Choosing</h3>
         <p>A trained classifier remains the better choice for a stable problem with labelled data, strict cost or latency limits, and a need for explanations. A decision model fits when there are many questions, when they change often, when labels do not exist yet, or when the input is unstructured text. In practice the decision model can also produce labels for training the classifier later.</p>
+        <h3>6.4 TF-IDF: text as word weights</h3>
+        <p>A gradient-boosted classifier needs numbers, not sentences, so the ticket text must first be converted into a vector. TF-IDF (term frequency, inverse document frequency) is the classical way. The vocabulary is built from the training tickets, here single words and pairs of consecutive words, and each ticket becomes a vector with one position per vocabulary entry. In the ticket case the vocabulary has 700 entries, and a single ticket uses only a few dozen of them; every other position is zero.</p>
+        <p>The weight of an entry combines two factors. The <em>term frequency</em> grows with the number of times the word occurs in the ticket, with diminishing returns (1 + ln of the count, so two occurrences count 1.69 and not 2). The <em>inverse document frequency</em> shrinks with the number of tickets that contain the word: ln((1 + N) / (1 + df)) + 1, where N is the number of tickets and df the number containing the word. A word found in almost every ticket carries little information about any particular one, while a rare word is distinctive. The product is then scaled so that the whole vector has length 1, which makes long and short tickets comparable.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m11-figure-tfidf-weights.svg" alt="TF-IDF computation for one ticket: the term frequency and inverse document frequency formulas, and a table of eight features with their count, document frequency, IDF, TF times IDF, and final weight as a bar.">
+          <figcaption><strong>Figure M11.2.</strong> TF-IDF weights computed on the 120 tickets for the ticket "The API has been timing out since this morning. Please refund the amount. This blocks our launch tomorrow morning." The word "morning" appears twice but occurs in 29 tickets, "timing" and "api" appear once but occur in 7 and 8 tickets, so they weigh almost the same; the frequent words "the" (78 tickets), "please" (43), and "refund" (46) receive the lowest weights. The pair "refund the" (12 tickets) is a feature of its own and weighs more than the single word "refund".</figcaption>
+        </figure>
+        <p>Two properties follow. First, the weights measure only how distinctive a word is: TF-IDF knows nothing about refunds or teams, and which words matter for a given question is learned afterwards by the classifier from the labels. Second, the representation ignores meaning and almost all word order. Synonyms are unrelated features, and a negation is visible only when the pair that contains it was seen in training, as with "not want" in the refund question. A decision model reads the ticket as written and does not need this step, which is why it can answer a new question without a labelled set.</p>
       </section>
 
       <section class="panel">
         <h2>7. Thresholds, cascades, and people</h2>
+        <p>This section is about routing: choosing, for each decision, which resource answers it. A judge is consulted at every step of an agent, on every ticket and every candidate, so the cost and the latency of a single decision are paid over and over. The aim is to spend less on each decision without losing quality: use the cheapest and fastest model that is good enough, and bring in a stronger model or a person only for the cases that need them. Four approaches are described, each saving in a different place.</p>
+        <ul>
+          <li><strong>Thresholds</strong> (7.1) turn a probability into act, reject, or defer, so that weak answers are not trusted by default.</li>
+          <li><strong>Cascades</strong> (7.2) order judges from cheap to strong and send to the next one only the questions the previous one is unsure about.</li>
+          <li><strong>Human review</strong> (7.3) is the last tier, called only in the uncertain band, before irreversible actions, or when the budget is exhausted.</li>
+          <li><strong>Escalation of the generating model</strong> (7.4) starts with a small model and moves to a larger one only after a failed attempt.</li>
+        </ul>
         <h3>7.1 Three-way decisions</h3>
         <p>A probability supports three outcomes instead of two: act, reject, or defer. The thresholds that separate them express the cost of each error. Raising the acceptance threshold fits actions where a false yes is expensive, such as a refund or an alert to a person on call; lowering it fits situations where a missed detection is expensive, such as a safety issue. The band between the thresholds is the share of work that goes to a person or to a stronger model, and it is the quantity to measure.</p>
         <h3>7.2 Cascades</h3>
@@ -318,7 +338,7 @@ def decide(answer, accept=0.7, reject=0.3):
         <p>Two escalations at 0.7 show how the mechanism works and what it does not guarantee. For the ticket "The refund you promised last month has still not arrived...", Jev answered the refund question with confidence 0.59, below the threshold, so only that question went to DeepSeek, which answered "no refund requested" with confidence 0.95 and was wrong. For "The API has been timing out since this morning. I do not want a refund...", Jev's urgency answer had confidence 0.57; DeepSeek answered "urgent" with 0.78, against a label of not urgent. In both cases the stronger judge was more confident and still wrong, and neither answer reached a person. Escalation raises confidence, not necessarily correctness; the threshold chooses how many answers are checked, and the benchmark of section 5 is what tells whether the confidence can be trusted. Raising the threshold to 0.95 sends 10 questions to a person but does not change the number of correct answers on this small sample, at about 3.7 times the cost.</p>
         <figure class="module-figure" data-zoomable>
           <img src="../assets/images/m11-figure-1-judge-cascade.svg" alt="Cascade of judges: a ticket with typed questions goes to a fast decision model; confident answers stop there, unsure questions are re-asked to a general language model, and questions still unsure go to a person.">
-          <figcaption><strong>Figure M11.1.</strong> Cascade of judges. Each question is answered by the first tier whose confidence reaches the threshold; only the unsure questions go to the next tier, and what remains unsure after the last tier goes to a person. The latency and cost shown are those measured for each judge alone on 120 synthetic tickets with three questions each.</figcaption>
+          <figcaption><strong>Figure M11.3.</strong> Cascade of judges. Each question is answered by the first tier whose confidence reaches the threshold; only the unsure questions go to the next tier, and what remains unsure after the last tier goes to a person. The latency and cost shown are those measured for each judge alone on 120 synthetic tickets with three questions each.</figcaption>
         </figure>
 
         <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/router.py#L21-L46" target="_blank" rel="noopener noreferrer"><code>CascadeJudge</code></a> · <a href="https://github.com/thimotyb/building-llm-applications/blob/9c6f74b/ch14/bench/routing_replay.py#L35-L69" target="_blank" rel="noopener noreferrer">replaying a cascade from stored answers</a></p>
@@ -380,7 +400,7 @@ def decide(answer, accept=0.7, reject=0.3):
       </section>
 
       <section class="panel">
-        <h2>9. Guided lab</h2>
+        <h2>9. Guided lab: judging support tickets</h2>
         <h3>9.1 Choose the judge by configuration</h3>
         <p>The exercises are in the chapter 14 directory of the companion repository. The same questions run on different judges by changing environment variables.</p>
         <pre><code>cd ch14
@@ -388,16 +408,69 @@ LLM_PROVIDER=deepseek .venv/bin/python demo_judge.py
 JUDGE_BACKEND=jev JEV_MODEL=jev-1.14.0 .venv/bin/python demo_judge.py
 LLM_PROVIDER=ollama OLLAMA_MODEL=gemma4:e4b .venv/bin/python demo_judge.py
 JUDGE_BACKEND=cascade CASCADE_THRESHOLD=0.7 LLM_PROVIDER=deepseek .venv/bin/python demo_judge.py</code></pre>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m11-figure-4-judge-demo-three-backends.png" alt="Terminal output of demo_judge.py run three times: with DeepSeek, with Jev, and with the cascade, each showing latency, cost, and the probabilities of the three answers.">
+          <figcaption><strong>Figure M11.4.</strong> The same ticket (a double charge with a checkout error and a deadline) judged by three configurations. DeepSeek takes 5.74 s and costs USD 0.00026; Jev takes 0.21 s and costs USD 0.00002. Both reach the same decisions (team engineering, urgent yes, refund no), but the team probability is 0.55 for DeepSeek and 0.69 for Jev. In the cascade every answer reaches the 0.7 threshold at the first tier, so the second tier is not called and the run costs the same as Jev alone. Single-call latencies vary from run to run.</figcaption>
+        </figure>
         <h3>9.2 Measure and route</h3>
         <pre><code>.venv/bin/python bench/run_bench.py --backend llm --label my-model
 .venv/bin/python bench/report.py
 .venv/bin/python bench/routing_replay.py --tiers jev-1.14.0 deepseek-v4-flash</code></pre>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m11-figure-5-benchmark-report.png" alt="Terminal output of bench/report.py: one table per question with accuracy, calibration, and confidence for each backend, and a final table of latency and cost.">
+          <figcaption><strong>Figure M11.5.</strong> Output of <code>report.py</code> on the stored results. It prints one table per question (accuracy, expected calibration error, Brier score, mean confidence, accuracy and coverage above the 0.7 confidence threshold) and a closing table of errors, latency, and cost. Because the local model was run on only part of the set, all backends are compared on the 49 tickets they have in common.</figcaption>
+        </figure>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m11-figure-6-routing-replay.png" alt="Terminal output of bench/routing_replay.py: for thresholds from 0.5 to 0.9, accuracy, share sent to a person, escalation share, cost per thousand tickets, and latency, for the cascade and for each judge alone.">
+          <figcaption><strong>Figure M11.6.</strong> Output of <code>routing_replay.py</code>, which recomputes a cascade from stored answers without calling any model. For each threshold it reports the accuracy of the automatic answers, the share sent to a person, the share escalated to the second tier, the cost per 1,000 tickets, and the latency per ticket, for the cascade and for each judge alone. This is the table to read when choosing the threshold.</figcaption>
+        </figure>
         <ol>
           <li>Run the benchmark on a judge of your choice and compare its calibration with the stored results.</li>
           <li>Replay a cascade at thresholds 0.6, 0.7, and 0.8 and find the point where the share sent to a person is acceptable.</li>
           <li>Add five tickets that contain negations and observe which judge fails first.</li>
         </ol>
-        <h3>9.3 Close the loop</h3>
+      </section>
+
+      <section class="panel">
+        <h2>10. Guided lab: a refinement loop on a task</h2>
+        <h3>10.1 The retry task</h3>
+        <p>The second lab uses a different case and a different kind of judge input. What is judged is no longer a support ticket but a piece of generated code: a payment-authorization function that must retry transient gateway errors. The loop generates a candidate, a deterministic harness runs the tests and static scope rules, and only when the harness passes is the judge asked typed questions about conformance to the specification and added behaviour. The starter code makes a single attempt, so two of the three acceptance tests fail at the beginning.</p>
+        <p>The specification has three requirements: retry a transient gateway error up to three attempts in total (FR-1), stop as soon as a payment is approved (FR-2), and after three transient errors fail and suggest an alternative payment method (FR-3). Backoff, a fourth attempt, real gateways, and the idempotency of the whole checkout are explicitly out of scope. Figure M11.7 shows the expected interaction.</p>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m11-figure-retry-sequence.svg" alt="Sequence diagram of the payment retry: the customer submits a payment, the web application calls the payment gateway inside a loop of at most three attempts, an approval ends the loop, and after all attempts fail the customer is notified with an alternative.">
+          <figcaption><strong>Figure M11.7.</strong> Sequence of the payment-retry specification. The <code>loop</code> fragment holds the repeatable authorization call and its limit of three attempts; the message stands for one iteration, so it is drawn once. An approved authorization returns the payment identifier and leaves the loop, a transient failure goes to the next attempt, and when all attempts have failed the customer is notified and offered an alternative payment method.</figcaption>
+        </figure>
+        <h3>10.2 A complete run of the loop</h3>
+        <p>The narrated demo runs the whole loop on a payment-retry function that makes a single attempt, so two of its three acceptance tests fail. It is executed here in the offline replay mode, with scripted candidates and judge scores, which makes every branch of the loop appear in a repeatable way and needs no network or key. The six figures below are consecutive parts of the same terminal run.</p>
+        <pre><code>cd ch14
+.venv/bin/python demo_live.py --mode replay
+.venv/bin/python demo_live.py --mode replay --delay 0.6</code></pre>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m11-figure-8-loop-start.png" alt="Terminal output of the demo: the goal from the specification, the starter code failing two of three tests, and the configuration with the thresholds.">
+          <figcaption><strong>Figure M11.8.</strong> Start of the run. The goal comes from the specification, with an explicit list of what is out of scope. The starter code is run against the tests first (two of three fail), and the configuration prints the worker, the judge, the thresholds kept in code (accept when <code>spec_ok</code> is at least 0.7 and <code>scope_creep</code> at most 0.3, ask a person in between), and the budget of five iterations.</figcaption>
+        </figure>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m11-figure-9-loop-iteration-1.png" alt="Terminal output of iteration 1: the first candidate with its diff, the harness result with one failing test, and the decision to send the failure back as feedback.">
+          <figcaption><strong>Figure M11.9.</strong> Iteration 1. The candidate is shown as a diff against the starter. It allows two attempts instead of three, so the harness reports one failing scenario; the judge is skipped and the failure text becomes the feedback of the next iteration.</figcaption>
+        </figure>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m11-figure-10-loop-iteration-2.png" alt="Terminal output of iteration 2: the feedback received, a candidate that passes all tests, and a static rule that rejects the sleep call.">
+          <figcaption><strong>Figure M11.10.</strong> Iteration 2. The feedback from the previous failure is passed to the model, and the candidate now passes all three tests. The harness still fails the run because a static rule forbids sleeping and backoff, which are outside the specification, so the judge is again skipped.</figcaption>
+        </figure>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m11-figure-11-loop-iteration-3.png" alt="Terminal output of iteration 3: the harness passes and the judge returns spec_ok 0.92 and scope_creep 0.84 with probability bars, leading to a revise decision.">
+          <figcaption><strong>Figure M11.11.</strong> Iteration 3. The harness passes, so the judge is asked its typed questions. Conformance to the specification is high (0.92), but the probability of added behaviour is 0.84, far above the 0.30 limit, because the candidate added a helper function nobody asked for. The decision is to revise, and the finding goes back to the generator.</figcaption>
+        </figure>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m11-figure-12-loop-iteration-4-person.png" alt="Terminal output of iteration 4 and of the human step: the judge scores fall in the uncertain band and the code is shown to a person for approval.">
+          <figcaption><strong>Figure M11.12.</strong> Iteration 4 and the person. The extra function is removed and the tests pass, but the judge scores (0.74 and 0.45) are neither clearly acceptable nor clearly rejectable. The loop stops and shows the code and the scores to a person; in the demo the answer is given automatically with <code>--human approve</code>.</figcaption>
+        </figure>
+        <figure class="module-figure" data-zoomable>
+          <img src="../assets/images/m11-figure-13-loop-outcome.png" alt="Terminal output of the outcome: accepted after four iterations, a table of iterations with harness and judge results, cost and time, and the diff from the starter to the accepted code.">
+          <figcaption><strong>Figure M11.13.</strong> Outcome. The status is accepted after four iterations. The table summarizes, for each iteration, the harness result, the judge scores, and what happened next (repair, revise, approved), followed by cost, wall time, a final re-run of the harness on the accepted code, and the diff from the starter.</figcaption>
+        </figure>
+        <p class="code-ref"><strong>Code:</strong> <a href="https://github.com/thimotyb/building-llm-applications/blob/40d8057/ch14/demo_live.py#L223-L229" target="_blank" rel="noopener noreferrer"><code>build_story</code>: scripted candidates and judge scores of the replay</a></p>
+        <h3>10.3 Close the loop</h3>
         <ol>
           <li>Run the agentic loop with a hosted decision model as evaluator and compare its cost with a general model as evaluator.</li>
           <li>Run it with escalation enabled and a small first model, and read the trace to see which iteration used which model.</li>
@@ -405,8 +478,8 @@ JUDGE_BACKEND=cascade CASCADE_THRESHOLD=0.7 LLM_PROVIDER=deepseek .venv/bin/pyth
       </section>
 
       <section class="panel">
-        <h2>10. Source map</h2>
-        <h3>10.1 Primary references</h3>
+        <h2>11. Source map</h2>
+        <h3>11.1 Primary references</h3>
         <ul>
           <li><a href="https://typesafe.ai/blog/introducing-system-one-models-and-jev" target="_blank" rel="noopener noreferrer">Introducing System One models and Jev</a></li>
           <li><a href="https://docs.typesafe.ai/" target="_blank" rel="noopener noreferrer">TypeSafe documentation</a></li>
@@ -421,8 +494,8 @@ JUDGE_BACKEND=cascade CASCADE_THRESHOLD=0.7 LLM_PROVIDER=deepseek .venv/bin/pyth
       </section>
 
       <section class="panel">
-        <h2>11. Key takeaways</h2>
-        <h3>11.1 Design rules</h3>
+        <h2>12. Key takeaways</h2>
+        <h3>12.1 Design rules</h3>
         <ul>
           <li>Use a typed decision where the answer space is small; keep generation for work that needs it.</li>
           <li>Keep the generating model out of its own verdict whenever the cost of an error is not negligible.</li>

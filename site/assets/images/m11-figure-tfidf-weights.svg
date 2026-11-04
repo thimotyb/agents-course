@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="1200" height="680" font-family="Helvetica, Arial, sans-serif">
+<rect width="1200" height="680" fill="#ffffff"/>
+<text x="600" y="34" text-anchor="middle" font-size="22" font-weight="700" fill="#132338">TF-IDF: turning a ticket into word weights</text>
+<text x="600" y="58" text-anchor="middle" font-size="14" fill="#4a5a6a">A word weighs more when it appears in the ticket and less when it appears in many tickets</text>
+<g stroke="#27465f" stroke-width="2"><rect x="30" y="80" width="350" height="86" rx="12" fill="#e7f0d9"/><rect x="415" y="80" width="370" height="86" rx="12" fill="#dff1f7"/><rect x="820" y="80" width="350" height="86" rx="12" fill="#fff0c9"/></g>
+<g text-anchor="middle" fill="#132338"><text x="205" y="106" font-size="16" font-weight="700">TF: how often in this ticket</text><text x="205" y="130" font-size="14">1 + ln(count)</text><text x="205" y="150" font-size="12">repeating a word helps, with diminishing returns</text><text x="600" y="106" font-size="16" font-weight="700">IDF: how rare across the tickets</text><text x="600" y="130" font-size="14">ln((1 + N) / (1 + df)) + 1</text><text x="600" y="150" font-size="12">N = 120 tickets, df = tickets containing the word</text><text x="995" y="106" font-size="16" font-weight="700">Weight in the ticket vector</text><text x="995" y="130" font-size="14">TF × IDF, then scaled to length 1</text><text x="995" y="150" font-size="12">so that long and short tickets are comparable</text></g>
+<text x="397" y="130" text-anchor="middle" font-size="26" fill="#27465f">×</text><text x="802" y="130" text-anchor="middle" font-size="26" fill="#27465f">→</text>
+<text x="30" y="205" font-size="14" font-weight="700" fill="#132338">Ticket</text>
+<text x="90" y="205" font-size="14" fill="#132338">"The API has been timing out since this morning. Please refund the amount. This blocks our launch tomorrow morning."</text>
+<text x="30" y="228" font-size="13" fill="#4a5a6a">Vocabulary of the 120 tickets: 700 features (single words and pairs of consecutive words). This ticket activates only 34 of them; all the others have weight 0.</text>
+<rect x="30" y="240" width="1140" height="30" fill="#132338"/>
+<text x="40" y="260" font-size="13" font-weight="700" fill="#ffffff">feature</text>
+<text x="250" y="260" font-size="13" font-weight="700" fill="#ffffff">count in ticket</text>
+<text x="380" y="260" font-size="13" font-weight="700" fill="#ffffff">tickets with it (of 120)</text>
+<text x="560" y="260" font-size="13" font-weight="700" fill="#ffffff">IDF</text>
+<text x="650" y="260" font-size="13" font-weight="700" fill="#ffffff">TF × IDF</text>
+<text x="760" y="260" font-size="13" font-weight="700" fill="#ffffff">weight after scaling</text>
+<rect x="30" y="270" width="1140" height="36" fill="#f2f5f9"/>
+<text x="40" y="292" font-size="15" font-weight="700" fill="#132338">morning</text>
+<text x="250" y="292" font-size="15" fill="#132338">2</text><text x="380" y="292" font-size="15" fill="#132338">29</text><text x="560" y="292" font-size="15" fill="#132338">2.39</text><text x="650" y="292" font-size="15" fill="#132338">4.05</text>
+<rect x="760" y="278" width="300" height="18" rx="3" fill="#3b8fb5"/><text x="1068" y="292" font-size="14" font-weight="700" fill="#132338">0.210</text>
+<rect x="30" y="308" width="1140" height="36" fill="#ffffff"/>
+<text x="40" y="330" font-size="15" font-weight="700" fill="#132338">timing</text>
+<text x="250" y="330" font-size="15" fill="#132338">1</text><text x="380" y="330" font-size="15" fill="#132338">7</text><text x="560" y="330" font-size="15" fill="#132338">3.72</text><text x="650" y="330" font-size="15" fill="#132338">3.72</text>
+<rect x="760" y="316" width="275" height="18" rx="3" fill="#3b8fb5"/><text x="1043" y="330" font-size="14" font-weight="700" fill="#132338">0.192</text>
+<rect x="30" y="346" width="1140" height="36" fill="#f2f5f9"/>
+<text x="40" y="368" font-size="15" font-weight="700" fill="#132338">api</text>
+<text x="250" y="368" font-size="15" fill="#132338">1</text><text x="380" y="368" font-size="15" fill="#132338">8</text><text x="560" y="368" font-size="15" fill="#132338">3.60</text><text x="650" y="368" font-size="15" fill="#132338">3.60</text>
+<rect x="760" y="354" width="266" height="18" rx="3" fill="#3b8fb5"/><text x="1034" y="368" font-size="14" font-weight="700" fill="#132338">0.186</text>
+<rect x="30" y="384" width="1140" height="36" fill="#ffffff"/>
+<text x="40" y="406" font-size="15" font-weight="700" fill="#132338">refund the</text>
+<text x="250" y="406" font-size="15" fill="#132338">1</text><text x="380" y="406" font-size="15" fill="#132338">12</text><text x="560" y="406" font-size="15" fill="#132338">3.23</text><text x="650" y="406" font-size="15" fill="#132338">3.23</text>
+<rect x="760" y="392" width="239" height="18" rx="3" fill="#3b8fb5"/><text x="1007" y="406" font-size="14" font-weight="700" fill="#132338">0.167</text>
+<rect x="30" y="422" width="1140" height="36" fill="#f2f5f9"/>
+<text x="40" y="444" font-size="15" font-weight="700" fill="#132338">blocks</text>
+<text x="250" y="444" font-size="15" fill="#132338">1</text><text x="380" y="444" font-size="15" fill="#132338">24</text><text x="560" y="444" font-size="15" fill="#132338">2.58</text><text x="650" y="444" font-size="15" fill="#132338">2.58</text>
+<rect x="760" y="430" width="191" height="18" rx="3" fill="#3b8fb5"/><text x="959" y="444" font-size="14" font-weight="700" fill="#132338">0.133</text>
+<rect x="30" y="460" width="1140" height="36" fill="#ffffff"/>
+<text x="40" y="482" font-size="15" font-weight="700" fill="#132338">the</text>
+<text x="250" y="482" font-size="15" fill="#132338">2</text><text x="380" y="482" font-size="15" fill="#132338">78</text><text x="560" y="482" font-size="15" fill="#132338">1.43</text><text x="650" y="482" font-size="15" fill="#132338">2.42</text>
+<rect x="760" y="468" width="179" height="18" rx="3" fill="#3b8fb5"/><text x="947" y="482" font-size="14" font-weight="700" fill="#132338">0.125</text>
+<rect x="30" y="498" width="1140" height="36" fill="#f2f5f9"/>
+<text x="40" y="520" font-size="15" font-weight="700" fill="#132338">please</text>
+<text x="250" y="520" font-size="15" fill="#132338">1</text><text x="380" y="520" font-size="15" fill="#132338">43</text><text x="560" y="520" font-size="15" fill="#132338">2.01</text><text x="650" y="520" font-size="15" fill="#132338">2.01</text>
+<rect x="760" y="506" width="149" height="18" rx="3" fill="#3b8fb5"/><text x="917" y="520" font-size="14" font-weight="700" fill="#132338">0.104</text>
+<rect x="30" y="536" width="1140" height="36" fill="#ffffff"/>
+<text x="40" y="558" font-size="15" font-weight="700" fill="#132338">refund</text>
+<text x="250" y="558" font-size="15" fill="#132338">1</text><text x="380" y="558" font-size="15" fill="#132338">46</text><text x="560" y="558" font-size="15" fill="#132338">1.95</text><text x="650" y="558" font-size="15" fill="#132338">1.95</text>
+<rect x="760" y="544" width="144" height="18" rx="3" fill="#3b8fb5"/><text x="912" y="558" font-size="14" font-weight="700" fill="#132338">0.101</text>
+<text x="30" y="620" font-size="13" fill="#132338">&#8220;morning&#8221; appears twice (TF 1.69) but is common (29 tickets); &#8220;api&#8221; appears once and is rarer (8 tickets). The frequent words &#8220;the&#8221; and &#8220;please&#8221; end up with low weights.</text>
+<text x="30" y="642" font-size="13" fill="#132338">TF-IDF knows nothing about refunds: it only measures words. Deciding which words matter for a question is left to the classifier trained on the labels.</text>
+</svg>
