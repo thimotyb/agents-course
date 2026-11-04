@@ -255,7 +255,13 @@ npx spectral lint openapi/checkout-api.yaml --ruleset rulesets/exported/document
         <ul>
           <li><strong>Move the fake gateway</strong> and the assertions to the read-only side, so that the candidate cannot supply or patch them.</li>
           <li><strong>Require the expected number of tests</strong> to have run (three here) before a pass is reported.</li>
-          <li><strong>Add hidden scenarios</strong> with outcome sequences the agent has not seen, such as two transient errors and then an approval.</li>
+          <li><strong>Add hidden scenarios</strong>, with outcome sequences the agent has not seen, such as two transient errors and then an approval. A scenario is hidden only if the agent cannot read it, so a file in the same repository does not count. Three ways to keep it hidden:
+            <ul>
+              <li>keep the scenarios outside the agent's workspace, in a place its permissions do not reach, and run them only from the harness or the pipeline;</li>
+              <li>generate them at every run, for example random sequences of outcomes checked against a simple rule (the number of attempts is the position of the first approval, at most three), so that there is no fixed value to hardcode;</li>
+              <li>report a failed hidden scenario without its details, because feedback that names the failing sequence lets the agent learn it in a few iterations.</li>
+            </ul>
+          </li>
           <li><strong>Check the parsed code</strong> for imports and calls instead of matching text, and run the candidate where the reference solution is not readable.</li>
         </ul>
       </section>
